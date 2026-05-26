@@ -1,0 +1,6 @@
+{
+  "name": "Biotech Portfolio",
+  "description": "High-end personal portfolio of Dhruv Gaur showcasing biotech UI/UX, scientific front-ends, and lab systems architecture.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
