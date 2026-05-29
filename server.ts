@@ -181,6 +181,20 @@ async function startServer() {
     }
   });
 
+  // API Route - Delete contact submission record
+  app.delete("/api/contact/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const submissions = await readSubmissions();
+      const filtered = submissions.filter((sub: any) => sub.id !== id);
+      await writeSubmissions(filtered);
+      res.json({ success: true, message: "Submission successfully deleted." });
+    } catch (err) {
+      console.error("Error deleting submission:", err);
+      res.status(500).json({ error: "Failed to delete submission record." });
+    }
+  });
+
   // Health check endpoint
   app.get("/api/health", (req, res) => {
     res.json({ status: "ok", service: "Biotech Curator API" });

@@ -29,7 +29,9 @@ import {
   Users,
   Terminal,
   Lock,
-  Unlock
+  Unlock,
+  Trash2,
+  Copy
 } from 'lucide-react';
 
 // Data and components
@@ -112,6 +114,10 @@ export default function App() {
   const [authEmail, setAuthEmail] = useState<string>('');
   const [authPasscode, setAuthPasscode] = useState<string>('');
   const [authError, setAuthError] = useState<string>('');
+
+  // Owner Floating Inbox States
+  const [isInboxExpanded, setIsInboxExpanded] = useState<boolean>(false);
+  const [inboxSearch, setInboxSearch] = useState<string>('');
 
   // IST clock tracking
   const [currTime, setCurrTime] = useState(new Date());
@@ -282,6 +288,31 @@ export default function App() {
       }, 4000);
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  // Delete message record helper (runs on server or falls back to client cache)
+  const handleDeleteSubmission = async (id: string) => {
+    try {
+      const res = await fetch(`/api/contact/${id}`, {
+        method: 'DELETE',
+      });
+      if (res.ok) {
+        setSubmissions(prev => {
+          const updated = prev.filter(sub => sub.id !== id);
+          localStorage.setItem('cached_submissions', JSON.stringify(updated));
+          return updated;
+        });
+      } else {
+        throw new Error('Server returned error status on delete');
+      }
+    } catch (err) {
+      console.warn('API delete failed, implementing cache fallback removal:', err);
+      setSubmissions(prev => {
+        const updated = prev.filter(sub => sub.id !== id);
+        localStorage.setItem('cached_submissions', JSON.stringify(updated));
+        return updated;
+      });
     }
   };
 
@@ -1526,6 +1557,224 @@ export default function App() {
           </span>
         </motion.button>
       </div>
+
+
+      {/* FLOATING SECURE MESSAGES TRIGGER BADGE */}
+      {!isInboxExpanded && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          whileHover={{ 
+            scale: 1.05, 
+            borderColor: isOwner ? '#10B981' : '#D97706',
+            boxShadow: isOwner ? '0 8px 24px -4px rgba(16, 185, 129, 0.3)' : '0 8px 24px -4px rgba(217, 119, 6, 0.25)'
+          }}
+          className={`fixed bottom-24 left-6 z-[49] flex items-center gap-2 px-3.5 h-10 bg-[#1A1A1A]/95 text-white border ${
+            isOwner ? 'border-[#10B981]' : 'border-zinc-700'
+          } font-mono text-[10px] sm:text-xs uppercase tracking-wider font-extrabold shadow-lg rounded-none cursor-pointer`}
+          onClick={() => setIsInboxExpanded(true)}
+        >
+          <span className="relative flex h-2 w-2 shrink-0">
+            <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${isOwner ? 'bg-[#10B981]' : 'bg-[#D97706]'}`}></span>
+            <span className={`relative inline-flex rounded-full h-2 w-2 ${isOwner ? 'bg-[#10B981]' : 'bg-[#D97706]'}`}></span>
+          </span>
+          <span className="relative font-bold">
+            📬 {isOwner ? `INBOX LOGS (${submissions.length} RECS)` : 'SECURE INBOX'}
+          </span>
+          <span className="text-[9px] text-zinc-500 font-normal">
+            [CLICK]
+          </span>
+        </motion.div>
+      )}
+
+      {/* FLOATING DRAGGABLE SECURE MESSAGES PANEL */}
+      <AnimatePresence>
+        {isInboxExpanded && (
+          <motion.div
+            initial={{ opacity: 0, x: -30, scale: 0.95 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            exit={{ opacity: 0, x: -30, scale: 0.95 }}
+            transition={{ type: "spring", duration: 0.5 }}
+            drag
+            dragMomentum={false}
+            dragElastic={0.1}
+            className={`fixed bottom-24 left-6 z-[49] max-w-[420px] w-[calc(100vw-3rem)] bg-[#1A1A1A]/98 backdrop-blur-md border-2 ${
+              isOwner ? 'border-[#10B981] shadow-[0_12px_36px_rgba(16,185,129,0.3)]' : 'border-[#D97706] shadow-[0_12px_36px_rgba(217,119,6,0.25)]'
+            } text-white p-4 font-mono select-none rounded-none cursor-grab active:cursor-grabbing overflow-hidden flex flex-col gap-2`}
+            style={{ touchAction: 'none' }}
+          >
+            {/* Warning top border strip and drag grip */}
+            <div className={`absolute top-0 left-0 w-full h-[6px] ${isOwner ? 'bg-[#10B981]' : 'bg-[#D97706]'} flex items-center justify-center gap-1`}>
+              <span className="w-1.5 h-[2px] bg-white/50" />
+              <span className="w-1.5 h-[2px] bg-white/50" />
+              <span className="w-1.5 h-[2px] bg-white/50" />
+            </div>
+
+            {/* Title headers */}
+            <div className="flex items-center justify-between gap-2 mt-1 border-b border-zinc-800 pb-2">
+              <div className="flex items-center gap-2 font-bold text-[10px] tracking-[0.2em] uppercase">
+                <Database className={`w-3.5 h-3.5 ${isOwner ? 'text-[#10B981]' : 'text-[#D97706]'}`} />
+                <span>MESSAGE ARCHIVES</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className={`text-[8px] px-1.5 py-0.5 tracking-wider font-extrabold uppercase ${
+                  isOwner ? 'bg-[#10B981]/20 text-[#10B981]' : 'bg-[#D97706]/20 text-[#D97706]'
+                }`}>
+                  {isOwner ? 'DECRYPTED' : 'SEALED'}
+                </span>
+                <button
+                  onClick={() => setIsInboxExpanded(false)}
+                  className="text-[9px] hover:underline text-zinc-400 hover:text-white transition-colors cursor-pointer"
+                >
+                  [MINIMIZE]
+                </button>
+              </div>
+            </div>
+
+            {/* Main content body */}
+            {!isOwner ? (
+              /* LOCKED SCREEN - REQUIRES PORT KEY ADDR LOG */
+              <div className="py-4 px-2 space-y-4 text-center">
+                <div className="mx-auto w-12 h-12 bg-[#D97706]/10 border border-[#D97706]/30 flex items-center justify-center rounded-none text-[#D97706]">
+                  <Lock className="w-6 h-6 animate-pulse" />
+                </div>
+                <div className="space-y-1">
+                  <h4 className="font-serif italic text-xs font-black text-white tracking-wide uppercase">
+                    ENCRYPTED OWNER TERMINAL
+                  </h4>
+                  <p className="text-[10px] text-zinc-400 leading-normal font-sans px-4">
+                    Secure communications, email records, and visitor inquiries are cryptographically archived. Owner keys are required to decrypt this node.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAuthError("Owner key authorized credentials required.");
+                    setShowOwnerModal(true);
+                  }}
+                  className="w-full bg-[#D97706] hover:bg-[#D97706]/90 text-black font-semibold text-[10px] py-2 px-3 tracking-wider uppercase transition-colors rounded-none font-mono cursor-pointer flex items-center justify-center gap-1.5"
+                >
+                  <Unlock className="w-3.5 h-3.5" />
+                  <span>AUTHORIZE SECURE NODE</span>
+                </button>
+              </div>
+            ) : (
+              /* UNLOCKED SCREEN - LOGS AND SEARCH ENGINE */
+              <div className="space-y-3 flex flex-col h-full">
+                {/* Search / Filter bar */}
+                <div className="relative">
+                  <span className="absolute inset-y-0 left-2.5 flex items-center pointer-events-none text-zinc-500">
+                    <Search className="w-3 h-3" />
+                  </span>
+                  <input
+                    type="text"
+                    placeholder="FILTER BY SENDER NAME, EMAIL, WORDS..."
+                    value={inboxSearch}
+                    onChange={(e) => setInboxSearch(e.target.value)}
+                    className="w-full bg-[#112F24]/30 text-[#86EFAC] text-[9px] border border-[#10B981]/30 focus:border-[#10B981] p-2 pl-7 uppercase tracking-wider focus:outline-none placeholder-zinc-500 font-mono"
+                  />
+                </div>
+
+                {/* Messages Listing scroll panel */}
+                <div className="space-y-2 max-h-[240px] overflow-y-auto pr-1 scrollbar-thin">
+                  {submissions.filter(sub => {
+                    const q = inboxSearch.toLowerCase();
+                    return (
+                      (sub.name || '').toLowerCase().includes(q) ||
+                      (sub.email || '').toLowerCase().includes(q) ||
+                      (sub.message || '').toLowerCase().includes(q)
+                    );
+                  }).length === 0 ? (
+                    <div className="text-center py-8 border border-dashed border-zinc-800 text-zinc-500 text-[10px] uppercase">
+                      No matching encrypted records found.
+                    </div>
+                  ) : (
+                    submissions
+                      .filter(sub => {
+                        const q = inboxSearch.toLowerCase();
+                        return (
+                          (sub.name || '').toLowerCase().includes(q) ||
+                          (sub.email || '').toLowerCase().includes(q) ||
+                          (sub.message || '').toLowerCase().includes(q)
+                        );
+                      })
+                      .map((sub) => (
+                        <div 
+                          key={sub.id} 
+                          className="bg-[#112F24]/10 border border-[#10B981]/15 p-2.5 relative flex flex-col gap-1 text-left"
+                        >
+                          <div className="flex justify-between items-start gap-2 text-[9px]">
+                            <span className="font-extrabold text-[#10B981] truncate max-w-[180px]">
+                              {sub.name}
+                            </span>
+                            <span className="text-zinc-500 text-[8px] shrink-0 font-light">
+                              {new Date(sub.timestamp || '').toLocaleDateString('en-US', { hour: '2-digit', minute: '2-digit' })}
+                            </span>
+                          </div>
+                          
+                          <div className="text-[8px] text-zinc-400 font-serif lowercase italic -mt-0.5 border-b border-zinc-800/20 pb-1">
+                            {sub.email}
+                          </div>
+
+                          <p className="text-[10px] text-zinc-300 whitespace-pre-wrap leading-relaxed font-sans mt-1">
+                            {sub.message}
+                          </p>
+
+                          <div className="flex gap-2 justify-end mt-2 pt-1 border-t border-zinc-800/40 text-[8px]">
+                            {/* Copy button */}
+                            <button
+                              onClick={() => {
+                                navigator.clipboard.writeText(`From: ${sub.name} <${sub.email}>\nMessage: ${sub.message}`);
+                              }}
+                              className="text-zinc-400 hover:text-[#10B981] flex items-center gap-1 cursor-pointer"
+                              title="Copy raw record"
+                            >
+                              <Copy className="w-2.5 h-2.5" />
+                              <span>COPY</span>
+                            </button>
+
+                            {/* Reply button */}
+                            <a
+                              href={`mailto:${sub.email}?subject=Re:%20Portfolio%20Inquiry`}
+                              className="text-zinc-400 hover:text-[#10B981] flex items-center gap-1 cursor-pointer"
+                            >
+                              <Mail className="w-2.5 h-2.5" />
+                              <span>REPLY</span>
+                            </a>
+
+                            {/* Delete Button */}
+                            <button
+                              onClick={() => handleDeleteSubmission(sub.id)}
+                              className="text-red-400 hover:text-red-500 flex items-center gap-1 cursor-pointer"
+                              title="Purge record"
+                            >
+                              <Trash2 className="w-2.5 h-2.5" />
+                              <span>DELETE</span>
+                            </button>
+                          </div>
+                        </div>
+                      ))
+                  )}
+                </div>
+
+                {/* Footer status line inside the expanded box */}
+                <div className="flex items-center justify-between text-[8px] text-zinc-500 pt-1 border-t border-zinc-800">
+                  <span>FILESYSTEM DECRYPTED // OK</span>
+                  <button
+                    onClick={() => {
+                      localStorage.removeItem('is_owner_authorized');
+                      setIsOwner(false);
+                    }}
+                    className="text-red-400 hover:underline cursor-pointer uppercase"
+                  >
+                    🔒 RELOCK DECODEVAULT
+                  </button>
+                </div>
+              </div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
 
       {/* FLOAT SUCCESS TOAST NOTIFIER */}
