@@ -45,6 +45,8 @@ import WorkingResearch from './components/WorkingResearch';
 import Logo from './components/Logo';
 import MaintenancePage from './components/MaintenancePage';
 import AcademicTimeline from './components/AcademicTimeline';
+import MicroscopeCellsBackground from './components/MicroscopeCellsBackground';
+import BioDataVizBackground from './components/BioDataVizBackground';
 
 // Framer Motion variants for core skills tag staggering
 const tagContainerVariants = {
@@ -121,6 +123,50 @@ export default function App() {
 
   // IST clock tracking
   const [currTime, setCurrTime] = useState(new Date());
+
+  // Interactive Microscopic Feed Sample Slides
+  const microscopeSlides = [
+    {
+      id: 'gfp-cells',
+      name: "CELL_GFP_402",
+      type: "Green Fluorescent Protein Expression",
+      mag: "15,000X",
+      stretches: "3.4nm/turn helix",
+      focus: "98.4%",
+      aperture: "f/1.4",
+      microns: "12µm",
+      description: "Active expression of bioluminescent markers inside cytoplasm. Organelles visible under high resolution scanning electron microscopy.",
+      url: "/src/assets/images/cellular_hero_banner_1780065823241.png"
+    },
+    {
+      id: 'mitosis-cell',
+      name: "CELL_DIV_880",
+      type: "Cytoplasmic Membranes Division",
+      mag: "25,000X",
+      stretches: "Chromatid pull asters",
+      focus: "99.1%",
+      aperture: "f/1.8",
+      microns: "8µm",
+      description: "Microscope slide capturing late-phase mitosis cytokinesis, cellular cleavage, and cytoplasmic fibers with fluorescent green contrast wash.",
+      url: "/src/assets/images/petri_dish_culture_1780065844731.png"
+    },
+    {
+      id: 'dna-assembly',
+      name: "NAN_DNA_911",
+      type: "DNA Nanotechnology Helix Matrix",
+      mag: "45,000X",
+      stretches: "Hydrogen base h-bonds",
+      focus: "97.8%",
+      aperture: "f/1.2",
+      microns: "3.4nm",
+      description: "Self-assembling synthetic DNA strands with fluorescent-dyed adenines and thymines forming complete crystalline molecular links.",
+      url: "/src/assets/images/dna_double_helix_1780065864560.png"
+    }
+  ];
+
+  const [activeSlideIdx, setActiveSlideIdx] = useState(0);
+  const [microContrast, setMicroContrast] = useState<number>(100);
+  const [scanLinesActive, setScanLinesActive] = useState<boolean>(true);
 
 
   useEffect(() => {
@@ -352,6 +398,10 @@ export default function App() {
   return (
     <div className="min-h-screen bg-brand-bg text-[#1A1A1A] font-sans selection:bg-brand-accent/20 selection:text-brand-accent relative grid-bg overflow-x-hidden">
       
+      {/* ----------------- INTERACTIVE MICROSCOPIC FLOATING CELLS Backplane ----------------- */}
+      <MicroscopeCellsBackground />
+      <BioDataVizBackground />
+
       {/* ----------------- LABORATORY LASER INTENSITY SCAN LINE ----------------- */}
       <div className="fixed inset-0 pointer-events-none z-10 overflow-hidden mix-blend-multiply opacity-[0.08]">
         <motion.div 
@@ -680,7 +730,7 @@ export default function App() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.7, delay: 0.2 }}
-                className="font-sans text-brand-text-muted text-base md:text-lg max-w-2xl leading-relaxed font-normal"
+                className="font-sans text-brand-[#1A1A1A] text-zinc-600 text-base md:text-lg max-w-2xl leading-relaxed font-normal"
               >
                 Bridging the interface between tactile brutalist engineering structures and high-throughput biotechnology. Custom interactive pipelines engineered with modern biological workflows.
               </motion.p>
@@ -706,7 +756,6 @@ export default function App() {
                 ACADEMIC PROFILE
               </button>
             </motion.div>
-
           </div>
         </section>
 
@@ -1107,13 +1156,13 @@ export default function App() {
                   transition={{ duration: 0.4 }}
                 >
                   {selectedProjectId === 'proj-sequencer' && (
-                    <UpcomingPrototype projectId="proj-sequencer" scientificMetric={currentProject.scientificMetric} />
+                    <DNASequencer scientificMetric={currentProject.scientificMetric} />
                   )}
                   {selectedProjectId === 'proj-bioreactor' && (
-                    <UpcomingPrototype projectId="proj-bioreactor" scientificMetric={currentProject.scientificMetric} />
+                    <BioreactorMonitor scientificMetric={currentProject.scientificMetric} />
                   )}
                   {selectedProjectId === 'proj-lims' && (
-                    <UpcomingPrototype projectId="proj-lims" scientificMetric={currentProject.scientificMetric} />
+                    <LIMSTracker scientificMetric={currentProject.scientificMetric} />
                   )}
                 </motion.div>
               </AnimatePresence>
