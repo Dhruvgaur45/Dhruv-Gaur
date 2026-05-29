@@ -24,12 +24,10 @@ interface UpcomingPrototypeProps {
 }
 
 export default function UpcomingPrototype({ projectId, scientificMetric }: UpcomingPrototypeProps) {
-  const isBioreactor = projectId === 'proj-bioreactor';
-  
   // Interactive Simulation states
   const [simulationActive, setSimulationActive] = useState(false);
   const [logMessages, setLogMessages] = useState<string[]>([]);
-  const [simulationParameter, setSimulationParameter] = useState(isBioreactor ? 250 : 8); // RPM or CSV Row count
+  const [simulationParameter, setSimulationParameter] = useState(20);
   const [registeredEmail, setRegisteredEmail] = useState('');
   const [isRegistered, setIsRegistered] = useState(false);
   const [showNotificationCheck, setShowNotificationCheck] = useState(false);
@@ -37,12 +35,25 @@ export default function UpcomingPrototype({ projectId, scientificMetric }: Upcom
   // Active layout view tab inside the preview block
   const [schemaTab, setSchemaTab] = useState<'schematics' | 'code' | 'specs'>('schematics');
 
-  // Load registered status from localStorage on mount
+  // Load parameter calibration and registered status on mount/change
   useEffect(() => {
+    if (projectId === 'proj-sequencer') {
+      setSimulationParameter(20);
+    } else if (projectId === 'proj-bioreactor') {
+      setSimulationParameter(250);
+    } else {
+      setSimulationParameter(8);
+    }
+    setSimulationActive(false);
+    setLogMessages([]);
+
     const saved = localStorage.getItem(`upcoming_register_${projectId}`);
     if (saved) {
       setIsRegistered(true);
       setRegisteredEmail(saved);
+    } else {
+      setIsRegistered(false);
+      setRegisteredEmail('');
     }
   }, [projectId]);
 
@@ -74,10 +85,23 @@ export default function UpcomingPrototype({ projectId, scientificMetric }: Upcom
   useEffect(() => {
     let interval: any;
     if (simulationActive) {
-      addLog(isBioreactor ? `[INIT] Starting IoT Serial MODBUS telemetry loop...` : `[INIT] Initializing 96-Well SBS-Standard plate matrix parser...`);
+      if (projectId === 'proj-sequencer') {
+        addLog(`[INIT] Booting ribosomal translation encoder streams...`);
+      } else if (projectId === 'proj-bioreactor') {
+        addLog(`[INIT] Starting IoT Serial MODBUS telemetry loop...`);
+      } else {
+        addLog(`[INIT] Initializing 96-Well SBS-Standard plate matrix parser...`);
+      }
       
       interval = setInterval(() => {
-        if (isBioreactor) {
+        if (projectId === 'proj-sequencer') {
+          const matchedGenomes = Math.floor(Math.random() * 12) + 8540;
+          const gcPercentage = (52.4 + (Math.random() - 0.5) * 1.5).toFixed(2);
+          const codonFreq = (0.23 + (Math.random() - 0.5) * 0.04).toFixed(3);
+          const frames = ["+1", "+2", "+3", "-1", "-2", "-3"];
+          const selectedFrame = frames[Math.floor(Math.random() * frames.length)];
+          addLog(`[CODON] Frame: ${selectedFrame} | GC Skew: ${gcPercentage}% | Translated: ${matchedGenomes} bp | Frequency: ${codonFreq}`);
+        } else if (projectId === 'proj-bioreactor') {
           const actualRPM = simulationParameter + Math.round((Math.random() - 0.5) * 6);
           const currentTemp = (37.0 + (Math.random() - 0.5) * 0.4).toFixed(2);
           const currentPH = (7.2 + (Math.random() - 0.5) * 0.05).toFixed(3);
@@ -99,7 +123,7 @@ export default function UpcomingPrototype({ projectId, scientificMetric }: Upcom
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [simulationActive, simulationParameter, isBioreactor]);
+  }, [simulationActive, simulationParameter, projectId]);
 
   const toggleSimulation = () => {
     const nextState = !simulationActive;
@@ -111,7 +135,22 @@ export default function UpcomingPrototype({ projectId, scientificMetric }: Upcom
 
   // Generate mock JSON code preview based on state
   const getCodeSnippet = () => {
-    if (isBioreactor) {
+    if (projectId === 'proj-sequencer') {
+      return `{
+  "sequenceId": "NC_000001.11",
+  "pipelineStage": "S1_UPCOMING",
+  "nucleotideSource": "RibosomalTranslationRef",
+  "parameters": {
+    "targetLength": "6.4k_bp",
+    "translationRateBps": ${simulationParameter},
+    "codonOptimization": "StandardHumanExpress"
+  },
+  "flags": {
+    "frameshiftFilter": true,
+    "gcSkewCheck": "Active"
+  }
+}`;
+    } else if (projectId === 'proj-bioreactor') {
       return `{
   "vesselId": "OMNIVESSEL-09B",
   "pipelineStage": "S2_UPCOMING",
@@ -155,13 +194,17 @@ export default function UpcomingPrototype({ projectId, scientificMetric }: Upcom
           <div>
             <span className="font-mono text-[10px] text-white/40 block uppercase tracking-widest font-bold">UPCOMING PIPELINE WORK</span>
             <h4 className="font-serif italic text-lg font-black text-white uppercase tracking-tight">
-              {isBioreactor ? 'Prototype 02: OmniVessel IoT Telemetry' : 'Prototype 03: LIMS Plate Mapper 96'}
+              {projectId === 'proj-sequencer' && 'Prototype 01: NucleoWave Sequence Map'}
+              {projectId === 'proj-bioreactor' && 'Prototype 02: OmniVessel IoT Telemetry'}
+              {projectId === 'proj-lims' && 'Prototype 03: LIMS Plate Mapper 96'}
             </h4>
           </div>
         </div>
         <div className="flex items-center gap-2">
           <span className="bg-brand-accent/20 text-brand-accent border border-brand-accent/35 px-2.5 py-1 text-[9px] font-mono tracking-widest font-bold uppercase">
-            {isBioreactor ? 'Phase: S2 (Atelier Control)' : 'Phase: S3 (Library Mapping)'}
+            {projectId === 'proj-sequencer' && 'Phase: S1 (Genomic Splicing)'}
+            {projectId === 'proj-bioreactor' && 'Phase: S2 (Atelier Control)'}
+            {projectId === 'proj-lims' && 'Phase: S3 (Library Mapping)'}
           </span>
         </div>
       </div>
@@ -213,16 +256,38 @@ export default function UpcomingPrototype({ projectId, scientificMetric }: Upcom
             {schemaTab === 'schematics' && (
               <div className="space-y-4">
                 <p className="text-xs text-white/75 leading-relaxed font-sans max-w-2xl">
-                  {isBioreactor 
-                    ? 'Visualizing the scheduled micro-controller IO pins and real-time serial stream pathways. Launch the simulated sensor signal thread using the control parameters below.'
-                    : 'A structural visualization of the upcoming SBS-standard 96-well grid. This block maps coordinate serializers used during automation batch allocations.'
-                  }
+                  {projectId === 'proj-sequencer' && 'Modeling raw genetic sequences as dynamic secondary structural folds. The upcoming sequence mapper module provides a highly graphic visualization of real-time codonic ribosomal splicing.'}
+                  {projectId === 'proj-bioreactor' && 'Visualizing the scheduled micro-controller IO pins and real-time serial stream pathways. Launch the simulated sensor signal thread using the control parameters below.'}
+                  {projectId === 'proj-lims' && 'A structural visualization of the upcoming SBS-standard 96-well grid. This block maps coordinate serializers used during automation batch allocations.'}
                 </p>
 
                 {/* SVG Visual Schema rendering */}
                 <div className="bg-[#121212] border border-white/5 p-6 relative flex flex-col items-center justify-center overflow-hidden min-h-[180px]">
                   
-                  {isBioreactor ? (
+                  {projectId === 'proj-sequencer' && (
+                    /* DNA Helix Blueprint Sketch */
+                    <div className="w-full max-w-lg flex flex-col items-center justify-center space-y-4 py-2">
+                      <div className="relative w-48 h-32 border-2 border-dashed border-white/20 flex flex-col items-center justify-center">
+                        <div className="absolute top-2 left-2 text-[8px] font-mono text-white/30">NUCLEOBASES: A, T, C, G</div>
+                        
+                        {/* Simple helix representation */}
+                        <div className="flex items-center gap-2">
+                          <span className="w-8 h-[2px] bg-brand-accent/50 block animate-pulse"></span>
+                          <span className="text-xs font-mono font-bold text-white/60">A ==== T</span>
+                          <span className="w-8 h-[2px] bg-brand-accent/50 block animate-pulse"></span>
+                        </div>
+                        <div className="flex items-center gap-2 mt-2">
+                          <span className="w-8 h-[2px] bg-sky-500/50 block animate-pulse"></span>
+                          <span className="text-xs font-mono font-bold text-white/60">C ==== G</span>
+                          <span className="w-8 h-[2px] bg-sky-500/50 block animate-pulse"></span>
+                        </div>
+                        
+                      </div>
+                      <span className="text-[9px] font-mono text-white/40 select-none tracking-widest uppercase">SCHEMA: RIBOSOMAL CODON SPLICING INTERLINK</span>
+                    </div>
+                  )}
+
+                  {projectId === 'proj-bioreactor' && (
                     /* Bioreactor Blueprint Sketch */
                     <div className="w-full max-w-lg flex flex-col items-center justify-center space-y-4 py-2">
                       <div className="relative w-48 h-32 border-2 border-dashed border-white/20 flex items-center justify-center">
@@ -251,7 +316,9 @@ export default function UpcomingPrototype({ projectId, scientificMetric }: Upcom
                       </div>
                       <span className="text-[9px] font-mono text-white/40 select-none tracking-widest uppercase">SCHEMA: IoT REACTOR CORE VESSEL FEEDBACK</span>
                     </div>
-                  ) : (
+                  )}
+
+                  {projectId === 'proj-lims' && (
                     /* 96-Well Matrix Blueprint Sketch */
                     <div className="w-full max-w-lg flex flex-col items-center justify-center space-y-4">
                       {/* Grid representation */}
@@ -312,7 +379,25 @@ export default function UpcomingPrototype({ projectId, scientificMetric }: Upcom
                   Analytical objectives and design guidelines curated for this research iteration.
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {isBioreactor ? (
+                  {projectId === 'proj-sequencer' && (
+                    <>
+                      <div className="bg-white/[0.02] border border-white/5 p-4 space-y-1.5">
+                        <span className="text-[9px] font-mono text-brand-accent uppercase font-bold tracking-wider">SPECIFICATION A</span>
+                        <h5 className="text-xs font-bold font-sans text-white">RIBOSOMAL DECODING LATENCY</h5>
+                        <p className="text-2xs text-white/60 font-sans leading-relaxed">
+                          Translating 3-character codon bases in millisecond frame indices with immediate peptide secondary shape projections.
+                        </p>
+                      </div>
+                      <div className="bg-white/[0.02] border border-white/5 p-4 space-y-1.5">
+                        <span className="text-[9px] font-mono text-brand-accent uppercase font-bold tracking-wider">SPECIFICATION B</span>
+                        <h5 className="text-xs font-bold font-sans text-white">GC COEFF ANALYSIS ENTIRETY</h5>
+                        <p className="text-2xs text-white/60 font-sans leading-relaxed">
+                          Automated skew assessment thresholds designed to isolate DNA segment transitions and alert for sequence anomalies.
+                        </p>
+                      </div>
+                    </>
+                  )}
+                  {projectId === 'proj-bioreactor' && (
                     <>
                       <div className="bg-white/[0.02] border border-white/5 p-4 space-y-1.5">
                         <span className="text-[9px] font-mono text-brand-accent uppercase font-bold tracking-wider">SPECIFICATION A</span>
@@ -329,7 +414,8 @@ export default function UpcomingPrototype({ projectId, scientificMetric }: Upcom
                         </p>
                       </div>
                     </>
-                  ) : (
+                  )}
+                  {projectId === 'proj-lims' && (
                     <>
                       <div className="bg-white/[0.02] border border-white/5 p-4 space-y-1.5">
                         <span className="text-[9px] font-mono text-brand-accent uppercase font-bold tracking-wider">SPECIFICATION A</span>
@@ -357,20 +443,22 @@ export default function UpcomingPrototype({ projectId, scientificMetric }: Upcom
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="space-y-1">
                 <span className="text-[9px] font-mono text-white/40 block uppercase tracking-widest font-bold">
-                  {isBioreactor ? 'MOCK RPM CALIBRATION SLIDER' : 'MOCK SERIAL DILUTION RATIO'}
+                  {projectId === 'proj-sequencer' && 'MOCK NUCLEOBASES DECODE SPEED'}
+                  {projectId === 'proj-bioreactor' && 'MOCK RPM CALIBRATION SLIDER'}
+                  {projectId === 'proj-lims' && 'MOCK SERIAL DILUTION RATIO'}
                 </span>
                 <div className="flex items-center gap-3">
                   <input
                     type="range"
-                    min={isBioreactor ? 50 : 2}
-                    max={isBioreactor ? 600 : 64}
+                    min={projectId === 'proj-sequencer' ? 5 : projectId === 'proj-bioreactor' ? 50 : 2}
+                    max={projectId === 'proj-sequencer' ? 80 : projectId === 'proj-bioreactor' ? 600 : 64}
                     value={simulationParameter}
                     onChange={(e) => setSimulationParameter(Number(e.target.value))}
                     disabled={!simulationActive}
                     className="w-40 accent-brand-accent disabled:opacity-30 cursor-pointer"
                   />
                   <span className="font-mono text-xs font-bold text-white bg-white/5 px-2 py-0.5 min-w-[50px] text-center">
-                    {simulationParameter} {isBioreactor ? 'RPM' : 'x'}
+                    {simulationParameter} {projectId === 'proj-sequencer' ? 'bp/sec' : projectId === 'proj-bioreactor' ? 'RPM' : 'x'}
                   </span>
                 </div>
               </div>
@@ -485,12 +573,18 @@ export default function UpcomingPrototype({ projectId, scientificMetric }: Upcom
           <div className="pt-4 border-t border-white/10 space-y-2 select-none">
             <div className="flex items-center justify-between text-[10px] font-mono font-bold text-white/30 uppercase">
               <span>PIPELINE BUILD STATE</span>
-              <span className="text-brand-accent">{isBioreactor ? '85% COMPLETE' : '60% SCHEMATIC'}</span>
+              <span className="text-brand-accent">
+                {projectId === 'proj-sequencer' && '90% DECODED'}
+                {projectId === 'proj-bioreactor' && '85% COMPLETE'}
+                {projectId === 'proj-lims' && '60% SCHEMATIC'}
+              </span>
             </div>
             <div className="w-full h-1.5 bg-white/10 rounded-none overflow-hidden">
               <div 
                 className="h-full bg-brand-accent transition-all duration-1000" 
-                style={{ width: isBioreactor ? '85%' : '60%' }}
+                style={{ 
+                  width: projectId === 'proj-sequencer' ? '90%' : projectId === 'proj-bioreactor' ? '85%' : '60%' 
+                }}
               ></div>
             </div>
           </div>

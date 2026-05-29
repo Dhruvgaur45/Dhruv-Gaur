@@ -35,6 +35,7 @@ export interface BiotechProject {
   tags: string[];
   scientificMetric: string;
   interactiveType: 'sequencer' | 'bioreactor' | 'structure' | 'lims';
+  lifecycle?: 'Alpha' | 'Beta' | 'Stable' | string;
 }
 
 export interface DNASequencingData {

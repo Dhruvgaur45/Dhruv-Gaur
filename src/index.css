@@ -7,13 +7,13 @@
   --font-serif: "Playfair Display", Georgia, serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 
-  --color-brand-bg: #F4F1EE;
-  --color-brand-surface: #EAE7E4;
+  --color-brand-bg: #F2F6F4;
+  --color-brand-surface: #E5EEFA;
   --color-brand-surface-card: #FFFFFF;
-  --color-brand-accent: #E5422B;
-  --color-brand-border: rgba(26, 26, 26, 0.12);
-  --color-brand-text: #1A1A1A;
-  --color-brand-text-muted: #666666;
+  --color-brand-accent: #10B981;
+  --color-brand-border: rgba(16, 185, 129, 0.12);
+  --color-brand-text: #112F24;
+  --color-brand-text-muted: #4B6F62;
 }
 
 @layer base {
@@ -24,23 +24,73 @@
   }
 }
 
-/* Custom background grid and glow utilities adapted to light editorial theme */
+/* Custom background grid and glow utilities adapted to light bio-lab theme */
 .glow-radial {
-  background: radial-gradient(circle at 50% 50%, rgba(229, 66, 43, 0.05) 0%, transparent 60%);
+  background: radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.08) 0%, transparent 60%);
 }
 
 .glow-radial-blue {
-  background: radial-gradient(circle at top right, rgba(229, 66, 43, 0.08) 0%, transparent 50%);
+  background: radial-gradient(circle at top right, rgba(59, 130, 246, 0.09) 0%, transparent 50%);
 }
 
 .glow-radial-green {
-  background: radial-gradient(circle at bottom left, rgba(26, 26, 26, 0.04) 0%, transparent 55%);
+  background: radial-gradient(circle at bottom left, rgba(16, 185, 129, 0.07) 0%, transparent 55%);
 }
 
 .grid-bg {
-  background-size: 50px 50px;
+  background-size: 40px 40px;
   background-image: 
-    linear-gradient(to right, rgba(26, 26, 26, 0.04) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(26, 26, 26, 0.04) 1px, transparent 1px);
+    linear-gradient(to right, rgba(16, 185, 129, 0.035) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(16, 185, 129, 0.035) 1px, transparent 1px);
+}
+
+/* HIGH-END CLINICAL BIOTECH COMPLEMENTARY COLOR MAPPINGS */
+.text-\[\#1A1A1A\] {
+  color: #112F24 !important;
+}
+.bg-\[\#1A1A1A\] {
+  background-color: #112F24 !important;
+}
+.hover\:text-\[\#1A1A1A\]:hover {
+  color: #112F24 !important;
+}
+.border-\[\#1A1A1A\]\/10 {
+  border-color: rgba(17, 47, 36, 0.1) !important;
+}
+.border-\[\#1A1A1A\]\/12 {
+  border-color: rgba(17, 47, 36, 0.12) !important;
+}
+.border-\[\#1A1A1A\]\/15 {
+  border-color: rgba(17, 47, 36, 0.15) !important;
+}
+.border-\[\#1A1A1A\]\/5 {
+  border-color: rgba(17, 47, 36, 0.05) !important;
+}
+.border-\[\#1A1A1A\]\/20 {
+  border-color: rgba(17, 47, 36, 0.2) !important;
+}
+.border-\[\#1A1A1A\]\/30 {
+  border-color: rgba(17, 47, 36, 0.3) !important;
+}
+.border-\[\#1A1A1A\]\/50 {
+  border-color: #10B981 !important; /* Glow active highlight */
+}
+.bg-\[\#1A1A1A\]\/10 {
+  background-color: rgba(17, 47, 36, 0.07) !important;
+}
+.bg-\[\#1A1A1A\]\/5 {
+  background-color: rgba(17, 47, 36, 0.035) !important;
+}
+.bg-\[\#1A1A1A\]\/85 {
+  background-color: rgba(11, 31, 24, 0.85) !important;
+}
+.text-brand-accent {
+  color: #10B981 !important;
+}
+.bg-brand-accent {
+  background-color: #10B981 !important;
+}
+.border-brand-accent {
+  border-color: #10B981 !important;
 }
 
