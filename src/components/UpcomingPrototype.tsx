@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Cpu, 
@@ -21,6 +21,97 @@ import {
 interface UpcomingPrototypeProps {
   projectId: string;
   scientificMetric: string;
+}
+
+// ----------------- HIGH END TECH BACKGROUND GRAPHICS -----------------
+function DraftBlueprintBackground() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let animationId: number;
+    let width = (canvas.width = canvas.parentElement?.clientWidth || 700);
+    let height = (canvas.height = canvas.parentElement?.clientHeight || 500);
+
+    const handleResize = () => {
+      if (canvas && canvas.parentElement) {
+        width = canvas.width = canvas.parentElement.clientWidth;
+        height = canvas.height = canvas.parentElement.clientHeight;
+      }
+    };
+    window.addEventListener('resize', handleResize);
+
+    let angle = 0;
+
+    const render = () => {
+      ctx.clearRect(0, 0, width, height);
+
+      // 1. Blueprint micro grids
+      ctx.strokeStyle = 'rgba(57, 10, 185, 0.006)'; // ultra subtle violet blueprint tint
+      ctx.lineWidth = 0.5;
+      const step = 20;
+      for (let x = 0; x < width; x += step) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, height);
+        ctx.stroke();
+      }
+      for (let y = 0; y < height; y += step) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(width, y);
+        ctx.stroke();
+      }
+
+      // 2. Concentric radar/spectrogram scopes in the bottom right corner
+      ctx.strokeStyle = 'rgba(59, 130, 246, 0.012)';
+      ctx.lineWidth = 0.75;
+      const centerX = width - 100;
+      const centerY = height - 100;
+
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, 60, 0, Math.PI * 2);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, 120, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Rotating radar line sweep
+      angle += 0.005;
+      ctx.strokeStyle = 'rgba(59, 130, 246, 0.022)';
+      ctx.beginPath();
+      ctx.moveTo(centerX, centerY);
+      ctx.lineTo(centerX + Math.cos(angle) * 140, centerY + Math.sin(angle) * 140);
+      ctx.stroke();
+
+      // Plot technical indicators
+      ctx.fillStyle = 'rgba(59, 130, 246, 0.025)';
+      ctx.font = '8px var(--font-mono, monospace)';
+      ctx.fillText(`SWEEP_RADIAL_DEG: ${(angle * (180 / Math.PI) % 360).toFixed(1)}°`, centerX - 120, centerY + 135);
+      ctx.fillText('DESIGN_SPEC: LEVEL_A_STABLE', 15, height - 15);
+
+      animationId = requestAnimationFrame(render);
+    };
+
+    render();
+
+    return () => {
+      cancelAnimationFrame(animationId);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      className="absolute inset-0 w-full h-full pointer-events-none select-none z-0"
+    />
+  );
 }
 
 export default function UpcomingPrototype({ projectId, scientificMetric }: UpcomingPrototypeProps) {
@@ -186,8 +277,10 @@ export default function UpcomingPrototype({ projectId, scientificMetric }: Upcom
 
   return (
     <div className="bg-[#1A1A1A] text-white rounded-none border-2 border-[#1A1A1A] overflow-hidden shadow-2xl relative">
-      
-      {/* HEADER BAR STATUS */}
+      <DraftBlueprintBackground />
+      <div className="relative z-10 w-full h-full text-white">
+        
+        {/* HEADER BAR STATUS */}
       <div className="bg-[#1A1A1A] border-b border-white/10 px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <div className="w-2.5 h-2.5 bg-brand-accent rounded-full animate-pulse"></div>
@@ -614,6 +707,7 @@ export default function UpcomingPrototype({ projectId, scientificMetric }: Upcom
           </motion.div>
         )}
       </AnimatePresence>
+      </div>
 
     </div>
   );

@@ -31,7 +31,8 @@ import {
   Lock,
   Unlock,
   Trash2,
-  Copy
+  Copy,
+  Key
 } from 'lucide-react';
 
 // Data and components
@@ -116,6 +117,12 @@ export default function App() {
   const [authEmail, setAuthEmail] = useState<string>('');
   const [authPasscode, setAuthPasscode] = useState<string>('');
   const [authError, setAuthError] = useState<string>('');
+  const [securityPin, setSecurityPin] = useState<string>(() => {
+    return localStorage.getItem('owner_security_pin') || 'dggaur2026';
+  });
+  const [pinChangeSuccess, setPinChangeSuccess] = useState<string>('');
+  const [pinChangeError, setPinChangeError] = useState<string>('');
+  const [newPinInput, setNewPinInput] = useState<string>('');
 
   // Owner Floating Inbox States
   const [isInboxExpanded, setIsInboxExpanded] = useState<boolean>(false);
@@ -1806,6 +1813,62 @@ export default function App() {
                   )}
                 </div>
 
+                {/* Change PIN section inside active session */}
+                <div className="border-t border-zinc-800/80 pt-2.5 pb-1 space-y-2">
+                  <div className="flex justify-between items-center text-[7.5px] text-zinc-400 font-mono font-bold uppercase tracking-wider">
+                    <span className="flex items-center gap-1">
+                      <Key className="w-2.5 h-2.5 text-[#10B981]" />
+                      SECURITY PASSKEY INTERFACE
+                    </span>
+                    <span className="text-[#10B981]">ACTIVE PIN: {securityPin}</span>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="ENTER NEW PIN..."
+                      value={newPinInput}
+                      onChange={(e) => setNewPinInput(e.target.value)}
+                      className="flex-1 bg-zinc-900 border border-zinc-700 text-[9px] px-2 py-1.5 focus:outline-none focus:border-[#10B981] placeholder-zinc-600 font-mono text-white"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const trimmed = newPinInput.trim();
+                        if (trimmed.length < 4) {
+                          setPinChangeError('PIN must be at least 4 characters');
+                          setPinChangeSuccess('');
+                        } else {
+                          localStorage.setItem('owner_security_pin', trimmed);
+                          setSecurityPin(trimmed);
+                          setPinChangeSuccess('Security PIN updated successfully!');
+                          setPinChangeError('');
+                          setNewPinInput('');
+                          setTimeout(() => setPinChangeSuccess(''), 4000);
+                        }
+                      }}
+                      className="bg-[#10B981] hover:bg-[#10B981]/90 text-black font-extrabold text-[8px] px-2 py-1.5 uppercase transition-all duration-150 rounded-none font-mono cursor-pointer"
+                    >
+                      UPDATE
+                    </button>
+                  </div>
+
+                  {pinChangeSuccess && (
+                    <div className="text-[7.5px] text-emerald-400 font-mono font-black uppercase">
+                      ✓ {pinChangeSuccess}
+                    </div>
+                  )}
+                  {pinChangeError && (
+                    <div className="text-[7.5px] text-red-400 font-mono font-black uppercase">
+                      ⚠️ {pinChangeError}
+                    </div>
+                  )}
+
+                  <span className="text-[6.5px] text-zinc-500 uppercase leading-none block">
+                    Updating the PIN writes directly to LocalStorage. Original fallbacks ('dggaur2026' and 'admin') remain active as redundant key fail-safes.
+                  </span>
+                </div>
+
                 {/* Footer status line inside the expanded box */}
                 <div className="flex items-center justify-between text-[8px] text-zinc-500 pt-1 border-t border-zinc-800">
                   <span>FILESYSTEM DECRYPTED // OK</span>
@@ -2011,7 +2074,8 @@ export default function App() {
               <form 
                 onSubmit={(e) => {
                   e.preventDefault();
-                  if (authEmail.trim().toLowerCase() === 'dggaur385@gmail.com' && (authPasscode.trim() === 'dggaur2026' || authPasscode.trim() === 'admin')) {
+                  const enteredPasscode = authPasscode.trim();
+                  if (authEmail.trim().toLowerCase() === 'dggaur385@gmail.com' && (enteredPasscode === securityPin || enteredPasscode === 'dggaur2026' || enteredPasscode === 'admin')) {
                     setIsOwner(true);
                     localStorage.setItem('is_owner_authorized', 'true');
                     localStorage.setItem('owner_email', 'dggaur385@gmail.com');
@@ -2070,10 +2134,6 @@ export default function App() {
                       className="w-full bg-white border border-[#1A1A1A]/10 px-3.5 py-2.5 text-xs focus:outline-none focus:border-[#10B981] placeholder:text-brand-text-muted/40 text-[#1A1A1A] font-mono rounded-none"
                     />
                   </div>
-                </div>
-
-                <div className="p-3 bg-brand-surface border border-[#1A1A1A]/10 text-[9.5px] font-mono leading-relaxed text-brand-text-muted">
-                  <strong>ℹ️ Audit Note:</strong> Verification is restricted to owner's official email <strong className="text-[#1A1A1A]">dggaur385@gmail.com</strong>. For auditing and preview, use verification key: <strong className="text-brand-accent font-bold">dggaur2026</strong>.
                 </div>
 
                 <div className="border-t border-[#1A1A1A]/10 pt-4 flex items-center justify-end gap-4">

@@ -5,6 +5,136 @@ interface BioreactorMonitorProps {
   scientificMetric: string;
 }
 
+// ----------------- HIGH END TECH BACKGROUND GRAPHICS -----------------
+function BioreactorFluidBackground() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let animationId: number;
+    let width = (canvas.width = canvas.parentElement?.clientWidth || 600);
+    let height = (canvas.height = canvas.parentElement?.clientHeight || 500);
+
+    const handleResize = () => {
+      if (canvas && canvas.parentElement) {
+        width = canvas.width = canvas.parentElement.clientWidth;
+        height = canvas.height = canvas.parentElement.clientHeight;
+      }
+    };
+    window.addEventListener('resize', handleResize);
+
+    interface Bubble {
+      x: number;
+      y: number;
+      radius: number;
+      speedY: number;
+      speedX: number;
+      opacity: number;
+    }
+
+    const bubbles: Bubble[] = Array.from({ length: 18 }, () => ({
+      x: Math.random() * width,
+      y: height + Math.random() * 100,
+      radius: Math.random() * 2.5 + 1.2,
+      speedY: Math.random() * 0.45 + 0.2,
+      speedX: Math.random() * 0.2 - 0.1,
+      opacity: Math.random() * 0.25 + 0.1
+    }));
+
+    let phase = 0;
+
+    const render = () => {
+      ctx.clearRect(0, 0, width, height);
+
+      // 1. Draw elegant grid lines
+      ctx.strokeStyle = 'rgba(59, 130, 246, 0.02)';
+      ctx.lineWidth = 0.5;
+      const gridSize = 40;
+      for (let x = 0; x < width; x += gridSize) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, height);
+        ctx.stroke();
+      }
+      for (let y = 0; y < height; y += gridSize) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(width, y);
+        ctx.stroke();
+      }
+
+      // 2. Rising fluid micro bubbles representing dissolved oxygen
+      bubbles.forEach(b => {
+        b.y -= b.speedY;
+        b.x += b.speedX;
+
+        // Reset if bubble floats out
+        if (b.y < -10) {
+          b.y = height + Math.random() * 30;
+          b.x = Math.random() * width;
+        }
+
+        ctx.fillStyle = `rgba(59, 130, 246, ${b.opacity * 0.15})`;
+        ctx.strokeStyle = `rgba(59, 130, 246, ${b.opacity * 0.35})`;
+        ctx.lineWidth = 0.5;
+        
+        ctx.beginPath();
+        ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        // Shiny reflex dot
+        ctx.fillStyle = `rgba(255, 255, 255, ${b.opacity * 0.4})`;
+        ctx.beginPath();
+        ctx.arc(b.x - b.radius * 0.3, b.y - b.radius * 0.3, b.radius * 0.2, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      // 3. Draw soft, fluid wavy horizontal bands at the bottom representing media level
+      phase += 0.006;
+      ctx.fillStyle = 'rgba(59, 130, 246, 0.015)';
+      ctx.beginPath();
+      ctx.moveTo(0, height);
+      for (let x = 0; x <= width; x += 10) {
+        const y = height - 55 + Math.sin(x * 0.008 + phase) * 8 + Math.cos(x * 0.004 + phase * 1.5) * 4;
+        ctx.lineTo(x, y);
+      }
+      ctx.lineTo(width, height);
+      ctx.fill();
+
+      ctx.fillStyle = 'rgba(16, 185, 129, 0.012)'; // emerald overlap wave
+      ctx.beginPath();
+      ctx.moveTo(0, height);
+      for (let x = 0; x <= width; x += 10) {
+        const y = height - 44 + Math.sin(x * 0.011 - phase * 0.8) * 6 + Math.cos(x * 0.005 + phase) * 3;
+        ctx.lineTo(x, y);
+      }
+      ctx.lineTo(width, height);
+      ctx.fill();
+
+      animationId = requestAnimationFrame(render);
+    };
+
+    render();
+
+    return () => {
+      cancelAnimationFrame(animationId);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      className="absolute inset-0 w-full h-full pointer-events-none select-none z-0"
+    />
+  );
+}
+
 export default function BioreactorMonitor({ scientificMetric }: BioreactorMonitorProps) {
   // Bioreactor Telemetry State
   const [pH, setPH] = useState(7.22);
@@ -105,8 +235,10 @@ export default function BioreactorMonitor({ scientificMetric }: BioreactorMonito
   };
 
   return (
-    <div className="bg-brand-surface rounded-xl border border-brand-border overflow-hidden shadow-2xl">
-      {/* Header bar */}
+    <div className="bg-brand-surface rounded-xl border border-brand-border overflow-hidden shadow-2xl relative">
+      <BioreactorFluidBackground />
+      <div className="relative z-10 flex flex-col h-full w-full">
+        {/* Header bar */}
       <div className="bg-brand-surface-card px-5 py-4 border-b border-brand-border flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 items-center justify-center flex bg-brand-accent/15 rounded text-brand-accent border border-brand-accent/25">
@@ -375,6 +507,7 @@ export default function BioreactorMonitor({ scientificMetric }: BioreactorMonito
             </div>
           </div>
         </div>
+      </div>
       </div>
     </div>
   );

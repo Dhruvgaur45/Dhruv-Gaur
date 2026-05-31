@@ -1,8 +1,111 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Database, FileSpreadsheet, RefreshCw, Layers, CheckCircle, Award } from 'lucide-react';
 
 interface LIMSTrackerProps {
   scientificMetric: string;
+}
+
+// ----------------- HIGH END TECH BACKGROUND GRAPHICS -----------------
+function LimsGridBackground() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let animationId: number;
+    let width = (canvas.width = canvas.parentElement?.clientWidth || 600);
+    let height = (canvas.height = canvas.parentElement?.clientHeight || 500);
+
+    const handleResize = () => {
+      if (canvas && canvas.parentElement) {
+        width = canvas.width = canvas.parentElement.clientWidth;
+        height = canvas.height = canvas.parentElement.clientHeight;
+      }
+    };
+    window.addEventListener('resize', handleResize);
+
+    // Laser scanning state
+    let scanY = 0;
+    let scanDirection = 1;
+
+    const render = () => {
+      ctx.clearRect(0, 0, width, height);
+
+      // 1. Draw elegant laboratory layout grid
+      ctx.strokeStyle = 'rgba(16, 185, 129, 0.015)';
+      ctx.lineWidth = 0.5;
+      const gridSize = 32;
+      for (let x = 0; x < width; x += gridSize) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, height);
+        ctx.stroke();
+
+        // Tiny crosshair ticks in grid intersections
+        for (let y = 0; y < height; y += gridSize) {
+          ctx.strokeStyle = 'rgba(16, 185, 129, 0.04)';
+          ctx.beginPath();
+          ctx.moveTo(x - 2, y); ctx.lineTo(x + 2, y);
+          ctx.moveTo(x, y - 2); ctx.lineTo(x, y + 2);
+          ctx.stroke();
+          ctx.strokeStyle = 'rgba(16, 185, 129, 0.015)';
+        }
+      }
+
+      // 2. Linear laser sweep line representing spectrophotometric scan
+      scanY += 0.8 * scanDirection;
+      if (scanY > height) {
+        scanY = height;
+        scanDirection = -1;
+      } else if (scanY < 0) {
+        scanY = 0;
+        scanDirection = 1;
+      }
+
+      // Draw faint bioluminescent scanning beam
+      const gradient = ctx.createLinearGradient(0, scanY - 20, 0, scanY + 20);
+      gradient.addColorStop(0, 'rgba(16, 185, 129, 0)');
+      gradient.addColorStop(0.5, 'rgba(16, 185, 129, 0.012)');
+      gradient.addColorStop(1, 'rgba(16, 185, 129, 0)');
+      
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, scanY - 20, width, 40);
+
+      // Bright laser thin edge
+      ctx.strokeStyle = 'rgba(16, 185, 129, 0.035)';
+      ctx.lineWidth = 0.75;
+      ctx.beginPath();
+      ctx.moveTo(0, scanY);
+      ctx.lineTo(width, scanY);
+      ctx.stroke();
+
+      // 3. Coordinate indicators text overlays in background margins
+      ctx.fillStyle = 'rgba(16, 185, 129, 0.03)';
+      ctx.font = '8px var(--font-mono, monospace)';
+      ctx.fillText(`LASER_SCAN_POS_Y: ${scanY.toFixed(1)}px`, 15, height - 15);
+      ctx.fillText('PLATE_REF: SBS_96_MATRIX', 15, 20);
+      ctx.fillText('FREQ: 540nm_GREEN_LED', width - 150, 20);
+
+      animationId = requestAnimationFrame(render);
+    };
+
+    render();
+
+    return () => {
+      cancelAnimationFrame(animationId);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      className="absolute inset-0 w-full h-full pointer-events-none select-none z-0"
+    />
+  );
 }
 
 interface WellData {
@@ -138,8 +241,10 @@ export default function LIMSTracker({ scientificMetric }: LIMSTrackerProps) {
   };
 
   return (
-    <div className="bg-brand-surface rounded-xl border border-brand-border overflow-hidden shadow-2xl">
-      {/* Header bar */}
+    <div className="bg-brand-surface rounded-xl border border-brand-border overflow-hidden shadow-2xl relative">
+      <LimsGridBackground />
+      <div className="relative z-10 flex flex-col h-full w-full">
+        {/* Header bar */}
       <div className="bg-brand-surface-card px-5 py-4 border-b border-brand-border flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 items-center justify-center flex bg-brand-accent/15 rounded text-brand-accent border border-brand-accent/25">
@@ -343,6 +448,7 @@ export default function LIMSTracker({ scientificMetric }: LIMSTrackerProps) {
             </div>
           </div>
         </div>
+      </div>
       </div>
     </div>
   );

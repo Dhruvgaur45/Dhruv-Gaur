@@ -1,8 +1,85 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Dna, RefreshCw, AlertTriangle, Cpu, HelpCircle, CheckCircle } from 'lucide-react';
 
 interface DNASequencerProps {
   scientificMetric: string;
+}
+
+// ----------------- HIGH END TECH BACKGROUND GRAPHICS -----------------
+function DnaDripBackground() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let animationId: number;
+    let width = (canvas.width = canvas.parentElement?.clientWidth || 600);
+    let height = (canvas.height = canvas.parentElement?.clientHeight || 450);
+
+    const handleResize = () => {
+      if (canvas && canvas.parentElement) {
+        width = canvas.width = canvas.parentElement.clientWidth;
+        height = canvas.height = canvas.parentElement.clientHeight;
+      }
+    };
+    window.addEventListener('resize', handleResize);
+
+    const fontSize = 10;
+    const columns = Math.ceil(width / 20);
+    const drops = Array(columns).fill(0).map(() => Math.random() * -60);
+    const bases = ['A', 'T', 'C', 'G'];
+
+    const render = () => {
+      // Very high contrast clearing background leaving nice high-tech traces
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
+      ctx.fillRect(0, 0, width, height);
+
+      ctx.fillStyle = 'rgba(16, 185, 129, 0.04)'; // Emerald green bio coding rain
+      ctx.font = `600 ${fontSize}px var(--font-mono, monospace)`;
+
+      for (let i = 0; i < drops.length; i++) {
+        const text = bases[Math.floor(Math.random() * bases.length)];
+        const x = i * 20;
+        const y = drops[i] * fontSize;
+
+        ctx.fillText(text, x, y);
+
+        // Random subtle horizontal connections representing base pairings
+        if (Math.random() > 0.985) {
+          ctx.strokeStyle = 'rgba(16, 185, 129, 0.03)';
+          ctx.lineWidth = 0.5;
+          ctx.beginPath();
+          ctx.moveTo(x - 6, y - 2);
+          ctx.lineTo(x + 14, y - 2);
+          ctx.stroke();
+        }
+
+        if (y > height && Math.random() > 0.975) {
+          drops[i] = 0;
+        }
+        drops[i] += 0.35; // smooth slow flow
+      }
+
+      animationId = requestAnimationFrame(render);
+    };
+
+    render();
+
+    return () => {
+      cancelAnimationFrame(animationId);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      className="absolute inset-0 w-full h-full pointer-events-none select-none z-0 opacity-[0.8]"
+    />
+  );
 }
 
 // Sample gene sequences
@@ -136,8 +213,10 @@ export default function DNASequencer({ scientificMetric }: DNASequencerProps) {
   };
 
   return (
-    <div className="bg-brand-surface rounded-xl border border-brand-border overflow-hidden shadow-2xl">
-      {/* Header bar */}
+    <div className="bg-brand-surface rounded-xl border border-brand-border overflow-hidden shadow-2xl relative">
+      <DnaDripBackground />
+      <div className="relative z-10 flex flex-col h-full w-full">
+        {/* Header bar */}
       <div className="bg-brand-surface-card px-5 py-4 border-b border-brand-border flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 items-center justify-center flex bg-brand-accent/15 rounded text-brand-accent border border-brand-accent/25">
@@ -354,6 +433,7 @@ export default function DNASequencer({ scientificMetric }: DNASequencerProps) {
             </div>
           </div>
         </div>
+      </div>
       </div>
     </div>
   );

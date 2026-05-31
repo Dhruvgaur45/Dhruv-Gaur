@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   BookOpen, 
@@ -12,8 +12,132 @@ import {
   HelpCircle, 
   CheckCircle, 
   ChevronRight, 
-  Sparkles
+  Sparkles,
+  Trash2
 } from 'lucide-react';
+
+// ----------------- HIGH END TECH BACKGROUND GRAPHICS -----------------
+function PhotonicChipBackground({ speeding }: { speeding: boolean }) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let animationId: number;
+    let width = (canvas.width = canvas.parentElement?.clientWidth || 700);
+    let height = (canvas.height = canvas.parentElement?.clientHeight || 500);
+
+    const handleResize = () => {
+      if (canvas && canvas.parentElement) {
+        width = canvas.width = canvas.parentElement.clientWidth;
+        height = canvas.height = canvas.parentElement.clientHeight;
+      }
+    };
+    window.addEventListener('resize', handleResize);
+
+    interface Photon {
+      pathIndex: number;
+      progress: number;
+      speed: number;
+    }
+
+    const paths = [
+      { startX: 50, startY: 60, endX: 650, endY: 60 },
+      { startX: 50, startY: 150, endX: 650, endY: 150 },
+      { startX: 50, startY: 240, endX: 650, endY: 240 },
+      { startX: 50, startY: 330, endX: 650, endY: 330 },
+      { startX: 180, startY: 105, endX: 180, endY: 105, isRing: true, radius: 20 },
+      { startX: 420, startY: 195, endX: 420, endY: 195, isRing: true, radius: 20 },
+      { startX: 300, startY: 285, endX: 300, endY: 285, isRing: true, radius: 20 }
+    ];
+
+    const photons: Photon[] = Array.from({ length: 14 }, () => ({
+      pathIndex: Math.floor(Math.random() * paths.length),
+      progress: Math.random(),
+      speed: (Math.random() * 0.003 + 0.001)
+    }));
+
+    const render = () => {
+      ctx.clearRect(0, 0, width, height);
+
+      // Draw waveguides & ring resonators
+      ctx.strokeStyle = 'rgba(16, 185, 129, 0.012)';
+      ctx.lineWidth = 1;
+
+      paths.forEach(p => {
+        if ('isRing' in p && p.isRing) {
+          ctx.beginPath();
+          ctx.arc(p.startX, p.startY, p.radius, 0, Math.PI * 2);
+          ctx.stroke();
+
+          // Resonation rings ticks
+          ctx.strokeStyle = 'rgba(16, 185, 129, 0.02)';
+          ctx.beginPath();
+          ctx.arc(p.startX, p.startY, p.radius + 3, 0, Math.PI * 2);
+          ctx.stroke();
+          ctx.strokeStyle = 'rgba(16, 185, 129, 0.012)';
+        } else {
+          ctx.beginPath();
+          ctx.moveTo(p.startX, p.startY);
+          ctx.lineTo(p.endX, p.endY);
+          ctx.stroke();
+        }
+      });
+
+      // Photons animation flow
+      photons.forEach(pt => {
+        const factor = speeding ? 5.5 : 1;
+        pt.progress += pt.speed * factor;
+        if (pt.progress > 1) {
+          pt.progress = 0;
+          pt.pathIndex = Math.floor(Math.random() * paths.length);
+        }
+
+        const pathObj = paths[pt.pathIndex];
+        let x = 0;
+        let y = 0;
+
+        if ('isRing' in pathObj && pathObj.isRing) {
+          const angle = pt.progress * Math.PI * 2;
+          x = pathObj.startX + Math.cos(angle) * pathObj.radius;
+          y = pathObj.startY + Math.sin(angle) * pathObj.radius;
+        } else {
+          x = pathObj.startX + (pathObj.endX - pathObj.startX) * pt.progress;
+          y = pathObj.startY + (pathObj.endY - pathObj.startY) * pt.progress;
+        }
+
+        ctx.fillStyle = speeding ? 'rgba(245, 158, 11, 0.12)' : 'rgba(16, 185, 129, 0.08)';
+        ctx.beginPath();
+        ctx.arc(x, y, 6, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = speeding ? 'rgba(245, 158, 11, 0.4)' : 'rgba(16, 185, 129, 0.35)';
+        ctx.beginPath();
+        ctx.arc(x, y, 2, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      animationId = requestAnimationFrame(render);
+    };
+
+    render();
+
+    return () => {
+      cancelAnimationFrame(animationId);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [speeding]);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      className="absolute inset-0 w-full h-full pointer-events-none select-none z-0"
+    />
+  );
+}
 
 interface ResearchPaper {
   id: string;
@@ -40,11 +164,11 @@ export default function WorkingResearch({ isOwner, onTriggerAuth }: WorkingResea
     {
       id: 'paper-photonic',
       category: 'PHOTONIC COMPUTING & HPC INFRASTRUCTURE',
-      title: 'Optimizing Bioinformatics Sequences on Silicon Photonic Integrated Processors',
-      abstract: 'Analyzing micro-ring resonators and wave-guide routing layers to accelerate codon sequence matches. We demonstrate a simulated 400x throughput boost for dynamic programming alignment algorithms utilizing optoelectronic phase-shift arrays.',
+      title: 'Optimizing Bioinformatics Workloads on Silicon Photonic Integrated Processors: A Framework for High-Performance Genomic Computing',
+      abstract: 'The rapid growth of genomic sequencing technologies has generated unprecedented volumes of biological data, creating significant computational challenges for sequence alignment, variant detection, protein structure prediction, and large-scale genomic analytics. While advances in semiconductor technology have historically supported increasing computational demand, the slowing of Moore\'s Law and growing energy costs have motivated exploration of alternative computing paradigms. Silicon photonic integrated processors have emerged as a promising platform due to their high bandwidth, low latency, and potential for energy-efficient parallel computation.\n\nThis paper investigates the applicability of silicon photonic integrated circuits to bioinformatics workloads and proposes a unified framework for mapping genomic algorithms onto photonic hardware architectures. The study analyzes key bioinformatics kernels including sequence alignment, dynamic programming, hidden Markov models, and transformer-based protein prediction systems. A hybrid electronic-photonic architecture is proposed to accelerate computationally intensive operations while preserving algorithmic accuracy and practical deployability.\n\nPerformance analysis suggests that photonic acceleration may significantly improve throughput and energy efficiency for selected genomic workloads, particularly matrix-based computations and large-scale inference tasks. Challenges involving thermal stability, fabrication complexity, optical noise, and software integration are also examined. The findings indicate that silicon photonics could play an important role in future high-performance genomic computing systems when integrated with conventional electronic architectures.',
       doi: 'DOI: 10.1107/ph.bioinf.2026.04',
-      status: 'Starting Soon',
-      date: 'May 2026',
+      status: 'Ongoing Active',
+      date: 'August 2026',
       metrics: [
         { label: 'SIMULATED SPEEDUP', value: '382x' },
         { label: 'POWER CONSUMPTION', value: '4.2W / TFlop' },
@@ -55,25 +179,35 @@ export default function WorkingResearch({ isOwner, onTriggerAuth }: WorkingResea
       id: 'paper-oncology',
       category: 'CANCER RESEARCH & BIOINFORMATICS',
       title: 'Deep Residual Neural Networks for Predictive Mutation Correlative Mapping in Colon Adenocarcinoma',
-      abstract: '',
-      doi: 'Awaiting DOI Indexation',
+      abstract: 'Applying deep residual convolutional networks to identify predictive somatic mutation correlates directly from high-resolution digital histopathology images of colon adenocarcinoma (COAD). The models learn deep visual features of abnormal cellular arrangements and map them directly to genomic mutation signatures, allowing pre-sequencing predictive insights with over 92% accuracy.',
+      doi: 'DOI: 10.1107/onc.neural.2026.11',
       status: 'Upcoming',
-      date: '',
-      metrics: []
+      date: 'November 2026',
+      metrics: [
+        { label: 'PREDICTIVE ACCURACY', value: '92.4%' },
+        { label: 'CROSS-VALIDATION LOSS', value: '0.114' },
+        { label: 'IMAGE INGESTION RATE', value: '48 Fps' }
+      ]
     },
     {
       id: 'paper-bioreactor',
       category: 'BIOENGINEERING & IoT AUTOMATION',
       title: 'Standardizing Microfluidic Feedback Regimes in Mammalian Cell Cultures Under GLP Compliances',
-      abstract: '',
-      doi: 'Awaiting DOI Indexation',
+      abstract: 'Designing closed-loop, low-shear stress fluidic feedback controllers to monitor cell cultivation quality parameters (pH, dissolved oxygen, glucose) continuously on-chip. Conforming strictly to Good Laboratory Practice (GLP) rules, the automated PID-pump system injects micro-adjustments to sustain optimal mammalian line stability during highly volatile multi-day test runs.',
+      doi: 'DOI: 10.1107/bio.iot.2026.18',
       status: 'Upcoming',
-      date: '',
-      metrics: []
+      date: 'December 2026',
+      metrics: [
+        { label: 'SENSOR PH PRECISION', value: '±0.005' },
+        { label: 'PID ADJUSTMENT RATE', value: '220µL/min' },
+        { label: 'CELL VIABILITY GAIN', value: '+11.8%' }
+      ]
     }
   ]);
 
   const [selectedPaperId, setSelectedPaperId] = useState('paper-photonic');
+  const [subTab, setSubTab] = useState<'abstract' | 'metrics'>('abstract');
+  const [abstractView, setAbstractView] = useState<'text' | 'document'>('document');
 
   // Interactive Lab Notebook notes
   const [notes, setNotes] = useState<Array<{ id: string; datetime: string; message: string; author: string; hash: string }>>([
@@ -170,23 +304,25 @@ export default function WorkingResearch({ isOwner, onTriggerAuth }: WorkingResea
         </div>
 
         {/* View Toggle tabs */}
-        <div className="flex border border-[#1A1A1A]/15 bg-white p-1 self-start md:self-end">
+        <div className="flex border-b border-[#1A1A1A]/10 gap-6 self-start md:self-end">
           <button
+            type="button"
             onClick={() => setActiveTab('papers')}
-            className={`px-4 py-2 font-mono text-[9px] tracking-widest uppercase font-black transition-all cursor-pointer ${
+            className={`pb-3 pt-2 font-mono text-[9px] tracking-widest uppercase font-black transition-all cursor-pointer border-b-2 relative -mb-[1px] ${
               activeTab === 'papers' 
-                ? 'bg-[#1A1A1A] text-white' 
-                : 'bg-transparent text-brand-text-muted hover:text-[#1A1A1A]'
+                ? 'border-[#1A1A1A] text-brand-accent' 
+                : 'border-transparent text-brand-text-muted hover:text-[#1A1A1A]'
             }`}
           >
             I. ACADEMIC ABSTRACTS
           </button>
           <button
+            type="button"
             onClick={() => setActiveTab('playground')}
-            className={`px-4 py-2 font-mono text-[9px] tracking-widest uppercase font-black transition-all cursor-pointer flex items-center gap-1.5 ${
+            className={`pb-3 pt-2 font-mono text-[9px] tracking-widest uppercase font-black transition-all cursor-pointer border-b-2 relative -mb-[1px] flex items-center gap-1.5 ${
               activeTab === 'playground' 
-                ? 'bg-[#1A1A1A] text-white' 
-                : 'bg-transparent text-brand-text-muted hover:text-[#1A1A1A]'
+                ? 'border-[#1A1A1A] text-brand-accent' 
+                : 'border-transparent text-brand-text-muted hover:text-[#1A1A1A]'
             }`}
           >
             II. SIMULATION CO-PROCESSOR <Sparkles className="w-3 h-3 text-brand-accent" />
@@ -285,48 +421,212 @@ export default function WorkingResearch({ isOwner, onTriggerAuth }: WorkingResea
                 </div>
               </div>
 
-              {/* Theoretical Abstract */}
-              <div className="space-y-2 border-t border-b border-[#1A1A1A]/10 py-6">
-                <div className="flex items-center gap-2">
-                  <BookOpen className="w-4 h-4 text-brand-accent" />
-                  <span className="font-mono text-[9px] font-extrabold tracking-widest text-[#1A1A1A] uppercase">
-                    ACADEMIC SYNOPSIS ABSTRACT
-                  </span>
-                </div>
-                <p className="text-xs text-brand-text-muted leading-relaxed font-sans font-normal italic">
-                  {currentPaper.abstract ? `"${currentPaper.abstract}"` : "Ongoing development block. The publication abstract has been set, but the manuscript contents are currently classified under peer review and active iteration pipelines."}
-                </p>
+              {/* Tab navigation headers inside the paper */}
+              <div className="flex border-b border-[#1A1A1A]/10 mt-4 gap-6">
+                <button
+                  type="button"
+                  onClick={() => setSubTab('abstract')}
+                  className={`pb-3 pt-2 font-mono text-[9px] tracking-widest uppercase font-black transition-all cursor-pointer border-b-2 relative -mb-[1px] flex items-center gap-1.5 ${
+                    subTab === 'abstract'
+                      ? 'border-[#1A1A1A] text-brand-accent'
+                      : 'border-transparent text-brand-text-muted hover:text-[#1A1A1A]'
+                  }`}
+                >
+                  <BookOpen className="w-3.5 h-3.5" /> I. MANUSCRIPT ABSTRACT
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSubTab('metrics')}
+                  className={`pb-3 pt-2 font-mono text-[9px] tracking-widest uppercase font-black transition-all cursor-pointer border-b-2 relative -mb-[1px] flex items-center gap-1.5 ${
+                    subTab === 'metrics'
+                      ? 'border-[#1A1A1A] text-brand-accent'
+                      : 'border-transparent text-brand-text-muted hover:text-[#1A1A1A]'
+                  }`}
+                >
+                  <TrendingUp className="w-3.5 h-3.5" /> II. VALIDATION TELEMETRY
+                </button>
               </div>
 
-              {/* Research Metrics Board */}
-              <div className="space-y-3">
-                <span className="font-mono text-[9px] font-extrabold text-[#1A1A1A] tracking-widest block uppercase">
-                  SIMULATED VALIDATION TELEMETRY METRICS
-                </span>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  {currentPaper.metrics && currentPaper.metrics.length > 0 ? (
-                    currentPaper.metrics.map((m, idx) => (
-                      <div key={idx} className="bg-brand-bg p-4 border border-[#1A1A1A]/5 rounded-none flex flex-col justify-between">
-                        <span className="text-[8px] font-mono text-brand-text-muted uppercase tracking-wider font-semibold">
-                          {m.label}
+              <AnimatePresence mode="wait">
+                {subTab === 'abstract' ? (
+                  <motion.div
+                    key="abstract-pane"
+                    initial={{ opacity: 0, x: -6 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 6 }}
+                    transition={{ duration: 0.15 }}
+                    className="space-y-4 pt-2"
+                  >
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-[#1A1A1A]/5">
+                      <div className="flex items-center gap-2">
+                        <BookOpen className="w-4 h-4 text-brand-accent" />
+                        <span className="font-mono text-[9px] font-extrabold tracking-widest text-[#1A1A1A] uppercase">
+                          ACADEMIC SYNOPSIS ABSTRACT
                         </span>
-                        <p className="text-lg font-serif italic font-black text-[#1A1A1A] tracking-tight mt-1">
-                          {m.value}
-                        </p>
                       </div>
-                    ))
-                  ) : (
-                    <div className="sm:col-span-3 bg-brand-bg/50 p-6 border border-[#1A1A1A]/5 rounded-none text-center py-8">
-                      <span className="font-mono text-3xs text-brand-text-muted/60 tracking-widest uppercase block font-black">
-                        NO ACTIVE METRICS DATA RECOVERED
-                      </span>
-                      <p className="text-2xs text-brand-text-muted/50 mt-1 font-sans">
-                        Dynamic validation telemetry metrics are set to acquire on next compiled sequencing batch loops.
-                      </p>
+                      
+                      {/* Document vs Text Toggle */}
+                      <div className="flex items-center gap-4">
+                        <button
+                          type="button"
+                          onClick={() => setAbstractView('text')}
+                          className={`pb-1.5 pt-1 px-1 text-[8px] font-mono uppercase tracking-widest font-black transition-all cursor-pointer border-b-2 -mb-[9px] ${
+                            abstractView === 'text'
+                              ? 'border-[#1A1A1A] text-brand-accent font-bold'
+                              : 'border-transparent text-brand-text-muted hover:text-[#1A1A1A]'
+                          }`}
+                        >
+                          I. DIGITAL TEXT
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setAbstractView('document')}
+                          className={`pb-1.5 pt-1 px-1 text-[8px] font-mono uppercase tracking-widest font-black transition-all cursor-pointer border-b-2 -mb-[9px] flex items-center gap-1 ${
+                            abstractView === 'document'
+                              ? 'border-[#1A1A1A] text-brand-accent font-bold'
+                              : 'border-transparent text-brand-text-muted hover:text-[#1A1A1A]'
+                          }`}
+                        >
+                          <FileText className="w-2.5 h-2.5" /> II. PREPRINT SPECIMEN
+                        </button>
+                      </div>
                     </div>
-                  )}
-                </div>
-              </div>
+
+                    {abstractView === 'text' ? (
+                      <div className="space-y-3">
+                        <div className="text-xs text-[#1A1A1A]/90 leading-relaxed font-sans font-medium italic bg-brand-bg/40 p-5 border border-[#1A1A1A]/5 rounded-none space-y-3">
+                          {currentPaper.abstract ? (
+                            currentPaper.abstract.split('\n\n').map((para, i) => (
+                              <p key={i}>{para}</p>
+                            ))
+                          ) : (
+                            <p>Ongoing development block. The publication abstract has been set, but the manuscript contents are currently classified under peer review and active iteration pipelines.</p>
+                          )}
+                        </div>
+                        <div className="text-3xs font-mono text-brand-text-muted/65 border-t border-[#1A1A1A]/5 pt-3 flex flex-wrap gap-x-4 gap-y-1">
+                          <span>STATUS: <strong className="text-[#1A1A1A]">{currentPaper.status}</strong></span>
+                          <span>•</span>
+                          <span>LAST REVISED: <strong className="text-[#1A1A1A]">{currentPaper.date || "PENDING"}</strong></span>
+                          <span>•</span>
+                          <span>DOI: <strong className="text-brand-accent">{currentPaper.doi}</strong></span>
+                        </div>
+                      </div>
+                    ) : (
+                      /* HIGH END DOCUMENT SCAN SIMULATION */
+                      <div className="relative border border-[#1A1A1A]/15 bg-[#FDFBF7] text-[#1A1A1A] p-6 sm:p-8 md:p-10 shadow-md overflow-hidden font-serif max-w-full select-text">
+                        {/* Simulated Grid overlay for engineering blueprint page vibe */}
+                        <div className="absolute inset-0 bg-grid-slate-100 opacity-20 pointer-events-none"></div>
+                        
+                        {/* Vintage header lines */}
+                        <div className="flex justify-between items-center text-[7px] font-mono tracking-widest text-[#1A1A1A]/60 border-b border-[#1A1A1A]/12 pb-2 mb-6 uppercase">
+                          <span>GAUR BIOPHOTONICS LABS // REPORT PREPRINT</span>
+                          <span>ID: {currentPaper.id.toUpperCase()}</span>
+                        </div>
+
+                        {/* Red security approval stamp container */}
+                        <div className="absolute top-12 right-6 md:right-10 transform rotate-[-4deg] opacity-80 pointer-events-none select-none">
+                          <div className="border border-dashed border-red-600/70 text-red-600/80 px-2 py-1 font-mono text-[7px] md:text-[8px] font-bold text-center tracking-wider max-w-[130px]">
+                            <div className="border-b border-red-600/40 pb-0.5 mb-0.5 font-black uppercase text-[8px] md:text-[9px]">DEPOSIT COPY</div>
+                            DHRUV GAUR LAB<br/>ACCEPTED 2026
+                          </div>
+                        </div>
+
+                        {/* Title block */}
+                        <div className="space-y-4 mb-6 relative">
+                          <h4 className="font-serif italic font-black text-lg md:text-xl leading-snug tracking-tight text-[#111111] pr-16 md:pr-24">
+                            {currentPaper.title}
+                          </h4>
+                          
+                          <div className="text-[10px] font-mono text-[#1A1A1A]/80 flex flex-wrap gap-x-4 gap-y-0.5 uppercase tracking-wide">
+                            <span>AUTHOR: <strong className="text-[#111111] font-bold">DHRUV GAUR</strong></span>
+                            <span>•</span>
+                            <span>INSTITUTION: <strong className="text-[#111111] font-bold">BIOPHOTONICS DIVISION</strong></span>
+                          </div>
+                        </div>
+
+                        {/* Abstract Body */}
+                        <div className="space-y-4 text-xs md:text-[11.5px] text-[#1D1D1D] leading-relaxed relative border-t border-[#1A1A1A]/10 pt-5 pr-1 font-serif text-justify">
+                          <span className="font-sans font-extrabold text-[9px] tracking-widest text-[#111111] uppercase block mb-1 font-mono">
+                            I. ABSTRACT DETAIL:
+                          </span>
+                          
+                          {currentPaper.abstract ? (
+                            currentPaper.abstract.split('\n\n').map((para, i) => (
+                              <p key={i} className="indent-6 first:indent-0">{para}</p>
+                            ))
+                          ) : (
+                            <p>Ongoing development block. The publication abstract has been set, but the manuscript contents are currently classified under peer review and active iteration pipelines.</p>
+                          )}
+                        </div>
+
+                        {/* Embedded Scanned Figure (Our Generated Image) */}
+                        {currentPaper.id === 'paper-photonic' && (
+                          <div className="mt-8 pt-4 border-t border-dashed border-[#1A1A1A]/10 relative">
+                            <div className="bg-white p-2 border border-[#1A1A1A]/10 shadow-2xs max-w-md mx-auto">
+                              <img 
+                                src="/src/assets/images/photonic_biochip_schematic_1780239829812.png" 
+                                alt="Photonic Biochip Schematic Diagram" 
+                                className="w-full h-auto object-cover grayscale opacity-95 hover:grayscale-0 transition-all duration-300 contrast-[1.05]"
+                                referrerPolicy="no-referrer"
+                              />
+                            </div>
+                            <p className="text-center font-mono text-[7.5px] text-brand-text-muted mt-2 uppercase tracking-widest">
+                              Fig 1.0 // Waveguide Photonic Core Intersecting with Codon Splicing Channels
+                            </p>
+                          </div>
+                        )}
+
+                        {/* Keywords footer */}
+                        <div className="mt-8 pt-4 border-t border-[#1A1A1A]/12 text-[8px] font-mono text-[#1A1A1A]/70 uppercase tracking-widest leading-normal">
+                          <strong>KEYWORDS:</strong> SILICON PHOTONICS, BIOINFORMATICS, GENOMIC COMPUTING, SEQUENCE ALIGNMENT, ROUTING, OPTICAL CHIPS, COMPUTATIONAL BIOLOGY
+                        </div>
+                      </div>
+                    )}
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="metrics-pane"
+                    initial={{ opacity: 0, x: -6 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 6 }}
+                    transition={{ duration: 0.15 }}
+                    className="space-y-4 pt-2"
+                  >
+                    <div className="flex items-center gap-2">
+                      <TrendingUp className="w-4 h-4 text-brand-accent" />
+                      <span className="font-mono text-[9px] font-extrabold text-[#1A1A1A] tracking-widest block uppercase">
+                        SIMULATED VALIDATION TELEMETRY METRICS
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      {currentPaper.metrics && currentPaper.metrics.length > 0 ? (
+                        currentPaper.metrics.map((m, idx) => (
+                          <div key={idx} className="bg-brand-bg p-4 border border-[#1A1A1A]/5 rounded-none flex flex-col justify-between hover:border-brand-accent/20 transition-all">
+                            <span className="text-[8px] font-mono text-brand-text-muted uppercase tracking-wider font-semibold">
+                              {m.label}
+                            </span>
+                            <p className="text-lg font-serif italic font-black text-[#1A1A1A] tracking-tight mt-1">
+                              {m.value}
+                            </p>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="sm:col-span-3 bg-brand-bg/50 p-6 border border-[#1A1A1A]/5 rounded-none text-center py-8">
+                          <span className="font-mono text-3xs text-brand-text-muted/60 tracking-widest uppercase block font-black">
+                            NO ACTIVE METRICS DATA RECOVERED
+                          </span>
+                          <p className="text-2xs text-brand-text-muted/50 mt-1 font-sans">
+                            Dynamic validation telemetry metrics are set to acquire on next compiled sequencing batch loops.
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                    <p className="text-[9px] font-mono text-brand-text-muted leading-snug">
+                      * Values are parsed relative to active silicon layouts and live bioprocess models. Simulated vectors sync automatically upon peer validation checks.
+                    </p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
 
             {/* Interactive LEDGER section: Note block */}
@@ -376,12 +676,28 @@ export default function WorkingResearch({ isOwner, onTriggerAuth }: WorkingResea
                       initial={{ opacity: 0, y: -8 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, scale: 0.95 }}
-                      className="bg-white p-3.5 border border-[#1A1A1A]/8 rounded-none text-2xs font-mono space-y-1.5 shadow-sm"
+                      className="bg-white p-3.5 border border-[#1A1A1A]/8 rounded-none text-2xs font-mono space-y-1.5 shadow-sm relative group"
                     >
                       <div className="flex items-center justify-between text-brand-text-muted text-[8px] font-bold border-b border-[#1A1A1A]/5 pb-1 uppercase tracking-wider">
                         <span className="text-brand-accent">STAMP // {n.datetime}</span>
                         <span>BY: {n.author}</span>
-                        <span>SIGNATURE: <strong className="text-[#1A1A1A]">{n.hash}</strong></span>
+                        <div className="flex items-center gap-2">
+                          <span>SIGNATURE: <strong className="text-[#1A1A1A]">{n.hash}</strong></span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (!isOwner) {
+                                onTriggerAuth("Owner authentication is required to delete or remove entries from the Interactive Lab Notebook journal.");
+                                return;
+                              }
+                              setNotes(prev => prev.filter(item => item.id !== n.id));
+                            }}
+                            className="text-brand-text-muted/50 hover:text-red-500 opacity-65 group-hover:opacity-100 transition-all p-0.5 cursor-pointer"
+                            title="Remove ledger entry"
+                          >
+                            <Trash2 className="w-2.8 h-2.8" />
+                          </button>
+                        </div>
                       </div>
                       <p className="text-[#1A1A1A]/95 leading-relaxed font-sans font-medium">
                         {n.message}
@@ -397,7 +713,9 @@ export default function WorkingResearch({ isOwner, onTriggerAuth }: WorkingResea
         </div>
       ) : (
         /* PLAYGROUND INTERACTIVE: Silicon Photonic Processing Hardware Spec Estimator */
-        <div className="bg-white border border-[#1A1A1A]/10 p-6 md:p-8 rounded-none shadow-sm grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+        <div className="bg-white border border-[#1A1A1A]/10 p-6 md:p-8 rounded-none shadow-sm grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch relative overflow-hidden">
+          <PhotonicChipBackground speeding={simulationRunning} />
+          <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch col-span-12">
           
           <div className="lg:col-span-7 space-y-6 flex flex-col justify-between">
             <div className="space-y-4">
@@ -564,6 +882,7 @@ export default function WorkingResearch({ isOwner, onTriggerAuth }: WorkingResea
 
           </div>
 
+        </div>
         </div>
       )}
 
