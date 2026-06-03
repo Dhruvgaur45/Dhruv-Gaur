@@ -46,6 +46,9 @@ import WorkingResearch from './components/WorkingResearch';
 import Logo from './components/Logo';
 import MaintenancePage from './components/MaintenancePage';
 import AcademicTimeline from './components/AcademicTimeline';
+import CertificationCollection from './components/CertificationCollection';
+import ExperienceTimeline from './components/ExperienceTimeline';
+import ResearchMap from './components/ResearchMap';
 import MicroscopeCellsBackground from './components/MicroscopeCellsBackground';
 import BioDataVizBackground from './components/BioDataVizBackground';
 
@@ -194,7 +197,7 @@ export default function App() {
         setShowScrollTop(false);
       }
 
-      const sections = ['welcome', 'intro', 'skills', 'research', 'projects', 'contact'];
+      const sections = ['welcome', 'intro', 'skills', 'experience', 'research', 'research_map', 'certifications', 'projects', 'contact'];
       const scrollPosition = window.scrollY + 200;
 
       for (const section of sections) {
@@ -648,24 +651,24 @@ export default function App() {
           </button>
 
           {/* Links Center */}
-          <nav className="hidden md:flex items-center gap-8 text-[11px] font-mono font-bold tracking-[0.2em] text-[#1A1A1A]/50 uppercase">
-            {['welcome', 'intro', 'skills', 'research', 'projects', 'contact'].map((sect) => (
-               <button
-                 key={sect}
-                 onClick={() => scrollTo(sect)}
-                 className={`py-2 transition-all cursor-pointer relative ${
-                   activeSection === sect ? 'text-brand-accent' : 'hover:text-[#1A1A1A]'
-                 }`}
-               >
-                 {sect === 'welcome' ? 'Welcome' : sect === 'intro' ? 'Intro' : sect === 'skills' ? 'Skills' : sect === 'research' ? 'Research' : sect === 'projects' ? 'Projects' : 'Contact'}
-                 {activeSection === sect && (
-                   <motion.span 
-                     layoutId="activeNavIndicator"
-                     className="absolute bottom-0 left-0 w-full h-[1.5px] bg-brand-accent"
-                     transition={{ type: "spring", stiffness: 350, damping: 25 }}
-                   />
-                 )}
-               </button>
+          <nav className="hidden md:flex items-center gap-7 text-[11px] font-mono font-bold tracking-[0.2em] text-[#1A1A1A]/50 uppercase">
+            {['welcome', 'intro', 'skills', 'experience', 'research', 'research_map', 'certifications', 'projects', 'contact'].map((sect) => (
+                <button
+                  key={sect}
+                  onClick={() => scrollTo(sect)}
+                  className={`py-2 transition-all cursor-pointer relative ${
+                    activeSection === sect ? 'text-brand-accent' : 'hover:text-[#1A1A1A]'
+                  }`}
+                >
+                  {sect === 'welcome' ? 'Welcome' : sect === 'intro' ? 'Intro' : sect === 'skills' ? 'Skills' : sect === 'experience' ? 'Experience' : sect === 'research' ? 'Research' : sect === 'research_map' ? 'Research Map' : sect === 'certifications' ? 'Certifications' : sect === 'projects' ? 'Projects' : 'Contact'}
+                  {activeSection === sect && (
+                    <motion.span 
+                      layoutId="activeNavIndicator"
+                      className="absolute bottom-0 left-0 w-full h-[1.5px] bg-brand-accent"
+                      transition={{ type: "spring", stiffness: 350, damping: 25 }}
+                    />
+                  )}
+                </button>
             ))}
           </nav>
 
@@ -969,45 +972,28 @@ export default function App() {
           </div>
         </motion.section>
 
-        {/* SECTION 4: CERTIFICATIONS */}
+        {/* SECTION: EXPERIENCE TIMELINE */}
         <motion.section 
+          id="experience"
           initial={{ opacity: 0, y: 35 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-120px" }}
           transition={{ duration: 0.75, ease: "easeOut" }}
           className="py-24 border-t border-[#1A1A1A]/10"
         >
-          <div className="space-y-12">
-            
-            {/* Header */}
-            <div className="max-w-xl space-y-3">
-              <span className="text-brand-accent text-[9px] font-bold tracking-widest uppercase block">Verified Accreditations</span>
-              <h2 className="font-serif italic text-3xl font-black text-[#1A1A1A] tracking-tight uppercase">Certifications</h2>
-              <p className="text-sm text-brand-text-muted leading-relaxed font-normal">
-                Accreditations verifying high standards of analysis, execution accuracy, and structure.
-              </p>
-            </div>
- 
-            {/* Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {CERTIFICATIONS.map((cert) => (
-                <div
-                  key={cert.id}
-                  className="bg-white p-6 rounded-none border border-[#1A1A1A]/10 flex items-start gap-4 hover:border-[#1A1A1A]/50 transition-all duration-300"
-                >
-                  <div className="w-9 h-9 flex items-center justify-center bg-[#1A1A1A] text-white shrink-0">
-                    {renderIcon(cert.iconName, "w-4.5 h-4.5")}
-                  </div>
-                  <div className="space-y-1.5 min-w-0">
-                    <h4 className="font-sans font-bold text-sm text-[#1A1A1A] truncate">{cert.title}</h4>
-                    <p className="font-mono text-[9px] text-brand-accent tracking-[0.2em] font-bold uppercase">{cert.issuer}</p>
-                    <p className="text-2xs text-brand-text-muted leading-relaxed font-normal">{cert.description}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
- 
-          </div>
+          <ExperienceTimeline />
+        </motion.section>
+
+        {/* SECTION 4: CERTIFICATION COLLECTION */}
+        <motion.section 
+          id="certifications"
+          initial={{ opacity: 0, y: 35 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-120px" }}
+          transition={{ duration: 0.75, ease: "easeOut" }}
+          className="py-24 border-t border-[#1A1A1A]/10"
+        >
+          <CertificationCollection />
         </motion.section>
 
         {/* SECTION: WORKING RESEARCH */}
@@ -1028,6 +1014,18 @@ export default function App() {
               setShowOwnerModal(true);
             }} 
           />
+        </motion.section>
+
+        {/* SECTION: RESEARCH MAP D3 DESIGN */}
+        <motion.section 
+          id="research_map" 
+          initial={{ opacity: 0, y: 35 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-120px" }}
+          transition={{ duration: 0.75, ease: "easeOut" }}
+          className="py-24 border-t border-[#1A1A1A]/10"
+        >
+          <ResearchMap />
         </motion.section>
 
         {/* SECTION 5: INTERACTIVE PROJECTS SHOWCASE */}
