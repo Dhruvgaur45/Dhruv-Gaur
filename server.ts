@@ -181,6 +181,73 @@ async function startServer() {
     }
   });
 
+  // Path to the JSON custom cert images storage
+  const certImagesFile = path.join(dataDir, "custom_cert_images.json");
+
+  // Helper to read custom cert images
+  async function readCertImages() {
+    try {
+      const content = await fs.readFile(certImagesFile, "utf-8");
+      return JSON.parse(content);
+    } catch {
+      return {};
+    }
+  }
+
+  // Helper to write custom cert images
+  async function writeCertImages(data: any) {
+    await fs.writeFile(certImagesFile, JSON.stringify(data, null, 2), "utf-8");
+  }
+
+  // API Route - Get all persistent custom cert images
+  app.get("/api/custom-certs", async (req, res) => {
+    try {
+      const data = await readCertImages();
+      res.json(data);
+    } catch (err) {
+      console.error("Error reading custom cert images:", err);
+      res.status(500).json({ error: "Failed to read custom certification images archive" });
+    }
+  });
+
+  // API Route - Save/Update a custom cert image
+  app.post("/api/custom-certs", async (req, res) => {
+    const { id, base64 } = req.body;
+
+    if (!id || !base64) {
+      return res.status(400).json({ error: "id and base64 string are required." });
+    }
+
+    try {
+      const data = await readCertImages();
+      data[id] = base64;
+      await writeCertImages(data);
+      console.log(`[Image Record System] New certificate image saved permanently for: ${id}`);
+      res.json({ success: true, message: "Certificate image successfully saved to server archive." });
+    } catch (err) {
+      console.error("Error saving custom cert image:", err);
+      res.status(500).json({ error: "Failed to persist certificate image record." });
+    }
+  });
+
+  // API Route - Delete a custom cert image
+  app.delete("/api/custom-certs/:id", async (req, res) => {
+    const { id } = req.params;
+
+    try {
+      const data = await readCertImages();
+      if (data[id]) {
+        delete data[id];
+        await writeCertImages(data);
+        console.log(`[Image Record System] Certificate image deleted permanently for: ${id}`);
+      }
+      res.json({ success: true, message: "Certificate image successfully deleted from server archive." });
+    } catch (err) {
+      console.error("Error deleting custom cert image:", err);
+      res.status(500).json({ error: "Failed to delete certificate image record." });
+    }
+  });
+
   // API Route - Delete contact submission record
   app.delete("/api/contact/:id", async (req, res) => {
     try {

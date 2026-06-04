@@ -651,7 +651,7 @@ export default function App() {
           </button>
 
           {/* Links Center */}
-          <nav className="hidden md:flex items-center gap-7 text-[11px] font-mono font-bold tracking-[0.2em] text-[#1A1A1A]/50 uppercase">
+          <nav className="hidden md:flex items-center gap-8 text-[11px] font-mono font-bold tracking-[0.2em] text-[#1A1A1A]/50 uppercase">
             {['welcome', 'intro', 'skills', 'experience', 'research', 'research_map', 'certifications', 'projects', 'contact'].map((sect) => (
                 <button
                   key={sect}

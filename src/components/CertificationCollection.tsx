@@ -257,6 +257,51 @@ export default function CertificationCollection() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCert, setSelectedCert] = useState<CertItem | null>(null);
 
+  // State to hold custom base64-encoded uploaded certificate images
+  const [customCertImages, setCustomCertImages] = useState<Record<string, string>>(() => {
+    try {
+      const saved = localStorage.getItem('db_custom_cert_images');
+      return saved ? JSON.parse(saved) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  // State to decide whether to view original image or high-fidelity stylized replica
+  const [specimenMode, setSpecimenMode] = useState<'replica' | 'original'>('original');
+  const [originalImgError, setOriginalImgError] = useState(false);
+
+  // Sync custom files from database server on component mount
+  React.useEffect(() => {
+    fetch('/api/custom-certs')
+      .then(res => {
+        if (res.ok) return res.json();
+        throw new Error('Server archive unresponsive');
+      })
+      .then(serverCerts => {
+        if (serverCerts && typeof serverCerts === 'object') {
+          setCustomCertImages(prev => {
+            const merged = { ...prev, ...serverCerts };
+            try {
+              localStorage.setItem('db_custom_cert_images', JSON.stringify(merged));
+            } catch (err) {
+              console.error('Local preservation state sync mismatch', err);
+            }
+            return merged;
+          });
+        }
+      })
+      .catch(err => {
+        console.warn('Backend custom certificate fetch error: UI running on active storage', err);
+      });
+  }, []);
+
+  const handleSelectCert = (cert: CertItem) => {
+    setSelectedCert(cert);
+    setOriginalImgError(false);
+    setSpecimenMode('original');
+  };
+
   // Filter & Search Logic
   const filteredCerts = CERT_DATA.filter(cert => {
     const matchesFilter = filter === 'all' || cert.category === filter;
@@ -456,7 +501,7 @@ export default function CertificationCollection() {
 
                         <button
                           type="button"
-                          onClick={() => setSelectedCert(cert)}
+                          onClick={() => handleSelectCert(cert)}
                           className="px-3 py-1.5 bg-[#1A1A1A] hover:bg-brand-accent text-white font-mono text-[8.5px] uppercase font-black tracking-widest transition-all cursor-pointer flex items-center gap-1.5 active:scale-95"
                         >
                           <Eye className="w-3 h-3" /> PREVIEW SPECIMEN
@@ -514,11 +559,64 @@ export default function CertificationCollection() {
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
                 
                 {/* 1. HIGH-FIDELITY DOCUMENT PREVIEW CANVAS (Col 1-7) */}
-                <div className="lg:col-span-7 flex flex-col items-center">
-                  <div className="w-full bg-[#F4F2EB] border-[6px] border-double border-[#A78BFA] p-1 shadow-inner relative overflow-hidden select-none select-none max-w-lg aspect-[11/8] flex flex-col justify-between">
+                <div className="lg:col-span-7 flex flex-col items-center w-full">
+                  {/* Mode Toggle Tabs above the document box */}
+                  <div className="flex gap-2 mb-3 bg-[#FAF9F5] border border-[#1A1A1A]/10 p-1 w-full max-w-lg select-none">
+                    <button
+                      type="button"
+                      onClick={() => setSpecimenMode('original')}
+                      className={`flex-1 py-1.5 px-2 text-center font-mono text-[9px] tracking-wider uppercase font-black cursor-pointer transition-all border ${
+                        specimenMode === 'original'
+                          ? 'bg-[#1A1A1A] text-white border-[#1A1A1A]'
+                          : 'bg-white text-brand-text-muted border-transparent hover:border-[#1A1A1A]/10 hover:text-[#1A1A1A]'
+                      }`}
+                    >
+                      [ ORIGINAL DOCUMENT ]
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSpecimenMode('replica')}
+                      className={`flex-1 py-1.5 px-2 text-center font-mono text-[9px] tracking-wider uppercase font-black cursor-pointer transition-all border ${
+                        specimenMode === 'replica'
+                          ? 'bg-[#1A1A1A] text-white border-[#1A1A1A]'
+                          : 'bg-white text-brand-text-muted border-transparent hover:border-[#1A1A1A]/10 hover:text-[#1A1A1A]'
+                      }`}
+                    >
+                      [ HIGH-FIDELITY REPLICA ]
+                    </button>
+                  </div>
+
+                  <div className="w-full bg-[#F4F2EB] border-[6px] border-double border-[#A78BFA] p-1 shadow-inner relative overflow-hidden select-none max-w-lg aspect-[11/8] flex flex-col justify-between">
                     
-                    {/* OPTION 1: VETERANS AMBASSADOR MEMBERSHIP */}
-                    {selectedCert.specimenType === 'veterans' && (
+                    {specimenMode === 'original' ? (
+                      /* ORIGINAL IMAGE PREVIEW */
+                      <div className="w-full h-full relative flex flex-col items-center justify-center bg-zinc-900 border border-slate-300">
+                        {(customCertImages[selectedCert.id] || !originalImgError) ? (
+                          <img
+                            src={customCertImages[selectedCert.id] || `/src/assets/images/${selectedCert.id}.png`}
+                            alt={selectedCert.title}
+                            referrerPolicy="no-referrer"
+                            className="max-w-full max-h-full object-contain pointer-events-auto"
+                            onError={() => {
+                              if (!customCertImages[selectedCert.id]) {
+                                setOriginalImgError(true);
+                                setSpecimenMode('replica');
+                              }
+                            }}
+                          />
+                        ) : (
+                          <div className="text-center p-6 text-slate-400 font-mono text-[10px] space-y-2">
+                            <FileText className="w-8 h-8 text-slate-600 mx-auto" />
+                            <p>No original file found at `/src/assets/images/{selectedCert.id}.png`</p>
+                            <p className="text-[8px] text-slate-500">Please upload your direct credential below.</p>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      /* REPLICA MODE */
+                      <>
+                        {/* OPTION 1: VETERANS AMBASSADOR MEMBERSHIP */}
+                        {selectedCert.specimenType === 'veterans' && (
                       <div className="p-4 md:p-6 w-full h-full border-2 border-amber-800/10 bg-white relative flex flex-col justify-between" style={{ fontFamily: 'Georgia, serif' }}>
                         {/* Corners ornaments */}
                         <div className="absolute top-1 left-1 w-6 h-6 border-t-2 border-l-2 border-amber-800/20" />
@@ -822,8 +920,374 @@ export default function CertificationCollection() {
                       </div>
                     )}
 
+                    {/* OPTION 8: GDG ANDROID WORKSHOP */}
+                    {selectedCert.specimenType === 'android-gdg' && (
+                      <div className="p-4 md:p-5 w-full h-full bg-white text-slate-800 relative flex flex-col justify-between border border-slate-200 font-sans">
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-slate-50 rounded-full blur-2xl pointer-events-none" />
+                        
+                        {/* Header Logos */}
+                        <div className="flex justify-between items-start border-b border-slate-100 pb-1 z-10 select-none">
+                          <div className="flex items-center gap-1.5">
+                            <div className="flex items-center gap-0.5 text-[#4285F4] font-black text-[10px]">
+                              <span>&lt;</span>
+                              <span className="text-[#EA4335]">&gt;</span>
+                              <span className="text-[#34A853] ml-1 font-sans text-[8.5px] tracking-tight uppercase">GDG on Campus</span>
+                            </div>
+                          </div>
+                          <span className="text-[5.5px] font-mono font-bold text-slate-400 text-right leading-tight">
+                            Trinity College of Engineering<br />and Research - Pune, India
+                          </span>
+                        </div>
+
+                        {/* Title Section */}
+                        <div className="text-center space-y-1 my-1 z-10 select-none">
+                          <h4 className="text-[12px] font-bold tracking-widest text-[#4285F4] uppercase font-mono">CERTIFICATE OF PARTICIPATION</h4>
+                          <p className="text-[6px] text-slate-400 italic">This is to certify that</p>
+                          <h5 className="text-sm font-black text-slate-900 border-b border-dotted border-slate-200 pb-0.5 w-1/2 mx-auto leading-none">Dhruv Gaur</h5>
+                          <p className="text-[6.5px] text-slate-500 leading-tight w-11/12 mx-auto">
+                            has successfully attended the workshop organized by <strong>GDG on Campus Trinity College of Engineering and Research</strong> on the topic:
+                          </p>
+                          <p className="text-[8px] font-bold font-mono text-[#0F9D58] bg-[#0F9D58]/5 p-1 border border-[#0F9D58]/10 max-w-xs mx-auto leading-tight">
+                            Hands-on Workshop: Building Your First Android app
+                          </p>
+                        </div>
+
+                        {/* Footer Signatures */}
+                        <div className="flex justify-between items-end text-[5.5px] text-slate-400 font-mono border-t border-slate-100 pt-1 z-10 select-none uppercase">
+                          <div className="text-center w-[70px]">
+                            <span className="text-slate-805 font-bold block italic font-serif leading-none">Clynit</span>
+                            <div className="h-[0.5px] bg-slate-300 my-0.5" />
+                            <span>GDG OC LEAD</span>
+                          </div>
+                          <div className="flex flex-col items-center">
+                            <span className="text-slate-800 font-bold text-[6px]">30th Of May 2026</span>
+                            <span>DATE OF SESSION</span>
+                          </div>
+                          <div className="text-center w-[70px]">
+                            <span className="text-slate-805 font-bold block italic font-serif leading-none font-bold">Gucoias</span>
+                            <div className="h-[0.5px] bg-slate-300 my-0.5" />
+                            <span>FACULTY ADVISOR</span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* OPTION 9: GOOGLE I/O BADGE */}
+                    {selectedCert.specimenType === 'google-io' && (
+                      <div className="p-4 md:p-5 w-full h-full bg-[#FAFAFA] text-slate-900 relative flex flex-col justify-between font-sans border border-slate-200 overflow-hidden">
+                        {/* Modern Google Color Ribbon Waves on bottom margin */}
+                        <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#4285F4] via-[#EA4335] to-[#F4B400] z-20" />
+                        <div className="absolute -bottom-8 -left-8 w-32 h-32 bg-[#4285F4]/10 rounded-full blur-xl pointer-events-none" />
+                        <div className="absolute -top-8 -right-8 w-32 h-32 bg-[#FFD043]/10 rounded-full blur-xl pointer-events-none" />
+
+                        {/* Header */}
+                        <div className="flex justify-between items-center z-10">
+                          <div className="flex items-center gap-1 font-bold text-[10px] uppercase text-[#4285F4] tracking-wide">
+                            <span className="text-slate-900 font-black">Google</span> I/O <span className="text-[7px] text-slate-400 font-mono">2026</span>
+                          </div>
+                          <span className="text-[6px] font-mono text-slate-400 bg-slate-100 px-1.5 py-0.5 font-bold uppercase tracking-widest rounded-none">
+                            #GoogleIO2026
+                          </span>
+                        </div>
+
+                        {/* Main Title Banner */}
+                        <div className="my-1 text-left space-y-0.5 z-10 pl-2">
+                          <h4 className="text-[15px] font-black tracking-tighter text-slate-950 leading-tight">
+                            I'm attending <br />
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#4285F4] via-[#EA4335] to-[#F4B400]">Google I/O 2026</span>
+                          </h4>
+                          <p className="text-[6.5px] text-slate-500 max-w-xs uppercase font-mono tracking-wider leading-none">
+                            The future is building. Let's build it together.
+                          </p>
+                        </div>
+
+                        {/* Details Grid */}
+                        <div className="grid grid-cols-2 gap-2 bg-white/80 backdrop-blur-xs border border-slate-100 p-1.5 text-[6px] font-mono text-slate-500 z-10 select-none">
+                          <div className="space-y-0.5 border-r border-slate-100">
+                            <div className="text-slate-400 font-bold uppercase">DATE & SCHEDULE:</div>
+                            <div className="text-slate-800 font-bold uppercase text-[7px]">19th & 20th May 2026</div>
+                            <div className="text-slate-500 leading-none">Virtually Streaming Live</div>
+                          </div>
+                          <div className="space-y-0.5 pl-2">
+                            <div className="text-slate-400 font-bold uppercase">FOCUS SEGMENT:</div>
+                            <div className="text-[#4285F4] font-bold text-[7px]" style={{ fontSize: '6.5px' }}>INTELLIGENT AGENTS</div>
+                            <div className="text-slate-500 leading-none">Learning. Inspiring. Building</div>
+                          </div>
+                        </div>
+
+                        {/* Footer Code Accent */}
+                        <div className="flex justify-between items-center text-[5.5px] font-mono text-slate-400 pt-1 border-t border-slate-100 z-10 leading-none">
+                          <span className="text-left font-black tracking-widest text-[#4285F4]">&lt;/&gt; CREATE THE NEXT WITH GOOGLE</span>
+                          <span>REGISTRATION CONFIRMED</span>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* OPTION 10: SHARDA BIOPROCESS EXPERT LECTURES */}
+                    {selectedCert.specimenType === 'sharda-bio' && (
+                      <div className="p-4 md:p-5 w-full h-full bg-[#FAF9F5] text-slate-800 relative flex flex-col justify-between border-[5px] border-double border-amber-950/20 font-sans">
+                        {/* Double thin corner brackets */}
+                        <div className="absolute top-1 left-1 w-4 h-4 border-t border-l border-amber-950/40" />
+                        <div className="absolute top-1 right-1 w-4 h-4 border-t border-r border-amber-950/40" />
+                        <div className="absolute bottom-1 left-1 w-4 h-4 border-b border-l border-amber-950/40" />
+                        <div className="absolute bottom-1 right-1 w-4 h-4 border-b border-r border-amber-950/40" />
+
+                        {/* Joint Header logos */}
+                        <div className="flex justify-between items-start border-b border-amber-950/10 pb-0.5 select-none">
+                          <div className="text-left font-serif leading-none min-w-[120px]">
+                            <span className="text-[7.5px] font-extrabold text-amber-950 tracking-wider block leading-none">SHARDA UNIVERSITY</span>
+                            <span className="text-[4.5px] text-slate-400 block tracking-widest font-sans uppercase">BEYOND BOUNDARIES</span>
+                          </div>
+                          <div className="text-right leading-none max-w-[120px]">
+                            <span className="text-[6.5px] font-bold text-red-700 block uppercase leading-none">INSTITUTION'S INNOVATION COUNCIL</span>
+                            <span className="text-[3.5px] text-slate-400 block uppercase tracking-tight leading-none">(Ministry of Education Initiative)</span>
+                          </div>
+                        </div>
+
+                        {/* Main certificate presentation */}
+                        <div className="text-center space-y-1 my-1 select-none">
+                          <h4 className="text-[12px] font-black font-serif text-amber-900 uppercase tracking-widest">CERTIFICATE OF APPRECIATION</h4>
+                          <p className="text-[5.5px] uppercase tracking-wider text-slate-400 italic">This certificate is awarded to</p>
+                          <h5 className="text-[13px] font-serif font-black tracking-tight text-slate-900 border-b border-amber-950/20 w-1/2 mx-auto leading-none pb-0.5">Dhruv gaur.</h5>
+                          <p className="text-[6.25px] w-11/12 mx-auto leading-relaxed text-slate-600 font-serif pt-1">
+                            has successfully participated in the Expert Lectures on <strong>"Industrial Bioprocess Engineering"</strong> held on 20th February 2026 organized by Department of Biotechnology, Sharda School of Bioscience and Technology, Sharda University, Greater Noida, Uttar Pradesh.
+                          </p>
+                        </div>
+
+                        {/* Signatures */}
+                        <div className="flex justify-between items-end text-[4.5px] text-slate-400 font-mono border-t border-amber-950/10 pt-1 select-none">
+                          <div className="text-center w-[65px] leading-tight">
+                            <span className="text-slate-800 font-bold block font-serif text-[5.5px]">Dr. Ajay K. Chauhan</span>
+                            <span className="text-slate-400 text-[4px] block">Assistant Professor</span>
+                            <span className="text-slate-400 text-[3.5px] block font-semibold">Sharda University</span>
+                          </div>
+                          <div className="text-center w-[65px] leading-tight">
+                            <span className="text-slate-800 font-bold block font-serif text-[5.5px]">Dr. K. N. Baruah</span>
+                            <span className="text-slate-400 text-[4px] block">Assistant Professor</span>
+                            <span className="text-slate-405 text-[3.5px] block font-semibold">Sharda University</span>
+                          </div>
+                          <div className="text-center w-[65px] leading-tight">
+                            <span className="text-slate-800 font-bold block font-serif text-[5.5px]">Dr. Amit Kumar</span>
+                            <span className="text-slate-400 text-[4px] block">Assistant Professor</span>
+                            <span className="text-slate-405 text-[3.5px] block font-semibold">Sharda University</span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* OPTION 11: EDUVEA CRISPR CRISPR & GENE EDITING */}
+                    {selectedCert.specimenType === 'crispr' && (
+                      <div className="p-4 md:p-5 w-full h-full bg-white text-slate-800 relative flex flex-col justify-between border-[4px] border-indigo-950/10 font-sans">
+                        {/* Laurel representation */}
+                        <div className="absolute top-4 bottom-4 left-2 w-3 border-l border-indigo-900/10 flex flex-col justify-between text-[4.5px] font-mono text-indigo-900/40 items-center pointer-events-none leading-none">
+                          <span>❈</span><span>❈</span><span>❈</span><span>❈</span><span>❈</span><span>❈</span><span>❈</span><span>❈</span>
+                        </div>
+                        <div className="absolute top-4 bottom-4 right-2 w-3 border-r border-indigo-900/10 flex flex-col justify-between text-[4.5px] font-mono text-indigo-900/40 items-center pointer-events-none leading-none">
+                          <span>❈</span><span>❈</span><span>❈</span><span>❈</span><span>❈</span><span>❈</span><span>❈</span><span>❈</span>
+                        </div>
+
+                        {/* Top logo */}
+                        <div className="flex flex-col items-center text-center space-y-0.5 select-none">
+                          <span className="text-[11px] font-black tracking-widest text-white uppercase font-mono bg-slate-950 px-2 py-0.5">EDUVEA</span>
+                          <span className="text-[4px] tracking-widest text-[#4f46e5] uppercase font-mono font-extrabold leading-none">AN ISO 9001:2015 CERTIFIED BRAND</span>
+                        </div>
+
+                        {/* Content */}
+                        <div className="text-center space-y-1 my-1 select-none">
+                          <h4 className="text-[10.5px] font-bold tracking-wider text-indigo-950 uppercase font-mono">CERTIFICATE OF COMPLETION</h4>
+                          <span className="text-[5.5px] text-slate-400 italic block leading-none">This certificate is awarded to</span>
+                          <h5 className="text-[14px] font-bold text-slate-950 leading-none py-0.5 tracking-tight uppercase">DHRUV GAUR</h5>
+                          <p className="text-[6.5px] leading-relaxed text-slate-600 w-11/12 mx-auto pt-0.5">
+                            In recognition of the successful completion of the 3-Days Online Workshop on <strong className="text-indigo-950 uppercase font-mono">CRISPR AND GENE EDITING</strong> conducted from February 17th to 19th, organised by EDUVEA.
+                          </p>
+                        </div>
+
+                        {/* Bottom Seals and signatures */}
+                        <div className="flex justify-between items-end border-t border-slate-100 pt-1 select-none uppercase">
+                          <div className="text-center w-[50px] text-[4.5px] font-mono font-bold text-slate-400 leading-none">
+                            <span className="text-slate-800 font-bold block text-[5px] italic font-serif leading-none leading-none">Udita</span>
+                            <div className="h-[0.5px] bg-slate-200 my-0.5" />
+                            <span>UDITA<br />DIRECTOR</span>
+                          </div>
+                          
+                          {/* Sponsoring logos list representative */}
+                          <div className="flex items-center gap-1">
+                            <div className="px-1 border border-indigo-900/10 text-[3.5px] font-bold text-indigo-900 font-mono scale-90 rounded-xs leading-none">Skill India</div>
+                            <div className="w-4 h-4 rounded-full border border-purple-900/20 bg-purple-50 p-0.5 flex flex-col items-center justify-center text-[3.5px] text-purple-900 font-bold leading-none scale-90 relative">
+                              <span>ISO</span>
+                            </div>
+                            <div className="px-1 bg-sky-50 border border-sky-400/20 text-[3.5px] font-bold text-sky-900 font-mono scale-90 rounded-xs leading-none">MSME</div>
+                          </div>
+
+                          <div className="text-center w-[50px] text-[4.5px] font-mono font-bold text-slate-400 leading-none">
+                            <span className="text-slate-800 font-bold block text-[5px] italic font-serif leading-none">Anupama</span>
+                            <div className="h-[0.5px] bg-slate-200 my-0.5" />
+                            <span>ANUPAMA<br />HEAD</span>
+                          </div>
+                        </div>
+
+                        <div className="text-center text-[4.5px] text-indigo-900/60 font-mono font-extrabold uppercase mt-0.5 leading-none">
+                          CERTIFICATE ID NO: EDUVEA-CB-FEB-009
+                        </div>
+                      </div>
+                    )}
+
+                    {/* OPTION 12: SHARDA DRONES AND ROBOTICS TRAINING WORKSHOP */}
+                    {selectedCert.specimenType === 'sharda-drones' && (
+                      <div className="p-0 w-full h-full bg-[#1e293b] text-[#1A1A1A] relative flex flex-col justify-between font-sans border border-slate-200 overflow-hidden">
+                        {/* Sharda diagonal background blocks */}
+                        <div className="absolute top-0 left-0 w-[45%] h-full bg-[#0284c7] -skew-x-12 -translate-x-8 shadow-lg z-0" />
+                        <div className="absolute top-0 right-0 w-[55%] h-full bg-[#FAF9F5] z-0" />
+                        <div className="absolute top-0 left-[41%] w-1.5 h-full bg-[#e11d48] -skew-x-12 z-10" />
+
+                        <div className="p-4 md:p-5 w-full h-full relative z-10 flex flex-col justify-between leading-none font-sans">
+                          {/* Symmetrical header logos */}
+                          <div className="flex justify-between items-start select-none">
+                            <div className="text-left max-w-[100px]">
+                              <span className="text-[6px] font-serif font-black tracking-wider text-white block leading-none">SHARDA UNIVERSITY</span>
+                              <span className="text-[4px] text-cyan-200 block tracking-widest font-sans uppercase">Beyond Boundaries</span>
+                            </div>
+                            <div className="text-right max-w-[110px]">
+                              <span className="text-[5px] font-bold text-slate-700 block uppercase leading-none">INSTITUTION'S INNOVATION COUNCIL</span>
+                              <span className="text-[3.5px] text-slate-400 block uppercase font-mono font-bold tracking-tighter leading-none">(MINISTRY OF EDUCATION INITIATIVE)</span>
+                            </div>
+                          </div>
+
+                          {/* Event Header Banner */}
+                          <div className="text-center my-1 space-y-1 select-none">
+                            <div className="bg-[#e11d48] text-white py-0.5 px-3 text-[7px] font-mono tracking-widest uppercase font-black rounded-xs shadow-xs inline-block leading-none">
+                              HANDS ON - WORKSHOP ON DRONES AND ROBOTICS
+                            </div>
+                            <h4 className="text-[11px] font-bold text-cyan-900 font-serif leading-none tracking-tight pt-1">CERTIFICATE OF COMPLETION</h4>
+                            <p className="text-[5.5px] text-slate-400 italic uppercase">This certificate is awarded to</p>
+                            <h5 className="text-[13px] font-black font-serif text-[#1e293b] leading-none">Dhruv Gaur</h5>
+                          </div>
+
+                          {/* Detail summary */}
+                          <div className="text-center select-none pt-0.5">
+                            <p className="text-[6.5px] text-slate-600 leading-relaxed font-sans w-11/12 mx-auto">
+                              In recognition of their active participation in the <strong>"Drones and Robotics Training Workshop"</strong> organized by Sharda University, Greater Noida, held from 19th to 22nd September 2025.
+                            </p>
+                          </div>
+
+                          {/* Symmetrical Signatures */}
+                          <div className="flex justify-between items-end text-[4.5px] text-slate-400 font-mono border-t border-slate-200 pt-1">
+                            <div className="text-center w-[60px] leading-tight">
+                              <span className="text-slate-100 font-bold block font-serif text-[5px]">DEAN</span>
+                              <div className="h-[0.5px] bg-sky-200/50 my-0.5" />
+                              <span className="text-sky-200 font-semibold block">SCHOOL OF ENG</span>
+                            </div>
+                            <div className="text-center">
+                              <span className="text-slate-800 font-black text-[5px]">SEPTEMBER 2025</span>
+                              <span className="text-slate-400 block">DATES VALUE</span>
+                            </div>
+                            <div className="text-center w-[60px] leading-tight">
+                              <span className="text-slate-800 font-bold block font-serif text-[5px] leading-none">HEAD OF DEPT</span>
+                              <div className="h-[0.5px] bg-slate-300 my-0.5" />
+                              <span className="text-slate-400 font-semibold block">BIOTECH</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* OPTION 13: 5-DAY AI AGENTS INTENSIVE BADGE */}
+                    {selectedCert.specimenType === 'ai-agents' && (
+                      <div className="p-4 md:p-5 w-full h-full bg-[#020617] text-white relative flex flex-col justify-between font-sans border border-slate-800 overflow-hidden">
+                        {/* High tech neon matrix theme */}
+                        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-900/30 via-slate-950 to-slate-950 pointer-events-none z-0" />
+                        <div className="absolute top-1/2 right-4 -translate-y-1/2 w-16 h-16 bg-[#3b82f6]/10 border border-[#3b82f6]/20 flex flex-col justify-center items-center rounded-lg rotate-12 z-0 pointer-events-none select-none">
+                          <Terminal className="w-6 h-6 text-[#3b82f6] animate-pulse" />
+                        </div>
+
+                        {/* Top banner */}
+                        <div className="flex justify-between items-center z-10 select-none">
+                          <span className="text-[6.5px] font-mono tracking-widest text-[#3b82f6] uppercase font-black">EXCITED TO ANNOUNCE!</span>
+                          <span className="text-[5.5px] font-mono text-cyan-400 border border-cyan-500/30 px-1.5 py-0.5 rounded-xs leading-none">OFFICIAL PART</span>
+                        </div>
+
+                        {/* Certificate Main details */}
+                        <div className="text-center my-0.5 select-none z-10 space-y-0.5">
+                          <h4 className="text-[12px] font-black tracking-tight leading-snug font-sans text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-400 to-indigo-400 uppercase">
+                            5-Day AI Agents:<br />Intensive Vibe Coding Course
+                          </h4>
+                          <div className="text-[#3b82f6] text-[7.5px] font-semibold tracking-wider font-mono uppercase bg-blue-950/40 py-0.5 px-3 rounded-full border border-blue-500/10 inline-block leading-none">
+                            With Google
+                          </div>
+                          
+                          <p className="text-[6.5px] text-slate-400">Awarded for active exploration to candidate</p>
+                          <h5 className="text-[13px] font-black font-mono tracking-wide text-white leading-none">Dhruv Gaur</h5>
+                          <p className="text-[6.5px] text-slate-500 leading-none">JUNE 15 to JUNE 19, 2025</p>
+                        </div>
+
+                        {/* Key achievements */}
+                        <div className="grid grid-cols-4 gap-1 select-none text-center bg-slate-950/60 p-1 border border-slate-900 z-10">
+                          {[
+                            { title: "VIBE CODING INDUCTION" },
+                            { title: "BUILD AI AGENTS" },
+                            { title: "POWERED BY GOOGLE" },
+                            { title: "FUTURE EXPANSION" }
+                          ].map((b, i) => (
+                            <div key={i} className="rounded-xs leading-none p-0.5 border border-slate-900">
+                              <span className="text-[5.5px] font-mono text-cyan-400 leading-none block uppercase font-bold tracking-tighter">{b.title}</span>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Footer decorative text */}
+                        <div className="text-center text-[5.5px] italic text-[#3b82f6] font-mono select-none z-10 pt-1 border-t border-slate-900 uppercase">
+                          "Learn. Code. Build. Automate. The AI Future is Vibe. ♡"
+                        </div>
+                      </div>
+                    )}
+
+                    {/* OPTION 14: FRENCH OLYMPIAD 2017 CERTIFICATE */}
+                    {selectedCert.specimenType === 'french' && (
+                      <div className="p-4 md:p-5 w-full h-full bg-white relative flex flex-col justify-between font-sans border border-slate-200 overflow-hidden">
+                        {/* Elegant Tricolor Background Columns */}
+                        <div className="absolute top-0 bottom-0 left-0 w-1/3 bg-blue-900/10 pointer-events-none z-0" />
+                        <div className="absolute top-0 bottom-0 right-0 w-1/3 bg-red-650/10 pointer-events-none z-0" style={{ backgroundColor: 'rgba(239, 68, 68, 0.08)' }} />
+                        
+                        {/* Symmetrical outline of France watermark */}
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-44 h-44 bg-slate-100 opacity-20 pointer-events-none rounded-full blur-xs z-0" />
+
+                        {/* Header card info */}
+                        <div className="flex justify-between items-start pb-1 border-b border-slate-100 z-10 select-none">
+                          <h4 className="text-[12px] font-black tracking-tight text-blue-900 font-serif uppercase leading-none">French Olympiad <span className="text-red-700">2017</span></h4>
+                          <span className="text-[6px] font-mono text-slate-400 tracking-wider">Certificat de participation</span>
+                        </div>
+
+                        {/* Certificate core details */}
+                        <div className="text-center space-y-1 my-1.5 z-10 select-none leading-none">
+                          <p className="text-[5.5px] italic text-slate-400 font-serif uppercase leading-none">Ce certificat est accordé à</p>
+                          <h5 className="text-[13px] font-bold font-serif text-slate-850 leading-none">Dhruv Gaur</h5>
+                          
+                          <div className="grid grid-cols-2 gap-1.5 max-w-xs mx-auto py-1 font-mono text-[5.5px] text-slate-500 bg-white/40 border border-slate-200/50 p-1">
+                            <div>CLASSE: <span className="text-slate-800 font-black">ELEMENTARY</span></div>
+                            <div className="truncate">ÉCOLE: <span className="text-slate-800 font-bold text-[5.5px]">DPS, BULANDSHAHR</span></div>
+                          </div>
+
+                          <p className="text-[6.25px] text-slate-600 font-serif leading-relaxed w-11/12 mx-auto pt-1 leading-normal text-center">
+                            pour sa participation au premier tour du concours national <strong className="text-blue-950 font-sans tracking-wide">French Olympiad 2017</strong>.
+                          </p>
+                        </div>
+
+                        {/* Collaborating logos representation */}
+                        <div className="flex justify-between items-end border-t border-slate-100 pt-1 z-10 select-none">
+                          <div className="text-[4px] font-bold text-slate-400 tracking-tighter uppercase min-w-[50px] leading-tight">
+                            ORGANIZED BY <br /><span className="text-slate-800">E&B Education & Beyond</span>
+                          </div>
+                          <div className="flex items-center gap-1.5 text-[4px] font-mono text-slate-300">
+                            <span className="px-1 border border-slate-200 text-blue-950 font-semibold">INSTITUT FRANÇAIS</span>
+                            <span className="px-1 bg-red-50 text-red-800 font-bold text-[3px] border border-red-100">EMBASSY OF TUNISIA</span>
+                            <span className="text-slate-900 font-serif font-black underline">Langers</span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
                     {/* FALLBACK/OTHER SPECIMENS SIMULATOR GIVEN REPETITION LIMITS */}
-                    {!['veterans', 'veterans-poster', 'genomics-poster', 'microsoft-build', 'google-analytics', 'iit-optical', 'cancer-bio'].includes(selectedCert.specimenType) && (
+                    {!['veterans', 'veterans-poster', 'genomics-poster', 'microsoft-build', 'google-analytics', 'iit-optical', 'cancer-bio', 'android-gdg', 'google-io', 'sharda-bio', 'crispr', 'sharda-drones', 'ai-agents', 'french'].includes(selectedCert.specimenType) && (
                       <div className="p-4 md:p-6 w-full h-full bg-white text-[#1A1A1A] relative flex flex-col justify-between border-4 border-slate-100 font-sans">
                         <div className="flex justify-between items-start border-b border-[#1A1A1A]/10 pb-2">
                           <div className="flex items-center gap-1.5">
@@ -859,11 +1323,96 @@ export default function CertificationCollection() {
                         </div>
                       </div>
                     )}
+                      </>
+                    )}
                   </div>
 
                   <span className="text-[9px] font-mono text-brand-text-muted mt-3 text-center tracking-wider leading-none select-none">
-                    ▲ STYLIZED VIRTUAL REPLICA DOCUMENT SPECIMEN (HIGH COMPLIANCE)
+                    {specimenMode === 'original' 
+                      ? "▲ AUTHENTIC CREDENTIAL DOCUMENTATION IMAGING RECORD"
+                      : "▲ STYLIZED VIRTUAL REPLICA DOCUMENT SPECIMEN (HIGH COMPLIANCE)"}
                   </span>
+
+                  {/* Dynamic interactive upload box inside modal */}
+                  <div className="mt-4 w-full max-w-lg bg-[#FAFAF9] border border-[#1A1A1A]/10 p-4 flex flex-col sm:flex-row items-center justify-between gap-3 font-mono text-[9px] select-none">
+                    <div className="text-left text-brand-text-muted leading-relaxed max-w-xs">
+                      <span className="font-extrabold text-[#1A1A1A] block uppercase tracking-wider mb-0.5">UPLOAD ORIGINAL CERTIFICATE</span>
+                      Attach your original image (PNG, JPG, or JPEG) to display your actual certificate in this slot.
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <label className="px-3.5 py-2 bg-brand-accent hover:bg-brand-accent/90 text-white font-black tracking-widest uppercase cursor-pointer transition-colors border border-[#1A1A1A]/10 flex items-center gap-1.5 shrink-0 select-none">
+                        <FileText className="w-3.5 h-3.5" />
+                        CHOOSE DOCUMENT
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              const reader = new FileReader();
+                              reader.onload = (event) => {
+                                const base64 = event.target?.result as string;
+                                if (base64) {
+                                  const updated = {
+                                    ...customCertImages,
+                                    [selectedCert.id]: base64
+                                  };
+                                  setCustomCertImages(updated);
+                                  localStorage.setItem('db_custom_cert_images', JSON.stringify(updated));
+                                  setSpecimenMode('original');
+                                  setOriginalImgError(false);
+
+                                  // Persistent backup to Express Backend
+                                  fetch('/api/custom-certs', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ id: selectedCert.id, base64 })
+                                  })
+                                  .then(res => res.json())
+                                  .then(data => {
+                                    console.log('[Dossier Sync] Persistent backup synced successfully to server:', data);
+                                  })
+                                  .catch(err => {
+                                    console.error('[Dossier Sync] Server-side backup failed:', err);
+                                  });
+                                }
+                              };
+                              reader.readAsDataURL(file);
+                            }
+                          }}
+                        />
+                      </label>
+                      {customCertImages[selectedCert.id] && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const updated = { ...customCertImages };
+                            delete updated[selectedCert.id];
+                            setCustomCertImages(updated);
+                            localStorage.setItem('db_custom_cert_images', JSON.stringify(updated));
+                            setOriginalImgError(false);
+                            setSpecimenMode('replica');
+
+                            // Delete permanent entry on server
+                            fetch(`/api/custom-certs/${selectedCert.id}`, {
+                              method: 'DELETE'
+                            })
+                            .then(res => res.json())
+                            .then(data => {
+                              console.log('[Dossier Sync] Persistent image deleted successfully from server:', data);
+                            })
+                            .catch(err => {
+                              console.error('[Dossier Sync] Server-side deletion failed:', err);
+                            });
+                          }}
+                          className="px-2.5 py-2 bg-[#DC2626] hover:bg-red-700 text-white font-black tracking-widest uppercase cursor-pointer transition-colors border border-[#1A1A1A]/5"
+                        >
+                          RESET
+                        </button>
+                      )}
+                    </div>
+                  </div>
                 </div>
 
                 {/* 2. SPECIMEN METADATA & ACCOMPLISHMENT DETAILS (Col 8-12) */}
