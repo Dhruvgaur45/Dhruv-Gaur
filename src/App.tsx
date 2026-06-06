@@ -51,6 +51,7 @@ import ExperienceTimeline from './components/ExperienceTimeline';
 import ResearchMap from './components/ResearchMap';
 import MicroscopeCellsBackground from './components/MicroscopeCellsBackground';
 import BioDataVizBackground from './components/BioDataVizBackground';
+import BiotechScheduler from './components/BiotechScheduler';
 
 // Framer Motion variants for core skills tag staggering
 const tagContainerVariants = {
@@ -81,6 +82,12 @@ export default function App() {
   // Navigation & Scroll Tracking
   const [activeSection, setActiveSection] = useState('welcome');
   const [showScrollTop, setShowScrollTop] = useState(false);
+
+  // Cleanup theme style remnants to ensure standard resilient Light Theme operation
+  useEffect(() => {
+    window.document.documentElement.classList.remove('dark');
+    localStorage.removeItem('app_theme');
+  }, []);
 
   // Active Interactive Project Selection
   const [selectedProjectId, setSelectedProjectId] = useState('proj-sequencer');
@@ -197,7 +204,7 @@ export default function App() {
         setShowScrollTop(false);
       }
 
-      const sections = ['welcome', 'intro', 'skills', 'experience', 'research', 'research_map', 'certifications', 'projects', 'contact'];
+      const sections = ['welcome', 'intro', 'skills', 'experience', 'research', 'research_map', 'certifications', 'projects', 'planner', 'contact'];
       const scrollPosition = window.scrollY + 200;
 
       for (const section of sections) {
@@ -652,7 +659,7 @@ export default function App() {
 
           {/* Links Center */}
           <nav className="hidden md:flex items-center gap-8 text-[11px] font-mono font-bold tracking-[0.2em] text-[#1A1A1A]/50 uppercase">
-            {['welcome', 'intro', 'skills', 'experience', 'research', 'research_map', 'certifications', 'projects', 'contact'].map((sect) => (
+            {['welcome', 'intro', 'skills', 'experience', 'research', 'research_map', 'certifications', 'projects', 'planner', 'contact'].map((sect) => (
                 <button
                   key={sect}
                   onClick={() => scrollTo(sect)}
@@ -660,7 +667,7 @@ export default function App() {
                     activeSection === sect ? 'text-brand-accent' : 'hover:text-[#1A1A1A]'
                   }`}
                 >
-                  {sect === 'welcome' ? 'Welcome' : sect === 'intro' ? 'Intro' : sect === 'skills' ? 'Skills' : sect === 'experience' ? 'Experience' : sect === 'research' ? 'Research' : sect === 'research_map' ? 'Research Map' : sect === 'certifications' ? 'Certifications' : sect === 'projects' ? 'Projects' : 'Contact'}
+                  {sect === 'welcome' ? 'Welcome' : sect === 'intro' ? 'Intro' : sect === 'skills' ? 'Skills' : sect === 'experience' ? 'Experience' : sect === 'research' ? 'Research' : sect === 'research_map' ? 'Research Map' : sect === 'certifications' ? 'Certifications' : sect === 'projects' ? 'Projects' : sect === 'planner' ? 'Lab Planner' : 'Contact'}
                   {activeSection === sect && (
                     <motion.span 
                       layoutId="activeNavIndicator"
@@ -674,6 +681,7 @@ export default function App() {
 
           {/* Call To Action Right & Live Biotech Clock */}
           <div className="flex items-center gap-4">
+
             {/* Clinical Live Clock Widget */}
             <div className="hidden sm:flex items-center gap-3 border-r border-[#1A1A1A]/10 pr-4 h-9 select-none shrink-0 font-mono">
               <div className="flex flex-col text-right">
@@ -1174,6 +1182,18 @@ export default function App() {
             </div>
 
           </div>
+        </motion.section>
+
+        {/* SECTION 5.5: BIOTECH GOOGLE CALENDAR PLANNER & SCHEDULER */}
+        <motion.section
+          id="planner"
+          initial={{ opacity: 0, y: 35 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-120px" }}
+          transition={{ duration: 0.75, ease: "easeOut" }}
+          className="py-24 border-t border-[#1A1A1A]/10"
+        >
+          <BiotechScheduler />
         </motion.section>
 
         {/* SECTION 6: CONTACT & FORM */}
