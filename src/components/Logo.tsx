@@ -16,46 +16,56 @@ interface LogoProps {
    * Custom Tailwind of CSS classes to apply to the container
    */
   className?: string;
+  /**
+   * Whether to hide the SVG symbol / icon (only applicable to horizontal)
+   */
+  hideSymbol?: boolean;
+  /**
+   * Whether to hide the biotechnology subtitle and indicator (only applicable to horizontal or full)
+   */
+  hideSubtitle?: boolean;
 }
 
 export default function Logo({
   variant = 'horizontal',
   size,
-  className = ''
+  className = '',
+  hideSymbol = false,
+  hideSubtitle = false
 }: LogoProps) {
   // Common vector gradients and defs
   const svgDefs = (
     <defs>
       {/* Helix Green Gradient */}
       <linearGradient id="helixGreenGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-        <stop offset="0%" stopColor="#4ADE80" />
-        <stop offset="100%" stopColor="#22C55E" />
+        <stop offset="0%" stopColor="#D946EF" />
+        <stop offset="100%" stopColor="#8B5CF6" />
       </linearGradient>
 
       {/* Helix Blue Gradient */}
       <linearGradient id="helixBlueGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-        <stop offset="0%" stopColor="#60A5FA" />
-        <stop offset="100%" stopColor="#2563EB" />
+        <stop offset="0%" stopColor="#8B5CF6" />
+        <stop offset="100%" stopColor="#6366F1" />
       </linearGradient>
 
-      {/* DG Gradient (Vibrant green to bright blue) */}
+      {/* DG Gradient (Vibrant purple to electric indigo) */}
       <linearGradient id="dgMainGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stopColor="#22C55E" />
-        <stop offset="45%" stopColor="#10B981" />
-        <stop offset="100%" stopColor="#2563EB" />
+        <stop offset="0%" stopColor="#D946EF" />
+        <stop offset="45%" stopColor="#8B5CF6" />
+        <stop offset="100%" stopColor="#6366F1" />
       </linearGradient>
 
       {/* Leaf Gradient */}
       <linearGradient id="leafGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stopColor="#86EFAC" />
-        <stop offset="100%" stopColor="#16A34A" />
+        <stop offset="0%" stopColor="#F5F3FF" />
+        <stop offset="100%" stopColor="#8B5CF6" />
       </linearGradient>
 
       {/* Text Metallic Gradient */}
       <linearGradient id="textMetallicGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-        <stop offset="0%" stopColor="#333333" />
-        <stop offset="50%" stopColor="#666666" />
-        <stop offset="100%" stopColor="#333333" />
+        <stop offset="0%" stopColor="#E2E8F0" />
+        <stop offset="50%" stopColor="#A78BFA" />
+        <stop offset="100%" stopColor="#E2E8F0" />
       </linearGradient>
 
       {/* Drop shadow for bio cells */}
@@ -146,15 +156,15 @@ export default function Logo({
       {/* 4. THREE BIO CELLS / DOTS (Floating above the leaf) */}
       <g id="cells-dots-group" filter="url(#subtleGlow)">
         {/* Circle 1 */}
-        <circle cx="415" cy="122" r="7.5" fill="#4ADE80" />
+        <circle cx="415" cy="122" r="7.5" fill="#D946EF" />
         <circle cx="413" cy="120" r="2.5" fill="#FFFFFF" opacity="0.6" />
 
         {/* Circle 2 */}
-        <circle cx="433" cy="112" r="10.5" fill="#22C55E" />
+        <circle cx="433" cy="112" r="10.5" fill="#8B5CF6" />
         <circle cx="430" cy="109" r="3.5" fill="#FFFFFF" opacity="0.6" />
 
         {/* Circle 3 */}
-        <circle cx="442" cy="129" r="6.0" fill="#10B981" />
+        <circle cx="442" cy="129" r="6.0" fill="#6366F1" />
         <circle cx="440" cy="127" r="1.8" fill="#FFFFFF" opacity="0.5" />
       </g>
 
@@ -162,7 +172,7 @@ export default function Logo({
       <path
         d="M205,274 C285,279 365,279 445,274"
         fill="none"
-        stroke="#60A5FA"
+        stroke="#8B5CF6"
         strokeWidth="2.5"
         strokeLinecap="round"
         opacity="0.9"
@@ -211,13 +221,15 @@ export default function Logo({
           <h2 className="text-[#1A1A1A] font-sans font-black uppercase text-xl md:text-2xl tracking-[0.25em] leading-none mb-2">
             DHRUV GAUR
           </h2>
-          <div className={`flex items-center gap-3 ${isCenter ? 'justify-center' : ''}`}>
-            <span className="h-[1px] w-8 bg-[#22C55E]" />
-            <p className="text-[#22C55E] font-mono text-[9px] md:text-[10px] font-black uppercase tracking-[0.35em] whitespace-nowrap">
-              BIOTECHNOLOGY
-            </p>
-            <span className="h-[1px] w-8 bg-[#22C55E]" />
-          </div>
+          {!hideSubtitle && (
+            <div className={`flex items-center gap-3 ${isCenter ? 'justify-center' : ''}`}>
+              <span className="h-[1px] w-8 bg-brand-accent" />
+              <p className="text-brand-accent font-mono text-[9px] md:text-[10px] font-black uppercase tracking-[0.35em] whitespace-nowrap">
+                BIOTECHNOLOGY
+              </p>
+              <span className="h-[1px] w-8 bg-brand-accent" />
+            </div>
+          )}
         </div>
       </div>
     );
@@ -228,28 +240,32 @@ export default function Logo({
   return (
     <div className={`flex items-center gap-3 select-none ${className}`}>
       {/* Scaled symbol */}
-      <svg
-        viewBox="100 90 380 200"
-        width={renderSize}
-        height={renderSize}
-        className="shrink-0"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        {svgDefs}
-        {drawEmblemSymbol()}
-      </svg>
+      {!hideSymbol && (
+        <svg
+          viewBox="100 90 380 200"
+          width={renderSize}
+          height={renderSize}
+          className="shrink-0"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          {svgDefs}
+          {drawEmblemSymbol()}
+        </svg>
+      )}
 
       {/* Styled text description */}
       <div className="flex flex-col text-left">
         <h1 className="font-display font-black text-[#1A1A1A] text-sm md:text-base uppercase tracking-[0.22em] leading-none">
           DHRUV GAUR
         </h1>
-        <div className="flex items-center gap-1.5 mt-1">
-          <span className="w-1.5 h-1.5 bg-[#22C55E] rounded-full animate-pulse" />
-          <span className="text-[9px] font-mono font-black uppercase tracking-[0.25em] text-[#22C55E]">
-            BIOTECHNOLOGY
-          </span>
-        </div>
+        {!hideSubtitle && (
+          <div className="flex items-center gap-1.5 mt-1">
+            <span className="w-1.5 h-1.5 bg-brand-accent rounded-full animate-pulse" />
+            <span className="text-[9px] font-mono font-black uppercase tracking-[0.25em] text-brand-accent animate-pulse">
+              BIOTECHNOLOGY
+            </span>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -83,10 +83,10 @@ export default function App() {
   const [activeSection, setActiveSection] = useState('welcome');
   const [showScrollTop, setShowScrollTop] = useState(false);
 
-  // Cleanup theme style remnants to ensure standard resilient Light Theme operation
+  // Initialize light mode on root document for light luxury aesthetic
   useEffect(() => {
     window.document.documentElement.classList.remove('dark');
-    localStorage.removeItem('app_theme');
+    localStorage.setItem('app_theme', 'light');
   }, []);
 
   // Active Interactive Project Selection
@@ -646,32 +646,34 @@ export default function App() {
       </div>
 
       {/* FIXED NAVIGATION HEADER */}
-      <header className="fixed top-0 left-0 w-full z-55 bg-brand-bg/90 backdrop-blur-md border-b border-[#1A1A1A]/10 transition-all">
+      <header className="fixed top-0 left-0 w-full z-55 bg-brand-bg/95 backdrop-blur-md border-b border-brand-border transition-all">
         <div className="max-w-[1280px] mx-auto px-6 md:px-12 h-20 flex items-center justify-between">
           
           {/* Logo brand */}
           <button 
             onClick={() => scrollTo('welcome')} 
-            className="cursor-pointer hover:opacity-85 transition-opacity duration-200"
+            className="cursor-pointer hover:opacity-85 transition-opacity duration-200 flex items-center"
           >
-            <Logo variant="horizontal" size={42} />
+            <Logo variant="horizontal" size={42} hideSymbol={true} hideSubtitle={true} />
           </button>
 
           {/* Links Center */}
-          <nav className="hidden md:flex items-center gap-8 text-[11px] font-mono font-bold tracking-[0.2em] text-[#1A1A1A]/50 uppercase">
+          <nav className="hidden lg:flex items-stretch h-full gap-3 xl:gap-5 text-[10px] xl:text-[11px] font-mono font-bold tracking-[0.08em] xl:tracking-[0.15em] text-brand-text-muted uppercase">
             {['welcome', 'intro', 'skills', 'experience', 'research', 'research_map', 'certifications', 'projects', 'planner', 'contact'].map((sect) => (
                 <button
                   key={sect}
                   onClick={() => scrollTo(sect)}
-                  className={`py-2 transition-all cursor-pointer relative ${
-                    activeSection === sect ? 'text-brand-accent' : 'hover:text-[#1A1A1A]'
+                  className={`h-full flex items-center px-1 xl:px-2 transition-all cursor-pointer relative nav-link-item ${
+                    activeSection === sect ? 'text-brand-accent nav-link-active' : 'hover:text-brand-text'
                   }`}
                 >
-                  {sect === 'welcome' ? 'Welcome' : sect === 'intro' ? 'Intro' : sect === 'skills' ? 'Skills' : sect === 'experience' ? 'Experience' : sect === 'research' ? 'Research' : sect === 'research_map' ? 'Research Map' : sect === 'certifications' ? 'Certifications' : sect === 'projects' ? 'Projects' : sect === 'planner' ? 'Lab Planner' : 'Contact'}
+                  <span className="relative z-10">
+                    {sect === 'welcome' ? 'Welcome' : sect === 'intro' ? 'Intro' : sect === 'skills' ? 'Skills' : sect === 'experience' ? 'Experience' : sect === 'research' ? 'Research' : sect === 'research_map' ? 'Research Map' : sect === 'certifications' ? 'Certifications' : sect === 'projects' ? 'Projects' : sect === 'planner' ? 'Lab Planner' : 'Contact'}
+                  </span>
                   {activeSection === sect && (
                     <motion.span 
                       layoutId="activeNavIndicator"
-                      className="absolute bottom-0 left-0 w-full h-[1.5px] bg-brand-accent"
+                      className="absolute bottom-0 left-0 w-full h-[2px] bg-brand-accent active-indicator-glow z-20"
                       transition={{ type: "spring", stiffness: 350, damping: 25 }}
                     />
                   )}
@@ -683,12 +685,12 @@ export default function App() {
           <div className="flex items-center gap-4">
 
             {/* Clinical Live Clock Widget */}
-            <div className="hidden sm:flex items-center gap-3 border-r border-[#1A1A1A]/10 pr-4 h-9 select-none shrink-0 font-mono">
-              <div className="flex flex-col text-right">
-                <span className="text-xs font-black text-[#112F24] tracking-wider tabular-nums leading-none flex items-center justify-end gap-1.5">
+            <div className="hidden sm:flex items-center gap-3 border-r border-brand-border pr-4 h-9 select-none shrink-0 font-mono">
+              <div className="flex flex-col text-right justify-center">
+                <span className="text-xs font-black text-brand-text tracking-wider tabular-nums leading-none flex items-center justify-end gap-1.5">
                   <span className="relative flex h-1.5 w-1.5">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#10B981] opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-[#10B981]"></span>
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-accent opacity-75 header-clock-dot"></span>
+                    <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-brand-accent header-clock-dot"></span>
                   </span>
                   {currTime.toLocaleTimeString('en-US', { 
                     timeZone: 'Asia/Kolkata',
@@ -698,16 +700,16 @@ export default function App() {
                     hour12: false
                   })}
                 </span>
-                <span className="text-[7.5px] text-[#4B6F62] font-semibold tracking-widest mt-1 uppercase whitespace-nowrap">
+                <span className="text-[7.5px] text-brand-text-muted font-semibold tracking-widest mt-1 uppercase whitespace-nowrap">
                   IST (UTC+05:30)
                 </span>
               </div>
-              <Clock className="w-4 h-4 text-[#10B981]" />
+              <Clock className="w-4 h-4 text-brand-accent header-clock-icon" />
             </div>
 
             <button
               onClick={() => scrollTo('contact')}
-              className="px-5 py-2.5 bg-[#1A1A1A] hover:bg-brand-accent text-white font-mono text-[10px] uppercase font-bold tracking-[0.15em] transition-all duration-300 flex items-center gap-1.5 cursor-pointer active:scale-95"
+              className="px-5 py-2.5 bg-brand-accent hover:bg-brand-accent text-white font-mono text-[10px] uppercase font-bold tracking-[0.15em] transition-all duration-300 flex items-center gap-1.5 cursor-pointer active:scale-95 header-cta-button"
             >
               LET'S TALK <ArrowRight className="w-3.5 h-3.5" />
             </button>
@@ -726,10 +728,10 @@ export default function App() {
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
-              className="inline-flex items-center gap-2 px-3 py-1.5 bg-white border border-[#1A1A1A]/10 text-[#1A1A1A] font-mono text-[9px] tracking-[0.25em] font-bold"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-[#151130] border border-[#8B5CF6]/30 text-white rounded-full font-mono text-[9px] tracking-[0.25em] font-semibold bg-gradient-to-r from-[#151130] to-[#1F1947] shadow-[0_0_15px_rgba(139,92,246,0.15)]"
             >
-              <span className="w-2 h-2 rounded-full bg-brand-accent"></span>
-              EXCLUSIVE WORK IN PROGRESS
+              <span className="w-2 h-2 rounded-full bg-[#A78BFA] animate-pulse"></span>
+              RECRUITER PORTAL • ACTIVE FAANG PIPELINE
             </motion.div>
  
             {/* Display Headings */}
@@ -738,19 +740,19 @@ export default function App() {
                 initial={{ opacity: 0, y: 25 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.7, delay: 0.1 }}
-                className="font-serif italic text-5xl md:text-8xl font-black text-[#1A1A1A] tracking-tighter uppercase leading-[0.85]"
+                className="font-display text-5xl md:text-8xl font-black text-white tracking-tighter uppercase leading-[0.85]"
               >
-                Dhruv <br className="sm:hidden" /><span className="not-italic text-brand-accent">Gaur.</span> <br />
-                <span className="text-4xl md:text-6xl not-italic font-sans font-black tracking-tight leading-tighter block mt-4">Biotechnology & Research.</span>
+                Dhruv <br className="sm:hidden" /><span className="text-transparent bg-clip-text bg-gradient-to-r from-[#D946EF] via-[#8B5CF6] to-[#6366F1]">Gaur.</span> <br />
+                <span className="text-3xl md:text-5xl font-sans font-extrabold tracking-tight leading-tighter block mt-4 text-[#A78BFA]">Compute Infrastructure & Biotech.</span>
               </motion.h1>
  
               <motion.p 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.7, delay: 0.2 }}
-                className="font-sans text-brand-[#1A1A1A] text-zinc-600 text-base md:text-lg max-w-2xl leading-relaxed font-normal"
+                className="font-sans text-[#A39DBE] text-base md:text-lg max-w-2xl leading-relaxed font-normal"
               >
-                Bridging the interface between tactile brutalist engineering structures and high-throughput biotechnology. Custom interactive pipelines engineered with modern biological workflows.
+                Systems Engineer bridging the divide between high-performance cloud compute fabrics (TPUs/GPUs) and enterprise biotech applications. Architecting high-throughput biological sequencing pipelines and real-time telemetry dashboards.
               </motion.p>
             </div>
  
@@ -763,15 +765,15 @@ export default function App() {
             >
               <button
                 onClick={() => scrollTo('projects')}
-                className="bg-[#1A1A1A] hover:bg-brand-accent text-white font-mono font-bold text-xs tracking-widest px-8 py-4 transition-all cursor-pointer border border-[#1A1A1A] active:scale-95 duration-300"
+                className="bg-gradient-to-r from-[#8B5CF6] to-[#6366F1] hover:from-[#A78BFA] hover:to-[#8B5CF6] text-white font-mono font-bold text-xs tracking-widest px-8 py-4 transition-all cursor-pointer border-none shadow-[0_4px_20px_rgba(139,92,246,0.3)] hover:shadow-[0_4px_25px_rgba(139,92,246,0.45)] hover:-translate-y-0.5 active:translate-y-0 duration-300"
               >
                 ENGAGE PROTOTYPES
               </button>
               <button
                 onClick={() => scrollTo('intro')}
-                className="border border-[#1A1A1A]/20 hover:border-[#1A1A1A] bg-transparent text-[#1A1A1A] font-mono font-bold text-xs tracking-widest px-8 py-4 transition-all active:scale-95 cursor-pointer duration-300"
+                className="border border-[#8B5CF6]/30 hover:border-[#8B5CF6] bg-[#0F0C23]/50 text-white font-mono font-bold text-xs tracking-widest px-8 py-4 transition-all hover:bg-[#8B5CF6]/10 active:scale-95 cursor-pointer duration-300"
               >
-                ACADEMIC PROFILE
+                ENGINEERING PROFILE
               </button>
             </motion.div>
           </div>
@@ -784,36 +786,36 @@ export default function App() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-120px" }}
           transition={{ duration: 0.75, ease: "easeOut" }}
-          className="py-24 border-t border-[#1A1A1A]/10"
+          className="py-24 border-t border-[#8B5CF6]/20"
         >
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-start">
             
             {/* Heading left */}
-            <div className="lg:col-span-5">
-              <span className="bg-brand-accent text-white text-[9px] font-bold px-2 py-1 uppercase tracking-widest inline-block mb-3">Academic Introduction</span>
-              <h2 className="font-serif text-3xl md:text-4xl font-black italic text-[#1A1A1A] tracking-tighter leading-none lg:max-w-xs uppercase">
-                Intro Page.
+            <div className="lg:col-span-12 xl:col-span-5 space-y-4">
+              <span className="bg-gradient-to-r from-[#8B5CF6] to-[#6366F1] text-white text-[9px] font-mono tracking-widest font-black px-3 py-1.5 uppercase inline-block shadow-[0_0_12px_rgba(139,92,246,0.25)] rounded">Recruiter-Optimized</span>
+              <h2 className="font-display text-4xl md:text-5xl font-black text-white tracking-tighter leading-none uppercase">
+                ENGINEERING <br />PROFILE.
               </h2>
             </div>
  
             {/* Paragraphs right */}
-            <div className="lg:col-span-7 space-y-6 text-[#1A1A1A]/85 text-sm md:text-base leading-relaxed font-normal">
+            <div className="lg:col-span-12 xl:col-span-7 space-y-6 text-[#A39DBE] text-sm md:text-base leading-relaxed font-normal">
               <p>
-                Currently pursuing a Bachelor of Technology in Biotechnology at Sharda University, I bring 10 months of academic experience and a focus on interdisciplinary research. My expertise is shaped by certifications in quantitative research, data analytics, and engineering simulations, which support my analytical thinking and research communication skills.
+                Currently pursuing a Bachelor of Technology in Biotechnology at Sharda University, I engineer high-end computational tools and software pipelines. Merging extensive academic investigations with high-fidelity React and Node.js solutions, my profile supports enterprise operations, fast-paced teams, and highly quantitative product suites.
               </p>
               <p>
-                Engaged in workshops, internships, and volunteer roles, I aim to contribute to advancements in biotechnology and healthcare. With a dedication to innovative biotech solutions, I strive to address global challenges and foster impactful scientific research while continuously expanding my knowledge and capabilities.
+                Having earned key Google Accreditations across UX Design research principles and generative AI prompting, I translate complex biological parameters and industrial processes into high-availability interactive dashboards. Recruiter-friendly pipeline structures focus on high reliability, robust testing, and smooth user micro-interactions.
               </p>
  
               {/* Stats Counters */}
-              <div className="grid grid-cols-2 gap-8 pt-8 border-t border-[#1A1A1A]/15">
+              <div className="grid grid-cols-2 gap-8 pt-8 border-t border-[#8B5CF6]/15">
                 <div>
-                  <p className="font-serif italic text-4xl font-black text-[#1A1A1A]">1+</p>
-                  <p className="font-mono text-[10px] text-brand-text-muted tracking-[0.2em] mt-1 uppercase font-bold">YEARS OF RESEARCH</p>
+                  <p className="font-sans font-black text-5xl text-transparent bg-clip-text bg-gradient-to-r from-[#D946EF] via-[#8B5CF6] to-[#6366F1] drop-shadow-[0_0_15px_rgba(139,92,246,0.2)]">10+</p>
+                  <p className="font-mono text-[9px] text-[#A39DBE] tracking-[0.2em] mt-1.5 uppercase font-bold">MONTHS ACADEMIC WORK</p>
                 </div>
                 <div>
-                  <p className="font-serif italic text-4xl font-black text-[#1A1A1A]">5+</p>
-                  <p className="font-mono text-[10px] text-brand-text-muted tracking-[0.2em] mt-1 uppercase font-bold">PIPELINES DEPLOYED</p>
+                  <p className="font-sans font-black text-5xl text-transparent bg-clip-text bg-gradient-to-r from-[#8B5CF6] to-[#6366F1] drop-shadow-[0_0_15px_rgba(99,102,241,0.2)]">100%</p>
+                  <p className="font-mono text-[9px] text-[#A39DBE] tracking-[0.2em] mt-1.5 uppercase font-bold">PRODUCTION READINESS</p>
                 </div>
               </div>
             </div>
@@ -828,22 +830,22 @@ export default function App() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-120px" }}
           transition={{ duration: 0.75, ease: "easeOut" }}
-          className="py-24 border-t border-[#1A1A1A]/10"
+          className="py-24 border-t border-[#8B5CF6]/20"
         >
           <div className="space-y-12">
             
             {/* Header layout */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
               <div className="max-w-xl space-y-3">
-                <span className="text-brand-accent text-[9px] font-bold tracking-widest uppercase block">Methodology Index</span>
-                <h2 className="font-serif italic text-3xl font-black text-[#1A1A1A] uppercase tracking-tight">Core Skills</h2>
-                <p className="text-sm text-brand-text-muted leading-relaxed font-normal">
-                  An indexical breakdown of structural core competencies leveraged across our lab pipelines. Featuring over 50+ interdisciplinary classifications.
+                <span className="text-brand-accent text-[9px] font-mono tracking-widest uppercase block font-bold">Technical Matrix</span>
+                <h2 className="font-display text-4xl font-black text-white uppercase tracking-tight">Core Competencies</h2>
+                <p className="text-sm text-[#A39DBE] leading-relaxed font-normal">
+                  Expertise and focus categories across AI infrastructure, biochemical computational stacks, and enterprise project leadership systems.
                 </p>
               </div>
-              <div className="flex items-center gap-3 self-start md:self-end font-mono text-[9px] font-bold tracking-wider text-brand-accent uppercase bg-brand-surface border border-[#1A1A1A]/10 px-4 py-2 select-none">
-                <span className="w-2 h-2 rounded-full bg-brand-accent animate-pulse"></span>
-                {SKILLS.reduce((acc, curr) => acc + curr.tags.length, 0)} Core Certifications & Skill Targets Integrated
+              <div className="flex items-center gap-3 self-start md:self-end font-mono text-[9px] font-bold tracking-wider text-[#A78BFA] uppercase bg-[#0F0C23] border border-[#8B5CF6]/25 px-4 py-2 select-none shadow-[0_0_10px_rgba(139,92,246,0.1)]">
+                <span className="w-2 h-2 rounded-full bg-[#8B5CF6] animate-pulse"></span>
+                {SKILLS.reduce((acc, curr) => acc + curr.tags.length, 0)} Active Engineering Targets Integrated
               </div>
             </div>
 
@@ -1046,14 +1048,13 @@ export default function App() {
           className="py-24 border-t border-[#1A1A1A]/10"
         >
           <div className="space-y-12">
-            
-            {/* Custom Header with Project Metric summaries */}
+                {/* Custom Header with Project Metric summaries */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
               <div className="max-w-xl space-y-3">
-                <span className="font-mono text-2xs text-brand-accent tracking-widest font-bold">THE ATELIER DECK (LIVE ISSUES)</span>
-                <h2 className="font-serif italic text-3xl font-black text-[#1A1A1A] uppercase tracking-tight">Research & Prototypes</h2>
-                <p className="text-sm text-brand-text-muted leading-relaxed font-normal">
-                  Our laboratory sequence mapping engines, planned biological sensors, and IoT automation vessels. Select a project to run dynamic modules or inspect planned specifications.
+                <span className="font-mono text-2xs text-[#A78BFA] tracking-widest font-black uppercase">THE ENTERPRISE DECK • COMPASS INTERACTIVE</span>
+                <h2 className="font-display text-4xl font-black text-white uppercase tracking-tight">Systems Engineering & Prototypes</h2>
+                <p className="text-sm text-[#A39DBE] leading-relaxed font-normal">
+                  FAANG-style high-integrity systems. Select any module to interact in real-time or audit live simulation outputs.
                 </p>
               </div>
  
@@ -1065,14 +1066,14 @@ export default function App() {
                     <button
                       key={proj.id}
                       onClick={() => setSelectedProjectId(proj.id)}
-                      className={`px-4 py-2 text-xs font-mono border transition-all cursor-pointer flex items-center gap-2 rounded-none uppercase tracking-widest font-bold ${
+                      className={`px-4 py-2.5 text-xs font-mono border transition-all cursor-pointer flex items-center gap-2 rounded-full uppercase tracking-widest font-bold ${
                         isActive 
-                          ? 'bg-brand-accent text-white border-transparent' 
-                          : 'bg-white hover:bg-brand-surface text-brand-text border-[#1A1A1A]/15'
+                          ? 'bg-gradient-to-r from-[#8B5CF6] to-[#6366F1] text-white border-transparent shadow-[0_0_15px_rgba(139,92,246,0.35)]' 
+                          : 'bg-[#0F0C23] hover:bg-[#151130] text-[#F5F3FF] border-[#8B5CF6]/20'
                       }`}
                     >
-                      {renderIcon(proj.iconName, "w-3.5 h-3.5")}
-                      {proj.id === 'proj-sequencer' ? 'SEQUENCE_MAP [UPCOMING]' : proj.id === 'proj-bioreactor' ? 'BIOREACTOR_IOT [UPCOMING]' : 'LIMS_PLATE_96 [UPCOMING]'}
+                      {renderIcon(proj.iconName, "w-3.5 h-3.5 text-[#A78BFA]")}
+                      {proj.id === 'proj-sequencer' ? 'NUCLEOWAVE TRANSLATOR' : proj.id === 'proj-bioreactor' ? 'OMNIVESSEL IOT TELEMETRY' : 'LIMS PORTAL 96'}
                     </button>
                   );
                 })}
@@ -1412,6 +1413,7 @@ export default function App() {
           {/* Copyright Right */}
           <div className="text-[10px] font-mono text-brand-text-muted flex items-center gap-3">
             <span>© {new Date().getFullYear()} Dhruv Gaur. All rights reserved.</span>
+            <span className="text-brand-accent font-bold px-1.5 py-0.5 rounded bg-brand-accent/5 border border-brand-accent/10">V1.0</span>
             <span className="text-[#1A1A1A]/20">|</span>
             <button 
               onClick={() => setShowCopyrightModal(true)} 
