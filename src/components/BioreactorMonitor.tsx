@@ -15,7 +15,7 @@ function BioreactorFluidBackground() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    let animationId: number;
+    let animationId: number | null = null;
     let width = (canvas.width = canvas.parentElement?.clientWidth || 600);
     let height = (canvas.height = canvas.parentElement?.clientHeight || 500);
 
@@ -116,14 +116,46 @@ function BioreactorFluidBackground() {
       ctx.lineTo(width, height);
       ctx.fill();
 
-      animationId = requestAnimationFrame(render);
+      if (window.innerWidth >= 1024) {
+        animationId = requestAnimationFrame(render);
+      }
     };
 
-    render();
+    let isIntersecting = false;
+
+    const startAnimation = () => {
+      if (!animationId) {
+        animationId = requestAnimationFrame(render);
+      }
+    };
+
+    const stopAnimation = () => {
+      if (animationId) {
+        cancelAnimationFrame(animationId);
+        animationId = null;
+      }
+    };
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        isIntersecting = entry ? entry.isIntersecting : true;
+        if (isIntersecting) {
+          startAnimation();
+        } else {
+          stopAnimation();
+        }
+      },
+      { threshold: 0.01 }
+    );
+
+    observer.observe(canvas);
 
     return () => {
-      cancelAnimationFrame(animationId);
+      stopAnimation();
       window.removeEventListener('resize', handleResize);
+      observer.unobserve(canvas);
+      observer.disconnect();
     };
   }, []);
 

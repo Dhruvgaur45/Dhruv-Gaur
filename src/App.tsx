@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence, useScroll, useSpring, Variants } from 'motion/react';
 import { 
   Wrench, 
   Code, 
@@ -52,6 +52,12 @@ import ResearchMap from './components/ResearchMap';
 import MicroscopeCellsBackground from './components/MicroscopeCellsBackground';
 import BioDataVizBackground from './components/BioDataVizBackground';
 import BiotechScheduler from './components/BiotechScheduler';
+import { HeroScene } from './components/HeroScene';
+import GitHubPortal from './components/GitHubPortal';
+import TrafficConsole from './components/TrafficConsole';
+import WelcomeAnimation from './components/WelcomeAnimation';
+import WelcomeGuide from './components/WelcomeGuide';
+import AdminPortal from './components/AdminPortal';
 
 // Framer Motion variants for core skills tag staggering
 const tagContainerVariants = {
@@ -64,7 +70,7 @@ const tagContainerVariants = {
   }
 };
 
-const tagItemVariants = {
+const tagItemVariants: Variants = {
   hidden: { opacity: 0, scale: 0.85, y: 5 },
   visible: {
     opacity: 1,
@@ -79,6 +85,23 @@ const tagItemVariants = {
 };
 
 export default function App() {
+  // Scroll progress for beautiful top scanner line
+  const { scrollYProgress } = useScroll();
+  const scaleX = useSpring(scrollYProgress, {
+    stiffness: 100,
+    damping: 30,
+    restDelta: 0.001
+  });
+
+  // Welcome Loading Animation State
+  const [showWelcome, setShowWelcome] = useState(() => {
+    try {
+      return sessionStorage.getItem('hasSeenWelcome') !== 'true';
+    } catch {
+      return true;
+    }
+  });
+
   // Navigation & Scroll Tracking
   const [activeSection, setActiveSection] = useState('welcome');
   const [showScrollTop, setShowScrollTop] = useState(false);
@@ -118,6 +141,75 @@ export default function App() {
 
   // Maintenance Page State
   const [isMaintenanceActive, setIsMaintenanceActive] = useState(false);
+  const [showAdminPortal, setShowAdminPortal] = useState(false);
+  const [systemStatus, setSystemStatus] = useState<any>(null);
+
+  const fetchSystemStatus = async () => {
+    try {
+      const offset = localStorage.getItem('virtual_time_offset') || '0';
+      const clientTime = new Date(Date.now() + parseInt(offset, 10)).toISOString();
+      const res = await fetch(`/api/admin/status?clientTime=${encodeURIComponent(clientTime)}`);
+      if (res.ok) {
+        const data = await res.json();
+        setSystemStatus(data);
+      }
+    } catch (err) {
+      console.error("Failed to load systems gateway parameters:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchSystemStatus();
+    const interval = setInterval(fetchSystemStatus, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const SectionGateWrapper = ({ 
+    id, 
+    name, 
+    children 
+  }: { 
+    id: string; 
+    name: string; 
+    children: React.ReactNode 
+  }) => {
+    const tabConfig = systemStatus?.tabs?.find((t: any) => t.id === id);
+    const isClosed = tabConfig?.status === "Temporarily Closed";
+
+    if (isClosed) {
+      return (
+        <div className="border border-[#1A1A1A]/10 bg-[#FAF9F5] p-8 md:p-12 text-center space-y-4 my-8 select-none relative overflow-hidden max-w-4xl mx-auto rounded-none">
+          <div className="absolute inset-0 bg-[radial-gradient(#1A1A1A_1.5px,transparent_1.5px)] [background-size:20px_20px] opacity-[0.02] pointer-events-none" />
+          <div className="mx-auto w-12 h-12 bg-[#1A1A1A]/5 border border-[#1A1A1A]/10 flex items-center justify-center rounded-none text-brand-accent">
+            <Wrench className="w-5 h-5 animate-pulse text-amber-600" />
+          </div>
+          <div className="max-w-md mx-auto space-y-2">
+            <h3 className="font-serif italic font-black text-xl uppercase tracking-tight text-neutral-800">
+              {name} Section Temporarily Closed
+            </h3>
+            <p className="text-[10px] text-neutral-500 font-mono uppercase tracking-widest font-semibold text-amber-700/80">
+              Biotech Lab Rework Active
+            </p>
+            <p className="text-xs text-neutral-600 leading-relaxed font-sans max-w-sm mx-auto">
+              {tabConfig.message || "This section is temporarily unavailable due to rework. Please check again later."}
+            </p>
+            {tabConfig.reason && (
+              <div className="text-[9px] uppercase font-mono text-zinc-100 bg-amber-600/90 py-1 px-2.5 inline-block font-bold mt-1">
+                Reason: {tabConfig.reason}
+              </div>
+            )}
+            {tabConfig.endTime && (
+              <div className="text-[9.5px] font-mono text-zinc-400 mt-2">
+                Estimated Restoration: {new Date(tabConfig.endTime).toLocaleString()}
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    return <>{children}</>;
+  };
 
   // Owner Authentication States
   const [isOwner, setIsOwner] = useState<boolean>(() => {
@@ -204,8 +296,8 @@ export default function App() {
         setShowScrollTop(false);
       }
 
-      const sections = ['welcome', 'intro', 'skills', 'experience', 'research', 'research_map', 'certifications', 'projects', 'planner', 'contact'];
-      const scrollPosition = window.scrollY + 200;
+      const sections = ['welcome', 'intro', 'skills', 'experience', 'certifications', 'research', 'research_map', 'projects', 'github', 'traffic', 'planner', 'contact'];
+      const scrollPosition = window.scrollY + 120;
 
       for (const section of sections) {
         const el = document.getElementById(section);
@@ -398,6 +490,27 @@ export default function App() {
   // Find active interactive project
   const currentProject = PROJECTS.find(p => p.id === selectedProjectId) || PROJECTS[0];
 
+  if (showAdminPortal) {
+    return (
+      <AdminPortal 
+        onClose={() => setShowAdminPortal(false)} 
+        onStatusChange={fetchSystemStatus} 
+      />
+    );
+  }
+
+  if (systemStatus?.maintenance?.enabled) {
+    return (
+      <MaintenancePage 
+        onBypass={() => {}} 
+        customMessage={systemStatus.maintenance.customMessage} 
+        reason={systemStatus.maintenance.reason} 
+        endTime={systemStatus.maintenance.endTime} 
+        onTimerEnd={fetchSystemStatus}
+      />
+    );
+  }
+
   if (isMaintenanceActive) {
     return <MaintenancePage onBypass={() => setIsMaintenanceActive(false)} />;
   }
@@ -415,87 +528,91 @@ export default function App() {
   return (
     <div className="min-h-screen bg-brand-bg text-[#1A1A1A] font-sans selection:bg-brand-accent/20 selection:text-brand-accent relative grid-bg overflow-x-hidden">
       
+      {/* ----------------- INTRO WELCOME ANIMATION SPLASH SYSTEM ----------------- */}
+      <AnimatePresence>
+        {showWelcome && (
+          <motion.div
+            key="welcome-loader"
+            initial={{ opacity: 1 }}
+            exit={{ 
+              opacity: 0, 
+              y: -40,
+              filter: "blur(12px)",
+              transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] }
+            }}
+            className="fixed inset-0 z-[9999]"
+          >
+            <WelcomeAnimation onComplete={() => setShowWelcome(false)} />
+          </motion.div>
+        )}
+      </AnimatePresence>
+      
+      {/* ----------------- INTERACTIVE VOICE WELCOME GUIDE ----------------- */}
+      {!showWelcome && <WelcomeGuide />}
+      
       {/* ----------------- INTERACTIVE MICROSCOPIC FLOATING CELLS Backplane ----------------- */}
       <MicroscopeCellsBackground />
       <BioDataVizBackground />
 
-      {/* ----------------- LABORATORY LASER INTENSITY SCAN LINE ----------------- */}
-      <div className="fixed inset-0 pointer-events-none z-10 overflow-hidden mix-blend-multiply opacity-[0.08]">
-        <motion.div 
-          animate={{ y: ["-10vh", "110vh"] }}
-          transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-          className="w-full h-1 bg-gradient-to-r from-transparent via-[#10B981] to-transparent shadow-[0_0_16px_5px_#10B981]"
-        />
-      </div>
+      {/* ----------------- LABORATORY LASER INTENSITY SCAN LINE (DEEP BACKPLANE) ----------------- */}
+      {/* Laser scan line removed to resolve auto-movement loops */}
 
       {/* ----------------- LABORATORY BIOMINERAL PULSING RADIAL ACCENTS ----------------- */}
-      <div className="absolute top-[25vh] left-[20%] w-[350px] h-[350px] bg-[#10B981]/[0.03] rounded-full blur-[80px] pointer-events-none z-0 select-none animate-pulse" style={{ animationDuration: '8s' }} />
-      <div className="absolute top-[160vh] right-[15%] w-[450px] h-[450px] bg-[#3B82F6]/[0.025] rounded-full blur-[100px] pointer-events-none z-0 select-none animate-pulse" style={{ animationDuration: '12s' }} />
-      <div className="absolute bottom-[80vh] left-[10%] w-[380px] h-[380px] bg-[#10B981]/[0.02] rounded-full blur-[90px] pointer-events-none z-0 select-none animate-pulse" style={{ animationDuration: '10s' }} />
+      <div className="absolute top-[25vh] left-[20%] w-[350px] h-[350px] bg-[#10B981]/[0.03] rounded-full blur-[80px] pointer-events-none z-0 select-none lg:animate-pulse" style={{ animationDuration: '8s' }} />
+      <div className="absolute top-[160vh] right-[15%] w-[450px] h-[450px] bg-[#3B82F6]/[0.025] rounded-full blur-[100px] pointer-events-none z-0 select-none lg:animate-pulse" style={{ animationDuration: '12s' }} />
+      <div className="absolute bottom-[80vh] left-[10%] w-[380px] h-[380px] bg-[#10B981]/[0.02] rounded-full blur-[90px] pointer-events-none z-0 select-none lg:animate-pulse" style={{ animationDuration: '10s' }} />
 
       {/* ----------------- BIOLOGICAL BACKGROUND FIGURES ----------------- */}
       {/* Fig A: DNA Transcription Double Helix blueprint in Hero region */}
-      <div className="absolute top-[12vh] right-[2%] md:right-[5%] w-[260px] md:w-[420px] h-auto select-none pointer-events-none opacity-[0.065] md:opacity-[0.085] text-brand-accent transition-all duration-300 z-0">
+      <div className="hidden md:block absolute top-[12vh] right-[2%] md:right-[5%] w-[260px] md:w-[420px] h-auto select-none pointer-events-none opacity-[0.065] md:opacity-[0.085] text-brand-accent transition-all duration-300 z-0">
         <svg className="w-full h-auto" viewBox="0 0 200 600" fill="none" xmlns="http://www.w3.org/2000/svg">
           <line x1="20" y1="50" x2="180" y2="50" stroke="currentColor" strokeWidth="0.5" strokeDasharray="3 3" />
           <line x1="100" y1="20" x2="100" y2="580" stroke="currentColor" strokeWidth="0.5" strokeDasharray="5 5" />
           <text x="50%" y="40" textAnchor="middle" fill="currentColor" className="font-mono text-[7px] font-black tracking-widest uppercase">HELIX MAIN TRANSCRIPTION AXIS [3.4nm/TURN]</text>
           
-          <motion.path 
+          <path 
             d="M50,100 C150,150 150,200 50,250 C-50,300 -50,350 50,400 C150,450 150,500 50,550" 
             fill="none" 
             stroke="currentColor" 
             strokeWidth="1.5"
-            animate={{ strokeDashoffset: [0, -40] }}
             strokeDasharray="8 4"
-            transition={{ repeat: Infinity, ease: "linear", duration: 12 }}
           />
-          <motion.path 
+          <path 
             d="M150,100 C50,150 50,200 150,250 C250,300 250,350 150,400 C50,450 50,500 150,550" 
             fill="none" 
             stroke="currentColor" 
             strokeWidth="1.5" 
-            animate={{ strokeDashoffset: [0, 40] }}
             strokeDasharray="4 4"
-            transition={{ repeat: Infinity, ease: "linear", duration: 16 }}
           />
           
           <line x1="68" y1="120" x2="132" y2="120" stroke="currentColor" strokeWidth="1.2" />
-          <motion.circle 
-            cx="68" cy="120" r="3.5" 
+          <circle 
+            cx="68" cy="120" r="3" 
             fill="currentColor" 
-            animate={{ scale: [1, 1.25, 1] }} 
-            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
           />
           <circle cx="132" cy="120" r="3" fill="none" stroke="currentColor" />
           <text x="80" y="116" fill="currentColor" className="font-mono text-[6.5px]">A == T [H2]</text>
           
           <line x1="90" y1="175" x2="110" y2="175" stroke="currentColor" strokeWidth="1.2" />
           <circle cx="90" cy="175" r="3" fill="none" stroke="currentColor" />
-          <motion.circle 
-            cx="110" cy="175" r="3.5" 
+          <circle 
+            cx="110" cy="175" r="3" 
             fill="currentColor" 
-            animate={{ opacity: [0.3, 1, 0.3] }} 
-            transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
           />
           <text x="94" y="171" fill="currentColor" className="font-mono text-[6px]">C ≡ G [H3]</text>
  
           <line x1="68" y1="230" x2="132" y2="230" stroke="currentColor" strokeWidth="1.2" />
           <circle cx="68" cy="230" r="3" fill="none" stroke="currentColor" />
-          <motion.circle 
-            cx="132" cy="230" r="3.5" 
+          <circle 
+            cx="132" cy="230" r="3" 
             fill="currentColor" 
-            animate={{ scale: [1, 1.3, 1] }} 
-            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 1 }}
           />
           <text x="80" y="226" fill="currentColor" className="font-mono text-[6.5px]">G ≡ C [H3]</text>
  
           <line x1="68" y1="370" x2="132" y2="370" stroke="currentColor" strokeWidth="1.2" />
-          <motion.circle 
-            cx="68" cy="370" r="3.5" 
+          <circle 
+            cx="68" cy="370" r="3" 
             fill="currentColor" 
-            animate={{ opacity: [0.4, 1, 0.4] }} 
-            transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }}
           />
           <circle cx="132" cy="370" r="3" fill="none" stroke="currentColor" />
           <text x="80" y="366" fill="currentColor" className="font-mono text-[6.5px]">T == A [H2]</text>
@@ -572,15 +689,12 @@ export default function App() {
       <div className="absolute top-[230vh] right-[1%] md:right-[3%] w-[250px] md:w-[360px] h-auto select-none pointer-events-none opacity-[0.06] md:opacity-[0.08] text-brand-accent transition-all duration-300 z-0">
         <svg className="w-full h-auto" viewBox="0 0 300 300" fill="none" xmlns="http://www.w3.org/2000/svg">
           <circle cx="150" cy="150" r="110" stroke="currentColor" strokeWidth="0.5" strokeDasharray="3 3" />
-          <motion.circle 
+          <circle 
             cx="150" 
             cy="150" 
             r="90" 
             stroke="currentColor" 
             strokeWidth="1" 
-            animate={{ rotate: 360 }}
-            transition={{ repeat: Infinity, duration: 40, ease: "linear" }}
-            style={{ originX: "150px", originY: "150px" }}
           />
           
           <path d="M40,150 L260,150" stroke="currentColor" strokeWidth="1" />
@@ -596,14 +710,12 @@ export default function App() {
           <circle cx="80" cy="80" r="6" fill="currentColor" opacity="0.1" />
           <circle cx="220" cy="220" r="12" fill="var(--color-brand-bg)" stroke="currentColor" strokeWidth="1" />
           
-          <motion.path 
+          <path 
             d="M180,70 L210,60 L240,75 L255,105" 
             fill="none" 
             stroke="currentColor" 
             strokeWidth="1" 
-            animate={{ strokeDashoffset: [0, -20] }}
             strokeDasharray="4 2"
-            transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
           />
           <circle cx="180" cy="70" r="3.5" fill="currentColor" />
           <circle cx="210" cy="60" r="3.5" fill="currentColor" />
@@ -622,10 +734,8 @@ export default function App() {
           {/* Internal chloroplast / plant cell cell wall patterns */}
           <path d="M40,40 L260,260 M40,260 L260,40" stroke="currentColor" strokeWidth="0.5" strokeDasharray="3 3" />
           {/* Ribosome / cellular organelles drafting */}
-          <motion.g 
+          <g 
             transform="translate(150, 150)"
-            animate={{ rotate: -360 }}
-            transition={{ repeat: Infinity, duration: 60, ease: "linear" }}
           >
             <rect x="-40" y="-40" width="80" height="80" rx="40" fill="none" stroke="currentColor" strokeWidth="1.2" />
             <polygon points="0,-35 30,15 -30,15" stroke="currentColor" strokeWidth="1" fill="none" />
@@ -633,7 +743,7 @@ export default function App() {
             <circle cx="0" cy="-35" r="4" fill="currentColor" />
             <circle cx="30" cy="15" r="4" fill="currentColor" />
             <circle cx="-30" cy="15" r="4" fill="currentColor" />
-          </motion.g>
+          </g>
           <text x="35" y="245" fill="currentColor" className="font-mono text-[6.5px]">CHLOROPLAST RE-ENTRY MAP</text>
           <text x="35" y="255" fill="currentColor" className="font-mono text-[5.5px] uppercase tracking-wider text-brand-text-muted/70">REF: DHRUV_GAUR_PLANT_PHYSIOLOGY</text>
         </svg>
@@ -647,7 +757,12 @@ export default function App() {
 
       {/* FIXED NAVIGATION HEADER */}
       <header className="fixed top-0 left-0 w-full z-55 bg-brand-bg/95 backdrop-blur-md border-b border-brand-border transition-all">
-        <div className="max-w-[1280px] mx-auto px-6 md:px-12 h-20 flex items-center justify-between">
+        {/* Dynamic high contrast scrolling progress scanline */}
+        <motion.div 
+          className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-gradient-to-r from-[#8B5CF6] via-[#D946EF] to-[#10B981] origin-left z-55 shadow-[0_1px_10px_rgba(139,92,246,0.2)]"
+          style={{ scaleX }}
+        />
+        <div className="max-w-[1360px] mx-auto px-4 md:px-6 lg:px-4 xl:px-8 2xl:px-12 h-20 flex items-center justify-between gap-2 xl:gap-4">
           
           {/* Logo brand */}
           <button 
@@ -658,21 +773,29 @@ export default function App() {
           </button>
 
           {/* Links Center */}
-          <nav className="hidden lg:flex items-stretch h-full gap-3 xl:gap-5 text-[10px] xl:text-[11px] font-mono font-bold tracking-[0.08em] xl:tracking-[0.15em] text-brand-text-muted uppercase">
-            {['welcome', 'intro', 'skills', 'experience', 'research', 'research_map', 'certifications', 'projects', 'planner', 'contact'].map((sect) => (
+          <nav className="hidden lg:flex items-stretch h-full gap-0.5 xl:gap-2.5 2xl:gap-4.5 text-[8px] min-[1080px]:text-[8.5px] min-[1140px]:text-[9px] min-[1200px]:text-[9.5px] xl:text-[10px] 2xl:text-[11px] font-mono font-bold tracking-[0.04em] min-[1140px]:tracking-[0.08em] xl:tracking-wider text-brand-text-muted uppercase">
+            {['welcome', 'intro', 'skills', 'experience', 'certifications', 'research', 'research_map', 'projects', 'github', 'traffic', 'planner', 'contact', 'admin'].map((sect) => (
                 <button
                   key={sect}
-                  onClick={() => scrollTo(sect)}
-                  className={`h-full flex items-center px-1 xl:px-2 transition-all cursor-pointer relative nav-link-item ${
+                  onClick={() => sect === 'admin' ? setShowAdminPortal(true) : scrollTo(sect)}
+                  className={`h-full flex items-center px-1 xl:px-2 2xl:px-3 transition-all duration-300 cursor-pointer relative nav-link-item group ${
                     activeSection === sect ? 'text-brand-accent nav-link-active' : 'hover:text-brand-text'
                   }`}
                 >
-                  <span className="relative z-10">
-                    {sect === 'welcome' ? 'Welcome' : sect === 'intro' ? 'Intro' : sect === 'skills' ? 'Skills' : sect === 'experience' ? 'Experience' : sect === 'research' ? 'Research' : sect === 'research_map' ? 'Research Map' : sect === 'certifications' ? 'Certifications' : sect === 'projects' ? 'Projects' : sect === 'planner' ? 'Lab Planner' : 'Contact'}
+                  {/* Faint luxurious backdrop pill that fades in on hover */}
+                  <span className="absolute inset-y-4 inset-x-0 bg-brand-accent/[0.02] border border-brand-accent/[0.05] rounded-md opacity-0 group-hover:opacity-100 transition-all duration-300 -z-10 scale-95 group-hover:scale-100" />
+                  
+                  {/* Luminous dynamic glow aura behind the active tab text */}
+                  {activeSection === sect && (
+                    <span className="absolute inset-y-4 inset-x-0 bg-brand-accent/[0.08] border border-brand-accent/[0.15] rounded-md shadow-[0_0_12px_rgba(124,58,237,0.12)] -z-10 transition-all duration-300 animate-pulse" />
+                  )}
+
+                  <span className="relative z-10 transition-transform duration-300 group-hover:scale-105">
+                    {sect === 'welcome' ? 'Welcome' : sect === 'intro' ? 'Intro' : sect === 'skills' ? 'Skills' : sect === 'experience' ? 'Experience' : sect === 'research' ? 'Research' : sect === 'research_map' ? 'Research Map' : sect === 'certifications' ? 'Certifications' : sect === 'projects' ? 'Projects' : sect === 'github' ? 'GitHub' : sect === 'traffic' ? 'Traffic' : sect === 'planner' ? 'Lab Planner' : sect === 'admin' ? '🔑 Admin Portal' : 'Contact'}
                   </span>
                   {activeSection === sect && (
                     <motion.span 
-                      layoutId="activeNavIndicator"
+                       layoutId="activeNavIndicator"
                       className="absolute bottom-0 left-0 w-full h-[2px] bg-brand-accent active-indicator-glow z-20"
                       transition={{ type: "spring", stiffness: 350, damping: 25 }}
                     />
@@ -685,7 +808,7 @@ export default function App() {
           <div className="flex items-center gap-4">
 
             {/* Clinical Live Clock Widget */}
-            <div className="hidden sm:flex items-center gap-3 border-r border-brand-border pr-4 h-9 select-none shrink-0 font-mono">
+            <div className="hidden xl:flex items-center gap-3 border-r border-brand-border pr-4 h-9 select-none shrink-0 font-mono">
               <div className="flex flex-col text-right justify-center">
                 <span className="text-xs font-black text-brand-text tracking-wider tabular-nums leading-none flex items-center justify-end gap-1.5">
                   <span className="relative flex h-1.5 w-1.5">
@@ -707,12 +830,14 @@ export default function App() {
               <Clock className="w-4 h-4 text-brand-accent header-clock-icon" />
             </div>
 
-            <button
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               onClick={() => scrollTo('contact')}
-              className="px-5 py-2.5 bg-brand-accent hover:bg-brand-accent text-white font-mono text-[10px] uppercase font-bold tracking-[0.15em] transition-all duration-300 flex items-center gap-1.5 cursor-pointer active:scale-95 header-cta-button"
+              className="px-3 py-2 xl:px-5 xl:py-2.5 bg-brand-accent hover:bg-brand-accent text-white font-mono text-[9px] xl:text-[10px] uppercase font-bold tracking-wider xl:tracking-[0.15em] transition-all duration-300 flex items-center gap-1 xl:gap-1.5 cursor-pointer header-cta-button"
             >
-              LET'S TALK <ArrowRight className="w-3.5 h-3.5" />
-            </button>
+              LET'S TALK <ArrowRight className="w-3 h-3 xl:w-3.5 xl:h-3.5" />
+            </motion.button>
           </div>
         </div>
       </header>
@@ -720,42 +845,45 @@ export default function App() {
       <main className="max-w-[1280px] mx-auto px-6 md:px-12 pt-20">
         
         {/* SECTION 1: HERO / WELCOME */}
-        <section id="welcome" className="min-h-[85vh] flex flex-col justify-center py-16 relative">
-          <div className="max-w-3xl space-y-8">
+        <section id="welcome" className="min-h-screen flex flex-col justify-center py-16 relative">
+          <div className="absolute inset-0 z-0 select-none pointer-events-none">
+            <HeroScene />
+          </div>
+          <div className="max-w-3xl space-y-8 relative z-10">
             
             {/* Availability Pill */}
             <motion.div 
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-[#151130] border border-[#8B5CF6]/30 text-white rounded-full font-mono text-[9px] tracking-[0.25em] font-semibold bg-gradient-to-r from-[#151130] to-[#1F1947] shadow-[0_0_15px_rgba(139,92,246,0.15)]"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-[#151130]/80 border border-[#8B5CF6]/30 text-white rounded-full font-mono text-[9px] tracking-[0.25em] font-semibold backdrop-blur-sm shadow-[0_0_15px_rgba(139,92,246,0.15)]"
             >
               <span className="w-2 h-2 rounded-full bg-[#A78BFA] animate-pulse"></span>
               RECRUITER PORTAL • ACTIVE FAANG PIPELINE
             </motion.div>
- 
+  
             {/* Display Headings */}
             <div className="space-y-4">
               <motion.h1 
                 initial={{ opacity: 0, y: 25 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.7, delay: 0.1 }}
-                className="font-display text-5xl md:text-8xl font-black text-white tracking-tighter uppercase leading-[0.85]"
+                className="font-display text-5xl md:text-8xl font-black text-white tracking-tighter uppercase leading-[0.85] drop-shadow-2xl"
               >
                 Dhruv <br className="sm:hidden" /><span className="text-transparent bg-clip-text bg-gradient-to-r from-[#D946EF] via-[#8B5CF6] to-[#6366F1]">Gaur.</span> <br />
-                <span className="text-3xl md:text-5xl font-sans font-extrabold tracking-tight leading-tighter block mt-4 text-[#A78BFA]">Compute Infrastructure & Biotech.</span>
+                <span className="text-3xl md:text-5xl font-sans font-extrabold tracking-tight leading-tighter block mt-4 text-[#A78BFA]">Biotechnology & AI Innovator.</span>
               </motion.h1>
- 
+  
               <motion.p 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.7, delay: 0.2 }}
-                className="font-sans text-[#A39DBE] text-base md:text-lg max-w-2xl leading-relaxed font-normal"
+                className="font-sans text-[#A39DBE] text-base md:text-lg max-w-2xl leading-relaxed font-normal bg-[#0F0C23]/30 backdrop-blur-sm p-4 rounded-xl"
               >
-                Systems Engineer bridging the divide between high-performance cloud compute fabrics (TPUs/GPUs) and enterprise biotech applications. Architecting high-throughput biological sequencing pipelines and real-time telemetry dashboards.
+                Biotechnology enthusiast bridging the gap between Bioinformatics, Genomics, and AI. Architecting high-throughput biological sequencing pipelines and real-time research dashboards.
               </motion.p>
             </div>
- 
+  
             {/* Action buttons */}
             <motion.div 
               initial={{ opacity: 0, y: 10 }}
@@ -763,18 +891,22 @@ export default function App() {
               transition={{ duration: 0.6, delay: 0.3 }}
               className="flex flex-wrap items-center gap-4 pt-4"
             >
-              <button
+              <motion.button
+                whileHover={{ scale: 1.05, y: -2 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={() => scrollTo('projects')}
-                className="bg-gradient-to-r from-[#8B5CF6] to-[#6366F1] hover:from-[#A78BFA] hover:to-[#8B5CF6] text-white font-mono font-bold text-xs tracking-widest px-8 py-4 transition-all cursor-pointer border-none shadow-[0_4px_20px_rgba(139,92,246,0.3)] hover:shadow-[0_4px_25px_rgba(139,92,246,0.45)] hover:-translate-y-0.5 active:translate-y-0 duration-300"
+                className="bg-gradient-to-r from-[#8B5CF6] to-[#6366F1] hover:from-[#A78BFA] hover:to-[#8B5CF6] text-white font-mono font-bold text-xs tracking-widest px-8 py-4 transition-all cursor-pointer border-none shadow-[0_4px_20px_rgba(139,92,246,0.3)] hover:shadow-[0_4px_25px_rgba(139,92,246,0.45)] duration-300"
               >
                 ENGAGE PROTOTYPES
-              </button>
-              <button
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.05, y: -2, borderColor: '#A78BFA' }}
+                whileTap={{ scale: 0.95 }}
                 onClick={() => scrollTo('intro')}
-                className="border border-[#8B5CF6]/30 hover:border-[#8B5CF6] bg-[#0F0C23]/50 text-white font-mono font-bold text-xs tracking-widest px-8 py-4 transition-all hover:bg-[#8B5CF6]/10 active:scale-95 cursor-pointer duration-300"
+                className="border border-[#8B5CF6]/30 hover:border-[#A78BFA] bg-[#0F0C23]/50 text-white font-mono font-bold text-xs tracking-widest px-8 py-4 transition-all hover:bg-[#8B5CF6]/10 cursor-pointer duration-300 backdrop-blur-sm"
               >
                 ENGINEERING PROFILE
-              </button>
+              </motion.button>
             </motion.div>
           </div>
         </section>
@@ -856,8 +988,10 @@ export default function App() {
                 {['All', 'AI & Advanced Computing', 'Biotechnology & Healthcare', 'Research & Lab Operations', 'Leadership & Academia'].map((cat) => {
                   const isActive = selectedSkillCategory === cat;
                   return (
-                    <button
+                    <motion.button
                       key={cat}
+                      whileHover={{ scale: 1.04 }}
+                      whileTap={{ scale: 0.96 }}
                       onClick={() => setSelectedSkillCategory(cat)}
                       className={`px-3 py-1.5 text-[9px] font-mono tracking-widest uppercase border transition-all cursor-pointer ${
                         isActive
@@ -866,7 +1000,7 @@ export default function App() {
                       }`}
                     >
                       {cat === 'All' ? 'ALL SYSTEM ARCHITECTURES' : cat}
-                    </button>
+                    </motion.button>
                   );
                 })}
               </div>
@@ -928,7 +1062,12 @@ export default function App() {
                     <motion.div
                       key={skill.id}
                       layout
-                      whileHover={{ y: -4, borderColor: '#1A1A1A' }}
+                      whileHover={{ 
+                        y: -8, 
+                        borderColor: '#8B5CF6',
+                        boxShadow: '0 20px 35px -10px rgba(139, 92, 246, 0.14)'
+                      }}
+                      transition={{ type: "spring", stiffness: 280, damping: 18 }}
                       className="bg-white p-6 md:p-8 rounded-none border border-[#1A1A1A]/10 flex flex-col justify-between space-y-6 transition-all duration-300"
                     >
                       <div className="space-y-4">
@@ -1047,7 +1186,8 @@ export default function App() {
           transition={{ duration: 0.75, ease: "easeOut" }}
           className="py-24 border-t border-[#1A1A1A]/10"
         >
-          <div className="space-y-12">
+          <SectionGateWrapper id="projects" name="Interactive Projects">
+            <div className="space-y-12 flex flex-col justify-stretch h-full">
                 {/* Custom Header with Project Metric summaries */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
               <div className="max-w-xl space-y-3">
@@ -1063,8 +1203,10 @@ export default function App() {
                 {PROJECTS.map((proj) => {
                   const isActive = selectedProjectId === proj.id;
                   return (
-                    <button
+                    <motion.button
                       key={proj.id}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
                       onClick={() => setSelectedProjectId(proj.id)}
                       className={`px-4 py-2.5 text-xs font-mono border transition-all cursor-pointer flex items-center gap-2 rounded-full uppercase tracking-widest font-bold ${
                         isActive 
@@ -1074,7 +1216,7 @@ export default function App() {
                     >
                       {renderIcon(proj.iconName, "w-3.5 h-3.5 text-[#A78BFA]")}
                       {proj.id === 'proj-sequencer' ? 'NUCLEOWAVE TRANSLATOR' : proj.id === 'proj-bioreactor' ? 'OMNIVESSEL IOT TELEMETRY' : 'LIMS PORTAL 96'}
-                    </button>
+                    </motion.button>
                   );
                 })}
               </div>
@@ -1183,6 +1325,35 @@ export default function App() {
             </div>
 
           </div>
+          </SectionGateWrapper>
+        </motion.section>
+
+        {/* SECTION 5.25: SECURE GITHUB COLLABORATION PORTAL */}
+        <motion.section
+          id="github"
+          initial={{ opacity: 0, y: 35 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-120px" }}
+          transition={{ duration: 0.75, ease: "easeOut" }}
+          className="py-24 border-t border-[#1A1A1A]/10"
+        >
+          <SectionGateWrapper id="github" name="GitHub Integration">
+            <GitHubPortal />
+          </SectionGateWrapper>
+        </motion.section>
+
+        {/* SECTION 5.3: SECURE API TRAFFIC TESTING & PERFORMANCE REACTOR */}
+        <motion.section
+          id="traffic"
+          initial={{ opacity: 0, y: 35 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-120px" }}
+          transition={{ duration: 0.75, ease: "easeOut" }}
+          className="py-24 border-t border-[#1A1A1A]/10"
+        >
+          <SectionGateWrapper id="traffic" name="Traffic Console">
+            <TrafficConsole />
+          </SectionGateWrapper>
         </motion.section>
 
         {/* SECTION 5.5: BIOTECH GOOGLE CALENDAR PLANNER & SCHEDULER */}
@@ -1194,7 +1365,9 @@ export default function App() {
           transition={{ duration: 0.75, ease: "easeOut" }}
           className="py-24 border-t border-[#1A1A1A]/10"
         >
-          <BiotechScheduler />
+          <SectionGateWrapper id="planner" name="Lab Planner">
+            <BiotechScheduler />
+          </SectionGateWrapper>
         </motion.section>
 
         {/* SECTION 6: CONTACT & FORM */}
@@ -1978,10 +2151,6 @@ export default function App() {
                   <div className="p-4 bg-brand-surface border border-[#1A1A1A]/12 mb-5 text-[11px] font-mono leading-normal text-[#1A1A1A] font-bold">
                     © {new Date().getFullYear()} Dhruv Gaur. All rights reserved.
                   </div>
-
-                  <p className="mb-4 text-justify">
-                    All content available on this website, including but not limited to text, graphics, logos, icons, images, videos, audio clips, documents, software, source code, website design, user interface elements, databases, and digital downloads, is the exclusive property of <strong className="text-[#1A1A1A] font-semibold">Dhruv Gaur</strong> and is protected under applicable copyright, trademark, and intellectual property laws.
-                  </p>
 
                   <p className="mb-1 text-justify">
                     The materials and information provided on this website are intended solely for personal, informational, and non-commercial use unless otherwise stated. Any unauthorized reproduction, modification, distribution, transmission, republication, display, performance, storage, or exploitation of the content in any form or by any means without prior written permission from <strong className="text-[#1A1A1A] font-semibold">Dhruv Gaur</strong> is strictly prohibited.

@@ -15,7 +15,7 @@ function DnaDripBackground() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    let animationId: number;
+    let animationId: number | null = null;
     let width = (canvas.width = canvas.parentElement?.clientWidth || 600);
     let height = (canvas.height = canvas.parentElement?.clientHeight || 450);
 
@@ -23,6 +23,7 @@ function DnaDripBackground() {
       if (canvas && canvas.parentElement) {
         width = canvas.width = canvas.parentElement.clientWidth;
         height = canvas.height = canvas.parentElement.clientHeight;
+        render();
       }
     };
     window.addEventListener('resize', handleResize);
@@ -62,15 +63,34 @@ function DnaDripBackground() {
         }
         drops[i] += 0.35; // smooth slow flow
       }
-
-      animationId = requestAnimationFrame(render);
     };
 
-    render();
+    let isIntersecting = false;
+
+    const startAnimation = () => {
+      render();
+    };
+
+    const stopAnimation = () => {};
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        isIntersecting = entry ? entry.isIntersecting : true;
+        if (isIntersecting) {
+          startAnimation();
+        }
+      },
+      { threshold: 0.01 }
+    );
+
+    observer.observe(canvas);
 
     return () => {
-      cancelAnimationFrame(animationId);
+      stopAnimation();
       window.removeEventListener('resize', handleResize);
+      observer.unobserve(canvas);
+      observer.disconnect();
     };
   }, []);
 

@@ -4,6 +4,10 @@ import { Wrench, Clock, ArrowLeft, RotateCw } from 'lucide-react';
 
 interface MaintenancePageProps {
   onBypass: () => void;
+  customMessage?: string;
+  reason?: string;
+  endTime?: string;
+  onTimerEnd?: () => void;
 }
 
 // Baseline starting anchor date: May 1st, 2026 UTC
@@ -12,10 +16,28 @@ const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 const CYCLE_MS = 31 * ONE_DAY_MS; // Core cyclic period
 const COUNTDOWN_LIMIT_MS = 30 * ONE_DAY_MS; // 30 Days active countdown timer
 
-export default function MaintenancePage({ onBypass }: MaintenancePageProps) {
+export default function MaintenancePage({ onBypass, customMessage, reason, endTime, onTimerEnd }: MaintenancePageProps) {
   const [simulatedTime, setSimulatedTime] = useState(new Date());
-  const [virtualTimeOffset, setVirtualTimeOffset] = useState(0);
+  const [virtualTimeOffset, setVirtualTimeOffset] = useState(() => {
+    const stored = localStorage.getItem('virtual_time_offset');
+    return stored ? parseInt(stored, 10) : 0;
+  });
   const [timeMultiplier, setTimeMultiplier] = useState(1);
+
+  // Sync virtual offset to localStorage
+  useEffect(() => {
+    localStorage.setItem('virtual_time_offset', virtualTimeOffset.toString());
+  }, [virtualTimeOffset]);
+
+  // Auto-trigger completion as soon as maintenance window has elapsed
+  useEffect(() => {
+    if (endTime && onTimerEnd) {
+      const remainingMs = new Date(endTime).getTime() - simulatedTime.getTime();
+      if (remainingMs <= 0) {
+        onTimerEnd();
+      }
+    }
+  }, [endTime, simulatedTime, onTimerEnd]);
 
   // Handle continuous clock ticks
   useEffect(() => {
@@ -41,7 +63,14 @@ export default function MaintenancePage({ onBypass }: MaintenancePageProps) {
   let seconds = 0;
   let isUnderMaintenance = true;
 
-  if (elapsedInCurrentCycle < COUNTDOWN_LIMIT_MS) {
+  if (endTime) {
+    const remainingMs = Math.max(0, new Date(endTime).getTime() - simulatedTime.getTime());
+    days = Math.floor(remainingMs / ONE_DAY_MS);
+    hours = Math.floor((remainingMs % ONE_DAY_MS) / (60 * 60 * 1000));
+    minutes = Math.floor((remainingMs % (60 * 60 * 1000)) / (60 * 1000));
+    seconds = Math.floor((remainingMs % (60 * 1000)) / 1000);
+    isUnderMaintenance = remainingMs > 0;
+  } else if (elapsedInCurrentCycle < COUNTDOWN_LIMIT_MS) {
     // Standard 30 days active countdown
     const remainingMs = COUNTDOWN_LIMIT_MS - elapsedInCurrentCycle;
     days = Math.floor(remainingMs / ONE_DAY_MS);
@@ -109,12 +138,21 @@ export default function MaintenancePage({ onBypass }: MaintenancePageProps) {
           {/* Title and Description */}
           <div className="space-y-4">
             <h1 className="text-3xl sm:text-4xl font-serif italic text-[#1A1A1A] tracking-tight uppercase leading-tight font-black">
-              Undergoing System <br />
-              <span className="not-italic text-brand-accent font-sans font-black">Recalibration</span>
+              {customMessage ? "System Under" : "Undergoing System"} <br />
+              <span className="not-italic text-brand-accent font-sans font-black">
+                {customMessage ? "Maintenance" : "Recalibration"}
+              </span>
             </h1>
-            <p className="text-xs text-[#1A1A1A]/60 max-w-sm mx-auto leading-relaxed font-normal">
-              Dhruv Gaur's biotechnology scheduler automatically cycles a 30-day structural upkeep window. This interface refreshes after every 31 days to optimize sequence caching, lab statistics, and static site indexes.
+            
+            <p className="text-xs text-[#1A1A1A]/60 max-w-sm mx-auto leading-relaxed font-normal capitalize-none">
+              {customMessage || "Dhruv Gaur's biotechnology scheduler automatically cycles a 30-day structural upkeep window. This interface refreshes after every 31 days to optimize sequence caching, lab statistics, and static site indexes."}
             </p>
+
+            {reason && (
+              <p className="text-[10px] font-mono text-amber-700 bg-amber-500/5 border border-amber-500/10 py-1.5 px-3 max-w-sm mx-auto uppercase tracking-wider font-bold">
+                REASON: {reason}
+              </p>
+            )}
           </div>
 
           {/* Elegant Simplified Countdown Row */}

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'motion/react';
 
 interface CellItem {
@@ -214,6 +214,157 @@ const CELLS_DATA: CellItem[] = [
   { id: 12, shape: 'mitochondrion', x: '65%', y: '75%', scale: 1.7, rotation: 85, opacity: 0.04, blur: 'blur(5px)', duration: 25, driftX: -50, driftY: -50, pulseSpeed: 6, color: '#10B981' }
 ];
 
+interface LazyLensProps {
+  className: string;
+  rotateDirection: number;
+  duration: number;
+  src: string;
+  alt: string;
+  labelLeftTop: string;
+  labelRightTop: string;
+  labelLeftBottom: string;
+  labelRightBottom: string;
+}
+
+function LazyLens({
+  className,
+  rotateDirection,
+  duration,
+  src,
+  alt,
+  labelLeftTop,
+  labelRightTop,
+  labelLeftBottom,
+  labelRightBottom
+}: LazyLensProps) {
+  const lensRef = useRef<HTMLDivElement>(null);
+  const [isInView, setIsInView] = useState(false);
+
+  useEffect(() => {
+    const el = lensRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        setIsInView(entry ? entry.isIntersecting : false);
+      },
+      { rootMargin: '300px 0px 300px 0px', threshold: 0.01 }
+    );
+    observer.observe(el);
+
+    return () => {
+      observer.unobserve(el);
+      observer.disconnect();
+    };
+  }, []);
+
+  return (
+    <div ref={lensRef} className={className}>
+      {isInView && (
+        <div className="relative w-full h-full rounded-full border border-emerald-500/10 p-1.5 overflow-hidden flex items-center justify-center">
+          {/* HUD circle scale ticks */}
+          <div
+            className="absolute inset-[1px] border border-dashed border-emerald-500/15 rounded-full"
+          />
+          {/* Inner crop image */}
+          <div className="w-full h-full rounded-full overflow-hidden relative">
+            <img
+              src={src}
+              alt={alt}
+              className="w-full h-full object-cover scale-110 saturate-[0.7] brightness-[0.7]"
+              referrerPolicy="no-referrer"
+            />
+            {/* Blending vignette overlay */}
+            <div
+              className="absolute inset-0 bg-radial-gradient opacity-60"
+              style={{
+                background: 'radial-gradient(circle, transparent 40%, #ededeb 100%)',
+                mixBlendMode: 'multiply',
+              }}
+            />
+          </div>
+          {/* HUD Overlay Labels */}
+          <div className="absolute inset-4 flex flex-col justify-between p-1.5 text-[7px] md:text-[8px] font-mono text-[#10B981]/50 leading-none">
+            <div className="flex justify-between items-start">
+              <span>{labelLeftTop}</span>
+              <span>{labelRightTop}</span>
+            </div>
+            <div className="flex justify-between items-end">
+              <span>{labelLeftBottom}</span>
+              <span>{labelRightBottom}</span>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function LazyCell({
+  cell,
+  getShape,
+}: {
+  key?: React.Key | number;
+  cell: CellItem;
+  getShape: (shape: string, color: string) => React.ReactNode;
+}) {
+  const cellRef = useRef<HTMLDivElement>(null);
+  const [isInView, setIsInView] = useState(false);
+
+  useEffect(() => {
+    const el = cellRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        setIsInView(entry ? entry.isIntersecting : false);
+      },
+      { rootMargin: '250px 0px 250px 0px', threshold: 0.01 }
+    );
+    observer.observe(el);
+
+    return () => {
+      observer.unobserve(el);
+      observer.disconnect();
+    };
+  }, []);
+
+  const baseWidth = cell.scale * 100;
+
+  return (
+    <div
+      ref={cellRef}
+      style={{
+        position: 'absolute',
+        left: cell.x,
+        top: cell.y,
+        width: `${baseWidth}px`,
+        height: `${baseWidth * 0.75}px`,
+      }}
+    >
+      {isInView && (
+        <div
+          style={{
+            width: '100%',
+            height: '100%',
+            transform: `rotate(${cell.rotation}deg)`,
+            opacity: cell.opacity,
+            filter: cell.blur,
+          }}
+          className="w-full h-full"
+        >
+          <div className="w-full h-full">
+            {getShape(cell.shape, cell.color)}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
 export default function MicroscopeCellsBackground() {
   const getShape = (shape: string, color: string) => {
     switch (shape) {
@@ -233,169 +384,47 @@ export default function MicroscopeCellsBackground() {
       {/* ----------------- MICROSCOPIC SIGHT LENSES (PHOTOREALISTIC SCIENTIFIC DISCS) ----------------- */}
       
       {/* Lens 1: Fluorophore cellular scan (near top-right) */}
-      <div className="absolute top-[18vh] right-[3%] md:right-[8%] w-[220px] h-[220px] md:w-[350px] md:h-[350px] select-none pointer-events-none opacity-[0.08] md:opacity-[0.14] transition-all duration-700 hover:opacity-[0.22] z-0">
-        <div className="relative w-full h-full rounded-full border border-emerald-500/10 p-1.5 overflow-hidden flex items-center justify-center">
-          {/* Rotating HUD circle scale ticks */}
-          <motion.div 
-            animate={{ rotate: 360 }}
-            transition={{ duration: 55, repeat: Infinity, ease: "linear" }}
-            className="absolute inset-[1px] border border-dashed border-emerald-500/15 rounded-full"
-          />
-          {/* Inner crop image */}
-          <div className="w-full h-full rounded-full overflow-hidden relative">
-            <img 
-              src="/src/assets/images/cellular_hero_banner_1780065823241.png"
-              alt="Cellular fluorescent scan slide"
-              className="w-full h-full object-cover scale-110 saturate-[0.7] brightness-[0.7]"
-              referrerPolicy="no-referrer"
-            />
-            {/* Blending vignette overlay */}
-            <div className="absolute inset-0 bg-radial-gradient opacity-60" style={{ background: 'radial-gradient(circle, transparent 40%, #ededeb 100%)', mixBlendMode: 'multiply' }} />
-          </div>
-          {/* HUD Overlay Labels */}
-          <div className="absolute inset-4 flex flex-col justify-between p-1.5 text-[7px] md:text-[8px] font-mono text-[#10B981]/50 leading-none">
-            <div className="flex justify-between items-start">
-              <span>PRE_SCAN: FLUOR_X01</span>
-              <span>MAG: 12,000X</span>
-            </div>
-            <div className="flex justify-between items-end">
-              <span>GFP_EMERALD_DYE</span>
-              <span>COORDS: X844_Y120</span>
-            </div>
-          </div>
-        </div>
-      </div>
+      <LazyLens
+        className="absolute top-[18vh] right-[3%] md:right-[8%] w-[220px] h-[220px] md:w-[350px] md:h-[350px] select-none pointer-events-none opacity-[0.08] md:opacity-[0.14] transition-all duration-700 hover:opacity-[0.22] z-0"
+        rotateDirection={1}
+        duration={55}
+        src="/src/assets/images/cellular_hero_banner_1780065823241.png"
+        alt="Cellular fluorescent scan slide"
+        labelLeftTop="PRE_SCAN: FLUOR_X01"
+        labelRightTop="MAG: 12,000X"
+        labelLeftBottom="GFP_EMERALD_DYE"
+        labelRightBottom="COORDS: X844_Y120"
+      />
 
       {/* Lens 2: GFP Petri Agar Culture Scan (mid-left behind Research/Skills) */}
-      <div className="absolute top-[168vh] -left-[10%] md:-left-[4%] w-[250px] h-[250px] md:w-[380px] md:h-[380px] select-none pointer-events-none opacity-[0.07] md:opacity-[0.12] transition-all duration-700 hover:opacity-[0.20] z-0">
-        <div className="relative w-full h-full rounded-full border border-emerald-500/10 p-1.5 overflow-hidden flex items-center justify-center">
-          <motion.div 
-            animate={{ rotate: -360 }}
-            transition={{ duration: 65, repeat: Infinity, ease: "linear" }}
-            className="absolute inset-[1px] border border-dashed border-emerald-500/15 rounded-full"
-          />
-          <div className="w-full h-full rounded-full overflow-hidden relative">
-            <img 
-              src="/src/assets/images/petri_dish_culture_1780065844731.png"
-              alt="Cell culture petri microscopy scan"
-              className="w-full h-full object-cover scale-110 saturate-[0.7] brightness-[0.7]"
-              referrerPolicy="no-referrer"
-            />
-            <div className="absolute inset-0 bg-radial-gradient opacity-60" style={{ background: 'radial-gradient(circle, transparent 40%, #ededeb 100%)', mixBlendMode: 'multiply' }} />
-          </div>
-          <div className="absolute inset-4 flex flex-col justify-between p-1.5 text-[7px] md:text-[8px] font-mono text-[#10B981]/50 leading-none">
-            <div className="flex justify-between items-start">
-              <span>PLATE_SCAN: SEC_D7</span>
-              <span>MAG: 4,000X</span>
-            </div>
-            <div className="flex justify-between items-end">
-              <span>VIABILITY: 98.4%</span>
-              <span>COORDS: X120_Y984</span>
-            </div>
-          </div>
-        </div>
-      </div>
+      <LazyLens
+        className="absolute top-[168vh] -left-[10%] md:-left-[4%] w-[250px] h-[250px] md:w-[380px] md:h-[380px] select-none pointer-events-none opacity-[0.07] md:opacity-[0.12] transition-all duration-700 hover:opacity-[0.20] z-0"
+        rotateDirection={-1}
+        duration={65}
+        src="/src/assets/images/petri_dish_culture_1780065844731.png"
+        alt="Cell culture petri microscopy scan"
+        labelLeftTop="PLATE_SCAN: SEC_D7"
+        labelRightTop="MAG: 4,000X"
+        labelLeftBottom="VIABILITY: 98.4%"
+        labelRightBottom="COORDS: X120_Y984"
+      />
 
       {/* Lens 3: Double Helix Macromolecule (near bottom-right behind contact) */}
-      <div className="absolute top-[282vh] right-[2%] md:right-[6%] w-[240px] h-[240px] md:w-[360px] md:h-[360px] select-none pointer-events-none opacity-[0.08] md:opacity-[0.13] transition-all duration-700 hover:opacity-[0.21] z-0">
-        <div className="relative w-full h-full rounded-full border border-emerald-500/10 p-1.5 overflow-hidden flex items-center justify-center">
-          <motion.div 
-            animate={{ rotate: 360 }}
-            transition={{ duration: 75, repeat: Infinity, ease: "linear" }}
-            className="absolute inset-[1px] border border-dashed border-emerald-500/15 rounded-full"
-          />
-          <div className="w-full h-full rounded-full overflow-hidden relative">
-            <img 
-              src="/src/assets/images/dna_double_helix_1780065864560.png"
-              alt="DNA scanning visualization"
-              className="w-full h-full object-cover scale-110 saturate-[0.7] brightness-[0.7]"
-              referrerPolicy="no-referrer"
-            />
-            <div className="absolute inset-0 bg-radial-gradient opacity-60" style={{ background: 'radial-gradient(circle, transparent 40%, #ededeb 100%)', mixBlendMode: 'multiply' }} />
-          </div>
-          <div className="absolute inset-4 flex flex-col justify-between p-1.5 text-[7px] md:text-[8px] font-mono text-[#10B981]/50 leading-none">
-            <div className="flex justify-between items-start">
-              <span>HELIX_SCAN: DET_03</span>
-              <span>MAG: 45,000X</span>
-            </div>
-            <div className="flex justify-between items-end">
-              <span>REPLICON_MATRIX</span>
-              <span>COORDS: X442_Y302</span>
-            </div>
-          </div>
-        </div>
-      </div>
+      <LazyLens
+        className="absolute top-[282vh] right-[2%] md:right-[6%] w-[240px] h-[240px] md:w-[360px] md:h-[360px] select-none pointer-events-none opacity-[0.08] md:opacity-[0.13] transition-all duration-700 hover:opacity-[0.21] z-0"
+        rotateDirection={1}
+        duration={75}
+        src="/src/assets/images/dna_double_helix_1780065864560.png"
+        alt="DNA scanning visualization"
+        labelLeftTop="HELIX_SCAN: DET_03"
+        labelRightTop="MAG: 45,000X"
+        labelLeftBottom="REPLICON_MATRIX"
+        labelRightBottom="COORDS: X442_Y302"
+      />
 
-      {CELLS_DATA.map((cell) => {
-        // Base width of elements
-        const baseWidth = cell.scale * 100;
-
-        return (
-          <motion.div
-            key={cell.id}
-            initial={{ 
-              x: `calc(${cell.x} + 0px)`, 
-              y: `calc(${cell.y} + 0px)`, 
-              rotate: cell.rotation,
-              opacity: cell.opacity
-            }}
-            animate={{
-              x: [
-                `calc(${cell.x} - 0px)`,
-                `calc(${cell.x} + ${cell.driftX}px)`,
-                `calc(${cell.x} - ${cell.driftX / 2}px)`,
-                `calc(${cell.x} - 0px)`
-              ],
-              y: [
-                `calc(${cell.y} - 0px)`,
-                `calc(${cell.y} + ${cell.driftY}px)`,
-                `calc(${cell.y} + ${cell.driftY / 3}px)`,
-                `calc(${cell.y} - 0px)`
-              ],
-              rotate: [
-                cell.rotation,
-                cell.rotation + 45,
-                cell.rotation - 30,
-                cell.rotation
-              ],
-              scale: [
-                1,
-                1.04,
-                0.97,
-                1
-              ]
-            }}
-            transition={{
-              duration: cell.duration,
-              repeat: Infinity,
-              ease: "easeInOut"
-            }}
-            style={{
-              position: 'absolute',
-              width: `${baseWidth}px`,
-              height: `${baseWidth * 0.75}px`,
-              filter: cell.blur,
-              willChange: 'transform',
-            }}
-          >
-            {/* Inner pulsing respiration layer */}
-            <motion.div
-              animate={{
-                opacity: [0.75, 1, 0.75],
-                scale: [0.97, 1.03, 0.97],
-              }}
-              transition={{
-                duration: cell.pulseSpeed,
-                repeat: Infinity,
-                ease: "easeInOut"
-              }}
-              className="w-full h-full"
-            >
-              {getShape(cell.shape, cell.color)}
-            </motion.div>
-          </motion.div>
-        );
-      })}
+      {CELLS_DATA.map((cell) => (
+        <LazyCell key={cell.id} cell={cell} getShape={getShape} />
+      ))}
     </div>
   );
 }

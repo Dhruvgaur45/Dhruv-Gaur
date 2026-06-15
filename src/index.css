@@ -192,12 +192,12 @@ header {
 
 .nav-link-item:hover {
   color: #1E1B4B !important;
-  text-shadow: 0 0 8px rgba(124, 58, 237, 0.2);
+  text-shadow: 0 0 10px rgba(124, 58, 237, 0.35), 0 0 20px rgba(124, 58, 237, 0.15);
 }
 
 .nav-link-active {
   color: #7C3AED !important; /* Premium rich orchid violet */
-  text-shadow: 0 0 8px rgba(124, 58, 237, 0.25);
+  text-shadow: 0 0 12px rgba(124, 58, 237, 0.45), 0 0 24px rgba(124, 58, 237, 0.25);
   font-weight: 700;
 }
 

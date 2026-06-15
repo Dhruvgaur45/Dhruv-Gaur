@@ -74,7 +74,7 @@ export default function BioDataVizBackground() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    let animationId: number;
+    let animationId: number | null = null;
     let width = canvas.width = 400;
     let height = canvas.height = 400;
 
@@ -242,14 +242,46 @@ export default function BioDataVizBackground() {
         }
       });
 
-      animationId = requestAnimationFrame(animate);
+      if (window.innerWidth >= 1024) {
+        animationId = requestAnimationFrame(animate);
+      }
     };
 
-    animate();
+    let isIntersecting = false;
+
+    const startAnimation = () => {
+      if (!animationId) {
+        animationId = requestAnimationFrame(animate);
+      }
+    };
+
+    const stopAnimation = () => {
+      if (animationId) {
+        cancelAnimationFrame(animationId);
+        animationId = null;
+      }
+    };
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        isIntersecting = entry ? entry.isIntersecting : true;
+        if (isIntersecting) {
+          startAnimation();
+        } else {
+          stopAnimation();
+        }
+      },
+      { threshold: 0.01 }
+    );
+
+    observer.observe(canvas);
 
     return () => {
-      cancelAnimationFrame(animationId);
+      stopAnimation();
       window.removeEventListener('resize', handleResize);
+      observer.unobserve(canvas);
+      observer.disconnect();
     };
   }, []);
 
