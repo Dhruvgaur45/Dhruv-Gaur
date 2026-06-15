@@ -847,7 +847,7 @@ async function startServer() {
     const profileUrl = token ? "https://api.github.com/user" : `https://api.github.com/users/${encodeURIComponent(username)}`;
     const profileRes = await fetch(profileUrl, { headers });
     if (!profileRes.ok) {
-      throw new Error(`Failed to fetch profile: ${profileRes.statusText}`);
+      throw new Error(`Failed to fetch profile: ${profileRes.statusText} (${profileRes.status})`);
     }
     const profile = await profileRes.json();
   
@@ -855,7 +855,7 @@ async function startServer() {
     const reposUrl = token ? "https://api.github.com/user/repos?sort=updated&per_page=12" : `https://api.github.com/users/${encodeURIComponent(username)}/repos?sort=updated&per_page=12`;
     const reposRes = await fetch(reposUrl, { headers });
     if (!reposRes.ok) {
-      throw new Error(`Failed to fetch repos: ${reposRes.statusText}`);
+      throw new Error(`Failed to fetch repos: ${reposRes.statusText} (${reposRes.status})`);
     }
     const repos = await reposRes.json();
   
@@ -890,6 +890,11 @@ async function startServer() {
           await writeGithubData(githubData);
         } catch (err: any) {
           console.warn("[GitHub API Sync Warning] Could not refresh GitHub details:", err.message);
+          // If rate limit exceeded (403), prevent retry for 2 hours
+          if (err.message.includes("403") || err.message.includes("rate limit")) {
+            githubData.lastUpdated = new Date(Date.now() + 1000 * 60 * 60 * 2).toISOString();
+            await writeGithubData(githubData);
+          }
         }
       }
       

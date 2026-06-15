@@ -762,7 +762,7 @@ export default function App() {
           className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-gradient-to-r from-[#8B5CF6] via-[#D946EF] to-[#10B981] origin-left z-55 shadow-[0_1px_10px_rgba(139,92,246,0.2)]"
           style={{ scaleX }}
         />
-        <div className="max-w-[1360px] mx-auto px-4 md:px-6 lg:px-4 xl:px-8 2xl:px-12 h-20 flex items-center justify-between gap-2 xl:gap-4">
+        <div className="max-w-[1360px] mx-auto px-6 md:px-8 lg:px-10 h-20 flex items-center justify-between gap-6 xl:gap-8">
           
           {/* Logo brand */}
           <button 
@@ -773,30 +773,22 @@ export default function App() {
           </button>
 
           {/* Links Center */}
-          <nav className="hidden lg:flex items-stretch h-full gap-0.5 xl:gap-2.5 2xl:gap-4.5 text-[8px] min-[1080px]:text-[8.5px] min-[1140px]:text-[9px] min-[1200px]:text-[9.5px] xl:text-[10px] 2xl:text-[11px] font-mono font-bold tracking-[0.04em] min-[1140px]:tracking-[0.08em] xl:tracking-wider text-brand-text-muted uppercase">
+          <nav className="hidden lg:flex items-center h-full gap-2 xl:gap-4 text-[9px] min-[1140px]:text-[10px] xl:text-[11px] font-mono font-bold tracking-wider text-brand-text-muted uppercase">
             {['welcome', 'intro', 'skills', 'experience', 'certifications', 'research', 'research_map', 'projects', 'github', 'traffic', 'planner', 'contact', 'admin'].map((sect) => (
                 <button
                   key={sect}
                   onClick={() => sect === 'admin' ? setShowAdminPortal(true) : scrollTo(sect)}
-                  className={`h-full flex items-center px-1 xl:px-2 2xl:px-3 transition-all duration-300 cursor-pointer relative nav-link-item group ${
-                    activeSection === sect ? 'text-brand-accent nav-link-active' : 'hover:text-brand-text'
+                  className={`h-full flex items-center px-2 xl:px-3 transition-all duration-300 cursor-pointer relative group ${
+                    activeSection === sect ? 'text-brand-accent' : 'hover:text-brand-text'
                   }`}
-                >
-                  {/* Faint luxurious backdrop pill that fades in on hover */}
-                  <span className="absolute inset-y-4 inset-x-0 bg-brand-accent/[0.02] border border-brand-accent/[0.05] rounded-md opacity-0 group-hover:opacity-100 transition-all duration-300 -z-10 scale-95 group-hover:scale-100" />
-                  
-                  {/* Luminous dynamic glow aura behind the active tab text */}
-                  {activeSection === sect && (
-                    <span className="absolute inset-y-4 inset-x-0 bg-brand-accent/[0.08] border border-brand-accent/[0.15] rounded-md shadow-[0_0_12px_rgba(124,58,237,0.12)] -z-10 transition-all duration-300 animate-pulse" />
-                  )}
-
+                >                
                   <span className="relative z-10 transition-transform duration-300 group-hover:scale-105">
-                    {sect === 'welcome' ? 'Welcome' : sect === 'intro' ? 'Intro' : sect === 'skills' ? 'Skills' : sect === 'experience' ? 'Experience' : sect === 'research' ? 'Research' : sect === 'research_map' ? 'Research Map' : sect === 'certifications' ? 'Certifications' : sect === 'projects' ? 'Projects' : sect === 'github' ? 'GitHub' : sect === 'traffic' ? 'Traffic' : sect === 'planner' ? 'Lab Planner' : sect === 'admin' ? '🔑 Admin Portal' : 'Contact'}
+                    {sect === 'welcome' ? 'Welcome' : sect === 'intro' ? 'Intro' : sect === 'skills' ? 'Skills' : sect === 'experience' ? 'Experience' : sect === 'research' ? 'Research' : sect === 'research_map' ? 'Map' : sect === 'certifications' ? 'Certs' : sect === 'projects' ? 'Projects' : sect === 'github' ? 'GitHub' : sect === 'traffic' ? 'Traffic' : sect === 'planner' ? 'Lab Planner' : sect === 'admin' ? '🔑 Admin' : 'Contact'}
                   </span>
                   {activeSection === sect && (
                     <motion.span 
                        layoutId="activeNavIndicator"
-                      className="absolute bottom-0 left-0 w-full h-[2px] bg-brand-accent active-indicator-glow z-20"
+                      className="absolute bottom-0 left-0 w-full h-[2px] bg-brand-accent active-indicator-glow"
                       transition={{ type: "spring", stiffness: 350, damping: 25 }}
                     />
                   )}
@@ -805,7 +797,7 @@ export default function App() {
           </nav>
 
           {/* Call To Action Right & Live Biotech Clock */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-6">
 
             {/* Clinical Live Clock Widget */}
             <div className="hidden xl:flex items-center gap-3 border-r border-brand-border pr-4 h-9 select-none shrink-0 font-mono">

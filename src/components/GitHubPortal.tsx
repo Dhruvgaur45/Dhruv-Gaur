@@ -75,6 +75,9 @@ export default function GitHubPortal() {
     setError(null);
     try {
       const response = await fetch('/api/github/profile');
+      if (response.status === 403) {
+        throw new Error("GitHub API rate limit exceeded. Please try again in 15 minutes.");
+      }
       if (!response.ok) {
         throw new Error(`Failed to load GitHub profile data (${response.status})`);
       }
