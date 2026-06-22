@@ -120,7 +120,7 @@ export default function BioDataVizBackground() {
         x: Math.cos(angle) * spiralRadius,
         y: Math.sin(angle) * spiralRadius,
         z: zOffset,
-        color: '#10B981', // emerald green (GFP core)
+        color: '#39FF14', // neon green (GFP core / Biotech)
         radius: i % 3 === 0 ? 3.5 : 2
       });
 
@@ -129,7 +129,7 @@ export default function BioDataVizBackground() {
         x: Math.cos(angle + Math.PI) * spiralRadius,
         y: Math.sin(angle + Math.PI) * spiralRadius,
         z: zOffset,
-        color: '#3B82F6', // Blue (Teal/Co-factor dye)
+        color: '#00F2FE', // Cyan (AI co-factor dye)
         radius: i % 3 === 0 ? 3.5 : 2
       });
 
@@ -205,7 +205,7 @@ export default function BioDataVizBackground() {
         const averageZ = (sourceNode.z + targetNode.z) / 2;
         const lineOpacity = Math.max(0.04, Math.min(0.28, 0.2 - averageZ / 400));
 
-        ctx.strokeStyle = link.dashed ? 'rgba(16, 185, 129, ' + lineOpacity + ')' : 'rgba(59, 130, 246, ' + lineOpacity + ')';
+        ctx.strokeStyle = link.dashed ? 'rgba(57, 255, 20, ' + lineOpacity + ')' : 'rgba(0, 242, 254, ' + lineOpacity + ')';
         ctx.lineWidth = link.dashed ? 0.75 : 1.25;
         ctx.beginPath();
         ctx.moveTo(sourceNode.x, sourceNode.y);
@@ -228,9 +228,9 @@ export default function BioDataVizBackground() {
         
         ctx.beginPath();
         ctx.arc(pNode.x, pNode.y, Math.max(1, rad), 0, Math.PI * 2);
-        ctx.fillStyle = pNode.original.color === '#10B981' 
-          ? `rgba(16, 185, 129, ${nodeOpacity})` 
-          : `rgba(59, 130, 246, ${nodeOpacity})`;
+        ctx.fillStyle = pNode.original.color === '#39FF14' 
+          ? `rgba(57, 255, 20, ${nodeOpacity})` 
+          : `rgba(0, 242, 254, ${nodeOpacity})`;
         ctx.fill();
 
         // Small inner nuclear highlight of atoms

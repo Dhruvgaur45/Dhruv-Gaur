@@ -21,10 +21,10 @@ export function ThreeDNAHelix() {
         return (
           <group key={i} position={[0, i * 0.4 - DNA_BASE_PAIRS * 0.2, 0]}>
             <Sphere position={[Math.cos(t), 0, Math.sin(t)]} args={[0.15, 16, 16]}>
-              <meshStandardMaterial color="#6366F1" emissive="#6366F1" emissiveIntensity={0.5} />
+              <meshStandardMaterial color="#00F2FE" emissive="#00F2FE" emissiveIntensity={0.5} />
             </Sphere>
             <Sphere position={[-Math.cos(t), 0, -Math.sin(t)]} args={[0.15, 16, 16]}>
-              <meshStandardMaterial color="#10B981" emissive="#10B981" emissiveIntensity={0.5} />
+              <meshStandardMaterial color="#39FF14" emissive="#39FF14" emissiveIntensity={0.5} />
             </Sphere>
             <Cylinder
               args={[0.05, 0.05, 1.5]}

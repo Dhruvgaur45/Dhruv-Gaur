@@ -889,9 +889,14 @@ async function startServer() {
           githubData.lastUpdated = new Date().toISOString();
           await writeGithubData(githubData);
         } catch (err: any) {
-          console.warn("[GitHub API Sync Warning] Could not refresh GitHub details:", err.message);
-          // If rate limit exceeded (403), prevent retry for 2 hours
-          if (err.message.includes("403") || err.message.includes("rate limit")) {
+          const isRateLimit = err.message.includes("403") || err.message.includes("429") || err.message.includes("rate limit");
+          if (!isRateLimit) {
+            console.warn("[GitHub API Sync Warning] Could not refresh GitHub details:", err.message);
+          } else {
+            console.log("[GitHub API] Rate limit reached. Skipping sync for 2 hours.");
+          }
+          // If rate limit exceeded (403/429), prevent retry for 2 hours
+          if (isRateLimit) {
             githubData.lastUpdated = new Date(Date.now() + 1000 * 60 * 60 * 2).toISOString();
             await writeGithubData(githubData);
           }

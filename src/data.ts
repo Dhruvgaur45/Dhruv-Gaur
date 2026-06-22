@@ -130,6 +130,19 @@ export const CERTIFICATIONS: Certification[] = [
 
 export const PROJECTS: BiotechProject[] = [
   {
+    id: 'ngs-learning',
+    title: 'NGS / RNA-seq Learning Projects',
+    subtitle: 'Reference-Based Gene Expression Alignment Pipeline',
+    description: 'Foundational Next-Generation Sequencing workflows mapping read counts, aligning reference transcriptomes, and running differential gene expression (DGE) pipelines.',
+    longDescription: 'Implemented pre-processing sequence quality checks using FastQC, multi-threaded alignment via STAR against reference genomes, and detailed gene expression quantifications. Used R/DESeq2 for identifying key biological regulation pathways.',
+    iconName: 'book',
+    tagline: 'GENOMICS COMPILING',
+    tags: ['RNA-seq', 'Next-Gen Sequencing', 'FastQC', 'DESeq2 Alignment', 'DGE analysis'],
+    scientificMetric: 'Q30 Base Score Quality: >96.8%',
+    lifecycle: 'Completed',
+    stage: 1
+  },
+  {
     id: 'proj-sequencer',
     title: 'NucleoWave Sequence Map',
     subtitle: 'DNA / mRNA Sequence Real-Time Translation & GC Analyzer',
@@ -140,7 +153,21 @@ export const PROJECTS: BiotechProject[] = [
     tags: ['Codon translation', 'GC Skew', 'Mutation flags', 'Interactive base map'],
     scientificMetric: 'Ribosomal Translation Rate: 20 bases/sec',
     interactiveType: 'sequencer',
-    lifecycle: 'Stable'
+    lifecycle: 'Stable',
+    stage: 2
+  },
+  {
+    id: 'linkedin-creator',
+    title: 'AI LinkedIn Post Creator',
+    subtitle: 'Large Language Model Fine-Turing for High-Integrity Biotech Content',
+    description: 'An automated assistant tuned for biotech & AI research sharing. It generates high-integrity LinkedIn updates, research paper summaries, and technical post blueprints.',
+    longDescription: 'Leverages fine-tuned generative AI modules to parse complex biotech, bioinformatics, or computer engineering abstracts into highly readable, structured, and search-optimized professional networking copy.',
+    iconName: 'cpu',
+    tagline: 'GENERATIVE AI MODEL',
+    tags: ['Generative AI', 'LLM Fine-tuning', 'Scientific Copywriting', 'LinkedIn APIs'],
+    scientificMetric: 'Research Summary Accuracy: 99.1%',
+    lifecycle: 'Prototype',
+    stage: 3
   },
   {
     id: 'proj-bioreactor',
@@ -153,7 +180,34 @@ export const PROJECTS: BiotechProject[] = [
     tags: ['PID setpoints', 'Real-time telemetry', 'Anomalous event logs', 'SVG visualizers'],
     scientificMetric: 'Culture Viability Index: 98.4%',
     interactiveType: 'bioreactor',
-    lifecycle: 'Beta'
+    lifecycle: 'Beta',
+    stage: 3
+  },
+  {
+    id: 'silicon-processors',
+    title: 'Silicon Photonic Genomic Accelerator',
+    subtitle: 'Optimizing Bioinformatics Workloads on Silicon Photonic Integrated Processors',
+    description: 'A framework for High-Performance Genomic Computing mapping high-throughput sequence alignment algorithms to electro-photonic hardware accelerators for near zero-latency execution.',
+    longDescription: 'Presented at leading research forums. Designs a mathematical layout that processes FM-index text searches and Smith-Waterman sequence alignments using light refractive waveguide arrays instead of electrical copper transistors, maximizing bandwidth and minimizing thermal loss.',
+    iconName: 'microscope',
+    tagline: 'HARDWARE ACCELERATION',
+    tags: ['Silicon Photonics', 'HPC Clusters', 'Genomic Compute', 'Smith-Waterman Alignment'],
+    scientificMetric: 'Latency Reduction: 15x / Bandwidth Opt',
+    lifecycle: 'Research',
+    stage: 4
+  },
+  {
+    id: 'portfolio-web',
+    title: 'Biotechnology Portfolio Website',
+    subtitle: 'Computational Aesthetics & Clinical Interactive Deck',
+    description: 'A polished academic and systems engineering profile featuring glassmorphism microplate grids, a real-time DNA sequencer interface, and an IoT culture telemetry suite.',
+    longDescription: 'Highly responsive, containerized React profile implementing Tailwind layouts, IntersectionObserver scroll spies, server-side secure admin routes, and full local persistence using state synchronizing logic.',
+    iconName: 'globe',
+    tagline: 'SYSTEMS COMPILATION',
+    tags: ['React', 'Vite', 'Tailwind CSS', 'DNA Animation', 'Framer Motion'],
+    scientificMetric: 'Page Load Performance: Class A',
+    lifecycle: 'Stable',
+    stage: 5
   },
   {
     id: 'proj-lims',
@@ -166,6 +220,20 @@ export const PROJECTS: BiotechProject[] = [
     tags: ['96-Well layouts', 'Assay dilutions', 'Barcode validation', 'Interactive CSV Export'],
     scientificMetric: 'Assay Precision: CV < 2.3%',
     interactiveType: 'lims',
-    lifecycle: 'Alpha'
+    lifecycle: 'Alpha',
+    stage: 5
+  },
+  {
+    id: 'civicalert-app',
+    title: 'CivicAlert Public Complaint App',
+    subtitle: 'High-Integrity Citizen Reporting & Dynamic Telemetry Logging',
+    description: 'High-integrity citizens logging dashboard facilitating public transparency, state agency routing, dynamic priority queueing, and geotagged incident telemetry.',
+    longDescription: 'Designed a beautiful administrative and user routing flow that allows public users to register local concerns, assigns geotags, computes priority scores automatically, and relays actions to specialized maintenance divisions.',
+    iconName: 'alert-triangle',
+    tagline: 'CIVIC TECHNOLOGY',
+    tags: ['Geolocations', 'Admin Dashboards', 'Priority Routing', 'Secure Inputs'],
+    scientificMetric: 'Resolution SLA Target: <24 Hours',
+    lifecycle: 'Completed',
+    stage: 5
   }
 ];
