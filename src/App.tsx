@@ -36,16 +36,14 @@ import {
   BookOpen,
   Microscope,
   AlertTriangle,
-  Workflow
+  Workflow,
+  Sun,
+  Moon
 } from 'lucide-react';
 
 // Data and components
-import { SKILLS, CERTIFICATIONS, PROJECTS } from './data';
-import { ContactSubmission, BiotechProject } from './types';
-import DNASequencer from './components/DNASequencer';
-import BioreactorMonitor from './components/BioreactorMonitor';
-import LIMSTracker from './components/LIMSTracker';
-import UpcomingPrototype from './components/UpcomingPrototype';
+import { SKILLS, CERTIFICATIONS } from './data';
+import { ContactSubmission } from './types';
 import WorkingResearch from './components/WorkingResearch';
 import Logo from './components/Logo';
 import MaintenancePage from './components/MaintenancePage';
@@ -56,6 +54,7 @@ import ResearchMap from './components/ResearchMap';
 import MicroscopeCellsBackground from './components/MicroscopeCellsBackground';
 import BioDataVizBackground from './components/BioDataVizBackground';
 import BiotechScheduler from './components/BiotechScheduler';
+import AIToolsExpertise from './components/AIToolsExpertise';
 import { HeroScene } from './components/HeroScene';
 import WelcomeAnimation from './components/WelcomeAnimation';
 import WelcomeGuide from './components/WelcomeGuide';
@@ -109,14 +108,31 @@ export default function App() {
   const [activeSection, setActiveSection] = useState('welcome');
   const [showScrollTop, setShowScrollTop] = useState(false);
 
-  // Initialize dark mode on root document for immersive AI + Biotech glassmorphic aesthetic
-  useEffect(() => {
-    window.document.documentElement.classList.add('dark');
-    localStorage.setItem('app_theme', 'dark');
-  }, []);
+  // Initialize light/dark theme, defaulting to light mode as requested
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    try {
+      const saved = localStorage.getItem('app_theme');
+      if (saved === 'dark') return 'dark';
+      return 'light'; // default to light theme
+    } catch {
+      return 'light';
+    }
+  });
 
-  // Active Interactive Project Selection
-  const [selectedProjectId, setSelectedProjectId] = useState('proj-sequencer');
+  useEffect(() => {
+    if (theme === 'dark') {
+      window.document.documentElement.classList.add('dark');
+      window.document.documentElement.classList.remove('light');
+    } else {
+      window.document.documentElement.classList.add('light');
+      window.document.documentElement.classList.remove('dark');
+    }
+    localStorage.setItem('app_theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(prev => prev === 'light' ? 'dark' : 'light');
+  };
 
   // Contact Form Submission States
   const [name, setName] = useState('');
@@ -163,8 +179,6 @@ export default function App() {
 
   useEffect(() => {
     fetchSystemStatus();
-    const interval = setInterval(fetchSystemStatus, 5000);
-    return () => clearInterval(interval);
   }, []);
 
   const SectionGateWrapper = ({ 
@@ -297,7 +311,7 @@ export default function App() {
       setShowScrollTop(window.scrollY > 400);
     };
 
-    const sections = ['welcome', 'intro', 'skills', 'experience', 'certifications', 'research', 'research_map', 'projects', 'planner', 'contact'];
+    const sections = ['welcome', 'intro', 'skills', 'experience', 'certifications', 'research', 'research_map', 'ai_tools', 'planner', 'contact'];
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -497,8 +511,7 @@ export default function App() {
     }
   };
 
-  // Find active interactive project
-  const currentProject = PROJECTS.find(p => p.id === selectedProjectId) || PROJECTS[0];
+
 
   if (showAdminPortal) {
     return (
@@ -784,7 +797,7 @@ export default function App() {
 
           {/* Links Center */}
           <nav className="hidden lg:flex items-center h-full gap-6 xl:gap-8 text-[10px] font-mono font-semibold text-brand-text-muted uppercase tracking-widest">
-            {['welcome', 'intro', 'skills', 'experience', 'certifications', 'research', 'research_map', 'projects', 'planner', 'contact', 'admin'].map((sect) => (
+            {['welcome', 'intro', 'skills', 'experience', 'certifications', 'research', 'research_map', 'ai_tools', 'planner', 'contact', 'admin'].map((sect) => (
                 <button
                   key={sect}
                   onClick={() => sect === 'admin' ? setShowAdminPortal(true) : scrollTo(sect)}
@@ -793,7 +806,7 @@ export default function App() {
                   }`}
                 >                
                   <span className="relative z-10">
-                    {sect === 'welcome' ? 'Welcome' : sect === 'intro' ? 'Intro' : sect === 'skills' ? 'Skills' : sect === 'experience' ? 'Experience' : sect === 'research' ? 'Research' : sect === 'research_map' ? 'Map' : sect === 'certifications' ? 'Certs' : sect === 'projects' ? 'Projects' : sect === 'planner' ? 'Planner' : sect === 'admin' ? 'Admin' : 'Contact'}
+                    {sect === 'welcome' ? 'Welcome' : sect === 'intro' ? 'Intro' : sect === 'skills' ? 'Skills' : sect === 'experience' ? 'Experience' : sect === 'research' ? 'Research' : sect === 'research_map' ? 'Map' : sect === 'certifications' ? 'Certs' : sect === 'ai_tools' ? 'AI Tools' : sect === 'planner' ? 'Planner' : sect === 'admin' ? 'Admin' : 'Contact'}
                   </span>
                   {activeSection === sect && (
                     <motion.span 
@@ -806,15 +819,26 @@ export default function App() {
             ))}
           </nav>
 
-          {/* CTA Right */}
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => scrollTo('contact')}
-            className="px-5 py-2 bg-brand-accent text-white font-mono text-[10px] uppercase font-bold tracking-widest transition-all rounded-full"
-          >
-            LET'S TALK
-          </motion.button>
+          {/* CTA Right & Theme Toggle */}
+          <div className="flex items-center gap-3">
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded-full border border-brand-border bg-brand-surface-card hover:bg-brand-surface text-brand-accent transition-all duration-300 flex items-center justify-center cursor-pointer"
+              title={theme === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode'}
+              id="theme-toggle-btn"
+            >
+              {theme === 'light' ? <Moon size={15} /> : <Sun size={15} />}
+            </button>
+
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => scrollTo('contact')}
+              className="px-5 py-2 bg-brand-accent text-white font-mono text-[10px] uppercase font-bold tracking-widest transition-all rounded-full cursor-pointer"
+            >
+              LET'S TALK
+            </motion.button>
+          </div>
         </div>
       </header>
 
@@ -870,10 +894,10 @@ export default function App() {
               <motion.button
                 whileHover={{ scale: 1.05, y: -2 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => scrollTo('projects')}
+                onClick={() => scrollTo('skills')}
                 className="bg-gradient-to-r from-[#8B5CF6] to-[#6366F1] hover:from-[#A78BFA] hover:to-[#8B5CF6] text-white font-mono font-bold text-xs tracking-widest px-8 py-4 transition-all cursor-pointer border-none shadow-[0_4px_20px_rgba(139,92,246,0.3)] hover:shadow-[0_4px_25px_rgba(139,92,246,0.45)] duration-300"
               >
-                ENGAGE PROTOTYPES
+                EXPLORE SKILLS
               </motion.button>
               <motion.button
                 whileHover={{ scale: 1.05, y: -2, borderColor: '#A78BFA' }}
@@ -1151,287 +1175,17 @@ export default function App() {
           <ResearchMap />
         </motion.section>
 
-        {/* SECTION 5: INTERACTIVE PROJECTS SHOWCASE */}
-        <motion.section 
-          id="projects" 
+        {/* SECTION 5.3: AI TOOLS EXPERTISE */}
+        <motion.section
+          id="ai_tools"
           initial={{ opacity: 0, y: 35 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-120px" }}
           transition={{ duration: 0.75, ease: "easeOut" }}
-          className="py-24 border-t border-[#1A1A1A]/10 bg-[#06050F]"
+          className="py-24 border-t border-[#1A1A1A]/10"
         >
-          <SectionGateWrapper id="projects" name="Interactive Projects">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
-              
-              {/* Header block with Scientific Branding */}
-              <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-[#1E1C38] pb-8">
-                <div className="max-w-xl space-y-3">
-                  <span className="font-mono text-xs text-[#8B5CF6] tracking-widest font-black uppercase flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
-                    RESEARCH & INNOVATION PIPELINE v2.4
-                  </span>
-                  <h2 className="font-display text-4xl font-extrabold text-white uppercase tracking-tight">
-                    Project Pipeline
-                  </h2>
-                  <p className="text-sm text-[#A39DBE] leading-relaxed font-normal">
-                    A structured journey through my biotechnology, bioinformatics, AI, and research-based projects.
-                  </p>
-                </div>
-
-                {/* Pipeline Stats widget */}
-                <div className="bg-[#0F0D24] border border-[#232047] p-4 flex gap-6 font-mono text-2xs uppercase tracking-wider text-[#A39DBE]">
-                  <div>
-                    <span className="text-zinc-500 block">Total Stages</span>
-                    <strong className="text-white text-lg font-bold">05 <span className="text-[#8B5CF6]">Nodes</span></strong>
-                  </div>
-                  <div className="h-8 w-px bg-[#232047]" />
-                  <div>
-                    <span className="text-zinc-500 block">Status</span>
-                    <strong className="text-[#10B981] text-lg font-bold flex items-center gap-1.5">
-                      ACTIVE SECURE
-                    </strong>
-                  </div>
-                </div>
-              </div>
-
-              {/* 1. HORIZONTAL PIPELINE STAGES OVERVIEW (DESKTOP ROADMAP MAP) */}
-              <div className="hidden lg:block bg-[#0D0B1E] border border-[#232047] p-5">
-                <span className="font-mono text-[9px] text-zinc-500 uppercase tracking-widest block mb-4">
-                  BIOTECHNOLOGY COMPILATION WORKFLOW GRAPH
-                </span>
-                <div className="flex items-center justify-between relative">
-                  {/* Connected Background Track Line */}
-                  <div className="absolute left-6 right-6 top-[22px] h-0.5 bg-gradient-to-r from-blue-500 via-teal-500 via-purple-500 via-amber-500 to-rose-500 opacity-30 z-0" />
-                  
-                  {[
-                    { s: 1, name: "Foundation", code: "STG-01", icon: <BookOpen className="w-3.5 h-3.5" />, bg: "from-blue-600 to-indigo-600" },
-                    { s: 2, name: "Genomics Map", code: "STG-02", icon: <Dna className="w-3.5 h-3.5" />, bg: "from-teal-600 to-emerald-600" },
-                    { s: 3, name: "AI & Telemetry", code: "STG-03", icon: <Cpu className="w-3.5 h-3.5" />, bg: "from-purple-600 to-pink-600" },
-                    { s: 4, name: "Silicon Accel", code: "STG-04", icon: <Microscope className="w-3.5 h-3.5" />, bg: "from-amber-600 to-orange-600" },
-                    { s: 5, name: "LIMS & Portals", code: "STG-05", icon: <Workflow className="w-3.5 h-3.5" />, bg: "from-rose-600 to-red-600" },
-                  ].map((stage) => {
-                    const stageProjects = PROJECTS.filter(p => p.stage === stage.s);
-                    const isActiveStage = stageProjects.some(p => p.id === selectedProjectId);
-                    return (
-                      <div key={stage.s} className="z-10 flex flex-col items-center text-center space-y-1.5 w-44">
-                        <motion.button
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.95 }}
-                          onClick={() => {
-                            const firstProj = PROJECTS.find(p => p.stage === stage.s);
-                            if (firstProj) setSelectedProjectId(firstProj.id);
-                          }}
-                          className={`w-11 h-11 rounded-full flex items-center justify-center transition-all border outline-none cursor-pointer ${
-                            isActiveStage 
-                              ? `bg-gradient-to-br ${stage.bg} text-white border-transparent shadow-[0_0_15px_rgba(139,92,246,0.5)]`
-                              : 'bg-[#151230] text-zinc-400 border-[#232047] hover:border-zinc-500'
-                          }`}
-                        >
-                          {stage.icon}
-                        </motion.button>
-                        <div>
-                          <span className="font-mono text-[9px] text-zinc-500 block uppercase font-bold">{stage.code}</span>
-                          <span className="text-[10px] text-zinc-300 font-bold block truncate max-w-[130px]">{stage.name}</span>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* 2. MAIN TIMELINE GRID / CONNECTED PIPELINE VERTICAL/ZIG-ZAG TRACK */}
-              <div className="relative">
-                {/* SVG Connecting Timeline Line running down the side */}
-                <div className="absolute left-6 md:left-[50%] top-0 bottom-0 w-1 -ml-0.5 bg-gradient-to-b from-blue-500 via-teal-500 via-purple-500 via-amber-500 to-rose-500 opacity-20 pointer-events-none" />
-                {/* Glowing traveling energy dot */}
-                <div className="absolute left-6 md:left-[50%] top-[10%] w-2 h-2 -ml-1 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,1)] animate-bounce pointer-events-none" />
-
-                <div className="space-y-12">
-                  {PROJECTS.map((proj, id) => {
-                    const isActive = selectedProjectId === proj.id;
-                    const isEven = id % 2 === 0;
-                    
-                    return (
-                      <motion.div
-                        key={proj.id}
-                        initial={{ opacity: 0, y: 30 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true, margin: "-100px" }}
-                        transition={{ duration: 0.5, delay: id * 0.1 }}
-                        className={`flex flex-col md:flex-row items-stretch ${
-                          isEven ? 'md:flex-row' : 'md:flex-row-reverse'
-                        } justify-between relative pl-12 md:pl-0`}
-                      >
-                        {/* Timeline Node Ring connected to grid */}
-                        <div className="absolute left-6 md:left-[50%] top-8 w-4 h-4 -ml-2 rounded-full border-2 border-[#1E1C38] bg-[#0A071E] flex items-center justify-center">
-                          <div className={`w-1.5 h-1.5 rounded-full ${
-                            isActive ? 'bg-emerald-400 animate-ping' : 'bg-indigo-500'
-                          }`} />
-                        </div>
-
-                        {/* Pipeline Stage Tag above card inside grid */}
-                        <div className="w-full md:w-[46%]">
-                          <motion.div
-                            whileHover={{ 
-                              y: -4,
-                              borderColor: isActive ? '#10B981' : '#8B5CF6',
-                              boxShadow: '0 8px 30px rgba(0, 0, 0, 0.4)'
-                            }}
-                            onClick={() => setSelectedProjectId(proj.id)}
-                            className={`p-6 border bg-[#0D0B1F]/90 backdrop-blur-md rounded-none transition-all duration-300 cursor-pointer flex flex-col justify-between h-full relative group ${
-                              isActive 
-                                ? 'border-[#10B981]/50 shadow-[0_4px_20px_rgba(16,185,129,0.15)] ring-1 ring-emerald-500/30' 
-                                : 'border-[#232047] hover:border-zinc-500 shadow-lg'
-                            }`}
-                          >
-                            
-                            {/* Decorative stage block index */}
-                            <div className="absolute top-4 right-4 flex items-center gap-2">
-                              <span className="font-mono text-[9px] text-[#8B5CF6] font-bold">STAGE 0{proj.stage}</span>
-                              <span className={`font-mono text-[8px] font-black tracking-wider px-2 py-0.5 border uppercase ${
-                                proj.lifecycle === 'Stable' || proj.lifecycle === 'Completed'
-                                  ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
-                                  : proj.lifecycle === 'Beta' || proj.lifecycle === 'Prototype'
-                                  ? 'bg-amber-500/10 text-amber-400 border-amber-500/30'
-                                  : 'bg-[#EF4444]/10 text-[#EF4444] border-[#EF4444]/30'
-                              }`}>
-                                {proj.lifecycle || 'STABLE'}
-                              </span>
-                            </div>
-
-                            <div className="space-y-4 font-sans text-left">
-                              <div className="flex items-center gap-2.5">
-                                <div className="w-8 h-8 rounded-none border border-[#232047] bg-[#110E28] flex items-center justify-center text-indigo-400">
-                                  {renderIcon(proj.iconName, "w-4 h-4")}
-                                </div>
-                                <span className="font-mono text-[9px] text-zinc-500 tracking-widest font-bold uppercase block">
-                                  {proj.tagline}
-                                </span>
-                              </div>
-
-                              <div className="space-y-1.5">
-                                <h3 className="text-lg font-bold text-white group-hover:text-[#A78BFA] transition-colors leading-snug">
-                                  {proj.title}
-                                </h3>
-                                <p className="text-[11px] font-mono text-[#8B5CF6] leading-tight font-semibold italic">
-                                  {proj.subtitle}
-                                </p>
-                              </div>
-
-                              <p className="text-xs text-[#A39DBE] leading-relaxed font-normal">
-                                {proj.description}
-                              </p>
-
-                              <div className="flex flex-wrap gap-1.5 pt-1">
-                                {proj.tags.map(tag => (
-                                  <span key={tag} className="px-2 py-0.5 bg-[#14122C] text-[#A39DBE] rounded-none text-[8px] font-mono uppercase border border-[#232047]">
-                                    {tag}
-                                  </span>
-                                ))}
-                              </div>
-                            </div>
-
-                            {/* Stat Badge & Action Buttons */}
-                            <div className="mt-6 pt-4 border-t border-[#1C1A3A] flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 text-left">
-                              <div className="space-y-0.5">
-                                <span className="text-[8px] font-mono text-zinc-500 uppercase block select-none">BENCH CALCULATION:</span>
-                                <span className="text-xs font-bold text-emerald-400 font-mono tracking-tight">{proj.scientificMetric}</span>
-                              </div>
-
-                              <div className="flex flex-wrap gap-2 w-full sm:w-auto">
-                                {proj.interactiveType ? (
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      setSelectedProjectId(proj.id);
-                                    }}
-                                    className="px-3.5 py-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-mono text-[9px] uppercase font-black border border-transparent shadow-lg tracking-wide hover:shadow-emerald-500/20 cursor-pointer transition-all"
-                                  >
-                                    Launch Simulator
-                                  </button>
-                                ) : (
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      setSelectedProjectId(proj.id);
-                                    }}
-                                    className="px-3.5 py-1.5 bg-[#17143A] hover:bg-[#1E1A4A] text-zinc-300 font-mono text-[9px] uppercase font-black border border-[#2D2A5E] tracking-wide cursor-pointer transition-all"
-                                  >
-                                    Verify Metrics
-                                  </button>
-                                )}
-
-                                {proj.githubUrl && (
-                                  <a
-                                    href={proj.githubUrl}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    onClick={(e) => e.stopPropagation()}
-                                    className="px-2.5 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-white font-mono text-[9px] uppercase border border-zinc-700 font-bold tracking-wide"
-                                  >
-                                    GitHub
-                                  </a>
-                                )}
-                              </div>
-                            </div>
-
-                          </motion.div>
-                        </div>
-
-                        {/* Hidden balancing column on opposite side on desktop to ensure perfect zig-zag spacing */}
-                        <div className="hidden md:block w-[46%] pointer-events-none" />
-                      </motion.div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* 3. ACTIVE SIMULATOR LAB DECK MODULE AREA */}
-              <div className="pt-8 border-t border-[#1E1C38] text-left">
-                <div className="mb-6 space-y-1.5">
-                  <div className="inline-flex items-center gap-2 px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/20 text-[9px] font-mono text-emerald-400 font-semibold uppercase">
-                    PRODUCE VERIFIED BIOMARKERS DATA
-                  </div>
-                  <h3 className="font-display text-xl font-bold text-white uppercase tracking-tight font-sans">
-                    Active Interactive Lab Console
-                  </h3>
-                  <p className="text-xs text-zinc-400 font-normal">
-                    Displaying telemetry streams for: <strong className="text-emerald-400 font-mono uppercase">{currentProject.title}</strong>
-                  </p>
-                </div>
-
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    key={selectedProjectId}
-                    initial={{ opacity: 0, scale: 0.98, y: 10 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.98, y: -10 }}
-                    transition={{ duration: 0.4 }}
-                  >
-                    {/* Render Interactive custom simulations for non-interactive types, otherwise load complex equipment logs */}
-                    {['proj-sequencer', 'proj-bioreactor', 'proj-lims'].includes(selectedProjectId) ? (
-                      <>
-                        {selectedProjectId === 'proj-sequencer' && (
-                          <DNASequencer scientificMetric={currentProject.scientificMetric} />
-                        )}
-                        {selectedProjectId === 'proj-bioreactor' && (
-                          <BioreactorMonitor scientificMetric={currentProject.scientificMetric} />
-                        )}
-                        {selectedProjectId === 'proj-lims' && (
-                          <LIMSTracker scientificMetric={currentProject.scientificMetric} />
-                        )}
-                      </>
-                    ) : (
-                      <PipelineConsole 
-                        projectId={selectedProjectId} 
-                        scientificMetric={currentProject.scientificMetric} 
-                      />
-                    )}
-                  </motion.div>
-                </AnimatePresence>
-              </div>
-
-            </div>
+          <SectionGateWrapper id="ai_tools" name="AI Tools Expertise">
+            <AIToolsExpertise />
           </SectionGateWrapper>
         </motion.section>
 

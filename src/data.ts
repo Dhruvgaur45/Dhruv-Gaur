@@ -195,45 +195,5 @@ export const PROJECTS: BiotechProject[] = [
     scientificMetric: 'Latency Reduction: 15x / Bandwidth Opt',
     lifecycle: 'Research',
     stage: 4
-  },
-  {
-    id: 'portfolio-web',
-    title: 'Biotechnology Portfolio Website',
-    subtitle: 'Computational Aesthetics & Clinical Interactive Deck',
-    description: 'A polished academic and systems engineering profile featuring glassmorphism microplate grids, a real-time DNA sequencer interface, and an IoT culture telemetry suite.',
-    longDescription: 'Highly responsive, containerized React profile implementing Tailwind layouts, IntersectionObserver scroll spies, server-side secure admin routes, and full local persistence using state synchronizing logic.',
-    iconName: 'globe',
-    tagline: 'SYSTEMS COMPILATION',
-    tags: ['React', 'Vite', 'Tailwind CSS', 'DNA Animation', 'Framer Motion'],
-    scientificMetric: 'Page Load Performance: Class A',
-    lifecycle: 'Stable',
-    stage: 5
-  },
-  {
-    id: 'proj-lims',
-    title: 'LIMS Plate Mapper 96',
-    subtitle: '96-Well Plate Storage Assay Grid & Sample Chain-of-Custody',
-    description: 'Dynamic assay visualizer displaying well dilutions, temperature safety gradients, sample barcodes, and high-content screening plate mapping.',
-    longDescription: 'High-density microplate software used to catalog PCR mixtures, barcode batches, and manage cold-room storage shelf indices recursively.',
-    iconName: 'gauge',
-    tagline: 'LAB AUTOMATION',
-    tags: ['96-Well layouts', 'Assay dilutions', 'Barcode validation', 'Interactive CSV Export'],
-    scientificMetric: 'Assay Precision: CV < 2.3%',
-    interactiveType: 'lims',
-    lifecycle: 'Alpha',
-    stage: 5
-  },
-  {
-    id: 'civicalert-app',
-    title: 'CivicAlert Public Complaint App',
-    subtitle: 'High-Integrity Citizen Reporting & Dynamic Telemetry Logging',
-    description: 'High-integrity citizens logging dashboard facilitating public transparency, state agency routing, dynamic priority queueing, and geotagged incident telemetry.',
-    longDescription: 'Designed a beautiful administrative and user routing flow that allows public users to register local concerns, assigns geotags, computes priority scores automatically, and relays actions to specialized maintenance divisions.',
-    iconName: 'alert-triangle',
-    tagline: 'CIVIC TECHNOLOGY',
-    tags: ['Geolocations', 'Admin Dashboards', 'Priority Routing', 'Secure Inputs'],
-    scientificMetric: 'Resolution SLA Target: <24 Hours',
-    lifecycle: 'Completed',
-    stage: 5
   }
 ];

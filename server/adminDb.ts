@@ -120,6 +120,7 @@ const initialTabs: TabStatus[] = [
   { id: "projects", name: "Interactive Projects", status: "Active", reason: "", startTime: "", endTime: "", message: "" },
   { id: "github", name: "GitHub Integration", status: "Active", reason: "", startTime: "", endTime: "", message: "" },
   { id: "traffic", name: "Traffic Console", status: "Active", reason: "", startTime: "", endTime: "", message: "" },
+  { id: "ai_tools", name: "AI Tools Expertise", status: "Active", reason: "", startTime: "", endTime: "", message: "" },
   { id: "planner", name: "Lab Planner", status: "Active", reason: "", startTime: "", endTime: "", message: "" },
   { id: "contact", name: "Contact Hub", status: "Active", reason: "", startTime: "", endTime: "", message: "" }
 ];

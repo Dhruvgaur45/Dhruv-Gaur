@@ -1,0 +1,119 @@
+[
+  {
+    "id": "welcome",
+    "name": "Welcome Portal",
+    "status": "Active",
+    "reason": "",
+    "startTime": "",
+    "endTime": "",
+    "message": ""
+  },
+  {
+    "id": "intro",
+    "name": "Intro Summary",
+    "status": "Active",
+    "reason": "",
+    "startTime": "",
+    "endTime": "",
+    "message": ""
+  },
+  {
+    "id": "skills",
+    "name": "Core Skills",
+    "status": "Active",
+    "reason": "",
+    "startTime": "",
+    "endTime": "",
+    "message": ""
+  },
+  {
+    "id": "experience",
+    "name": "Experience Timeline",
+    "status": "Active",
+    "reason": "",
+    "startTime": "",
+    "endTime": "",
+    "message": ""
+  },
+  {
+    "id": "certifications",
+    "name": "Certifications",
+    "status": "Active",
+    "reason": "",
+    "startTime": "",
+    "endTime": "",
+    "message": ""
+  },
+  {
+    "id": "research",
+    "name": "Active Research",
+    "status": "Active",
+    "reason": "",
+    "startTime": "",
+    "endTime": "",
+    "message": ""
+  },
+  {
+    "id": "research_map",
+    "name": "Research Map",
+    "status": "Active",
+    "reason": "",
+    "startTime": "",
+    "endTime": "",
+    "message": ""
+  },
+  {
+    "id": "projects",
+    "name": "Interactive Projects",
+    "status": "Active",
+    "reason": "",
+    "startTime": "",
+    "endTime": "",
+    "message": ""
+  },
+  {
+    "id": "github",
+    "name": "GitHub Integration",
+    "status": "Active",
+    "reason": "",
+    "startTime": "",
+    "endTime": "",
+    "message": ""
+  },
+  {
+    "id": "traffic",
+    "name": "Traffic Console",
+    "status": "Active",
+    "reason": "",
+    "startTime": "",
+    "endTime": "",
+    "message": ""
+  },
+  {
+    "id": "ai_tools",
+    "name": "AI Tools Expertise",
+    "status": "Active",
+    "reason": "",
+    "startTime": "",
+    "endTime": "",
+    "message": ""
+  },
+  {
+    "id": "planner",
+    "name": "Lab Planner",
+    "status": "Active",
+    "reason": "",
+    "startTime": "",
+    "endTime": "",
+    "message": ""
+  },
+  {
+    "id": "contact",
+    "name": "Contact Hub",
+    "status": "Active",
+    "reason": "",
+    "startTime": "",
+    "endTime": "",
+    "message": ""
+  }
+]
