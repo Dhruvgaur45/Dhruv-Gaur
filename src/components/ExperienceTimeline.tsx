@@ -33,6 +33,26 @@ export interface ExperienceItem {
 
 const EXPERIENCE_DATA: ExperienceItem[] = [
   {
+    id: 'exp-techfest-iitb',
+    company: 'Techfest, IIT Bombay',
+    role: 'Campus Ambassador',
+    duration: 'June 2026 – Present',
+    periodText: 'Currently Active',
+    location: 'IIT Bombay, Mumbai, India',
+    type: 'professional',
+    badge: 'Campus Leadership / Student Ambassador',
+    description: 'Serving as a Campus Ambassador for Techfest, IIT Bombay, representing and promoting one of Asia’s leading science and technology festivals. Supporting student outreach, event promotion, community engagement, and communication of Techfest opportunities within the university network.',
+    skillsAcquired: ['Campus Branding', 'Digital Outreach', 'Event Promotion', 'Community Engagement', 'Leadership Communication'],
+    keyHighlights: [
+      'Promote Techfest events, competitions, workshops, and initiatives among students.',
+      'Increase student awareness and participation through digital outreach and campus networking.',
+      'Share official announcements and registration opportunities.',
+      'Connect interested students with relevant Techfest programs.',
+      'Support the promotion of innovation, science, technology, and entrepreneurship.',
+      'Represent Techfest professionally within the university community.'
+    ]
+  },
+  {
     id: 'exp-veterans-india',
     company: 'Veterans India',
     role: 'PATRIOTIC YOUTH AMBASSADOR',
@@ -155,7 +175,7 @@ const EXPERIENCE_DATA: ExperienceItem[] = [
 
 export default function ExperienceTimeline() {
   const [activeFilter, setActiveFilter] = useState<'all' | 'professional' | 'academic' | 'volunteering' | 'schooling'>('all');
-  const [expandedId, setExpandedId] = useState<string | null>('exp-veterans-india');
+  const [expandedId, setExpandedId] = useState<string | null>('exp-techfest-iitb');
 
   const filteredItems = EXPERIENCE_DATA.filter(item => {
     return activeFilter === 'all' || item.type === activeFilter;
@@ -222,7 +242,7 @@ export default function ExperienceTimeline() {
           <div className="h-8 w-[1px] bg-[#1A1A1A]/10" />
           <div className="space-y-1 text-left">
             <span className="text-[8px] text-brand-text-muted tracking-widest block uppercase font-bold">COMMITTED STATIONS</span>
-            <span className="text-2xl font-black text-brand-accent tracking-tight">7 <span className="text-xs font-semibold text-brand-text-muted">PLACES</span></span>
+            <span className="text-2xl font-black text-brand-accent tracking-tight">8 <span className="text-xs font-semibold text-brand-text-muted">PLACES</span></span>
           </div>
         </div>
       </div>
@@ -245,7 +265,7 @@ export default function ExperienceTimeline() {
                   setActiveFilter(tab.id as any);
                   setExpandedId(null);
                 }}
-                className={`py-1.5 px-3.5 font-mono text-[9px] tracking-wider uppercase font-black transition-all cursor-pointer border ${
+                className={`py-1.5 px-3.5 font-sans text-[9px] tracking-wider uppercase font-black transition-all cursor-pointer border ${
                   activeFilter === tab.id
                     ? 'bg-[#1A1A1A] text-white border-[#1A1A1A]'
                     : 'bg-white text-brand-text-muted border-[#1A1A1A]/10 hover:border-[#1A1A1A]/30 hover:text-[#1A1A1A]'
@@ -277,11 +297,19 @@ export default function ExperienceTimeline() {
                 animate={{ opacity: 1, x: 0, y: 0 }}
                 exit={{ opacity: 0, x: 15 }}
                 transition={{ duration: 0.35, delay: index * 0.05 }}
-                className={`bg-white border-2 border-[#1A1A1A]/10 border-l-4 ${style.border} hover:border-[#1A1A1A]/30 p-6 shadow-xs relative transition-all group`}
+                className={`border-2 border-l-4 ${style.border} p-6 relative transition-all group duration-300
+                  ${item.id === 'exp-techfest-iitb'
+                    ? 'bg-gradient-to-br from-amber-500/[0.03] via-white/95 to-blue-500/[0.03] border-amber-500/30 hover:border-amber-500/50 shadow-[0_4px_25px_rgba(217,119,6,0.06)] hover:shadow-[0_12px_40px_rgba(217,119,6,0.12)] hover:-translate-y-1'
+                    : 'bg-white border-[#1A1A1A]/10 hover:border-[#1A1A1A]/30 shadow-xs hover:-translate-y-0.5'
+                  }`}
               >
                 {/* TIMELINE POINT CIRCLE DETECTOR */}
-                <div className="absolute -left-[33px] md:-left-[41px] top-7 w-4.5 h-4.5 rounded-full bg-[#FAFAF9] border-2 border-[#1A1A1A] p-0.5 z-10 shadow-xs flex items-center justify-center">
-                  <div className={`w-2 h-2 rounded-full ${style.dot} animate-pulse`} />
+                <div className={`absolute -left-[33px] md:-left-[41px] top-7 w-4.5 h-4.5 rounded-full bg-[#FAFAF9] border-2 p-0.5 z-10 shadow-xs flex items-center justify-center transition-all duration-300 ${
+                  item.id === 'exp-techfest-iitb'
+                    ? 'border-[#D97706] group-hover:scale-125'
+                    : 'border-[#1A1A1A]'
+                }`}>
+                  <div className={`w-2 h-2 rounded-full ${style.dot} ${item.id === 'exp-techfest-iitb' ? 'animate-ping' : 'animate-pulse'}`} />
                 </div>
 
                 {/* CARD BODY CONTENT */}
@@ -299,7 +327,10 @@ export default function ExperienceTimeline() {
                         </span>
                       </div>
                       
-                      <h3 className="font-sans font-black text-lg text-[#1A1A1A] leading-tight group-hover:text-brand-accent transition-colors duration-200">
+                      <h3 className="font-sans font-black text-lg text-[#1A1A1A] leading-tight group-hover:text-brand-accent transition-colors duration-200 flex items-center gap-2">
+                        {item.id === 'exp-techfest-iitb' && (
+                          <Award className="w-5 h-5 text-amber-600 shrink-0" />
+                        )}
                         {item.role}
                       </h3>
                     </div>

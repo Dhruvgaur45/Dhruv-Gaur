@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,100..900;1,100..900&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@500;600;700&display=swap');
 @import "tailwindcss";
 
 :root {
@@ -9,6 +9,10 @@
   --brand-border: rgba(13, 148, 136, 0.12);
   --brand-text: #1E293B;
   --brand-text-muted: #57657A;
+
+  --font-heading: 'Space Grotesk', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --font-technical: 'IBM Plex Mono', monospace;
 }
 
 .dark {
@@ -23,9 +27,9 @@
 
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Hanken Grotesk", sans-serif;
-  --font-serif: "Playfair Display", Georgia, serif;
-  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  --font-display: "Space Grotesk", sans-serif;
+  --font-serif: "Space Grotesk", Georgia, serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
 
   --color-brand-bg: var(--brand-bg);
   --color-brand-surface: var(--brand-surface);
@@ -41,6 +45,37 @@
     scroll-behavior: smooth;
     background-color: var(--brand-bg);
     color: var(--brand-text);
+    font-family: var(--font-sans);
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  body {
+    font-family: var(--font-sans);
+    font-weight: 400;
+    line-height: 1.6;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+  h1 {
+    font-size: clamp(2.3rem, 5vw, 4.8rem);
+    line-height: 1.08;
+  }
+  h2 {
+    font-size: clamp(1.8rem, 3.5vw, 3rem);
+    line-height: 1.15;
+  }
+  p {
+    font-size: clamp(1rem, 1.2vw, 1.1rem);
+    line-height: 1.7;
+  }
+  button, nav, a {
+    font-family: var(--font-sans);
+    font-weight: 500;
+  }
+  .code, .sequence, .data-value, .scientific-label, .technical-tag {
+    font-family: var(--font-mono);
   }
 }
 

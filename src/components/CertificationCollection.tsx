@@ -382,7 +382,7 @@ export default function CertificationCollection() {
                 key={tab.id}
                 type="button"
                 onClick={() => setFilter(tab.id as any)}
-                className={`py-1.5 px-3.5 font-mono text-[9px] tracking-wider uppercase font-black transition-all cursor-pointer border ${
+                className={`py-1.5 px-3.5 font-sans text-[9px] tracking-wider uppercase font-black transition-all cursor-pointer border ${
                   filter === tab.id
                     ? 'bg-[#1A1A1A] text-white border-[#1A1A1A]'
                     : 'bg-white text-brand-text-muted border-[#1A1A1A]/10 hover:border-[#1A1A1A]/30 hover:text-[#1A1A1A]'

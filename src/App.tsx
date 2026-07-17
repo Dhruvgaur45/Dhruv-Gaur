@@ -38,7 +38,8 @@ import {
   AlertTriangle,
   Workflow,
   Sun,
-  Moon
+  Moon,
+  X
 } from 'lucide-react';
 
 // Data and components
@@ -148,6 +149,10 @@ export default function App() {
   
   // Copyright Notice Modal State
   const [showCopyrightModal, setShowCopyrightModal] = useState(true);
+
+  // Floating Achievement Badge State
+  const [isFloatingDismissed, setIsFloatingDismissed] = useState(false);
+  const [isFloatingHovered, setIsFloatingHovered] = useState(false);
 
   // Patriotic Youth Ambassador Modal State
   const [showAmbassadorModal, setShowAmbassadorModal] = useState(false);
@@ -790,13 +795,13 @@ export default function App() {
           {/* Logo brand */}
           <button 
             onClick={() => scrollTo('welcome')} 
-            className="cursor-pointer hover:opacity-85 transition-opacity duration-200 flex items-center font-bold text-lg text-brand-text"
+            className="cursor-pointer hover:opacity-85 transition-opacity duration-200 flex items-center font-display font-bold text-lg text-brand-text"
           >
             Dhruv Gaur
           </button>
 
           {/* Links Center */}
-          <nav className="hidden lg:flex items-center h-full gap-6 xl:gap-8 text-[10px] font-mono font-semibold text-brand-text-muted uppercase tracking-widest">
+          <nav className="hidden lg:flex items-center h-full gap-6 xl:gap-8 text-[11px] font-sans font-semibold text-brand-text-muted uppercase tracking-wider">
             {['welcome', 'intro', 'skills', 'experience', 'certifications', 'research', 'research_map', 'ai_tools', 'planner', 'contact', 'admin'].map((sect) => (
                 <button
                   key={sect}
@@ -834,7 +839,7 @@ export default function App() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => scrollTo('contact')}
-              className="px-5 py-2 bg-brand-accent text-white font-mono text-[10px] uppercase font-bold tracking-widest transition-all rounded-full cursor-pointer"
+              className="px-5 py-2 bg-brand-accent text-white font-display text-[11px] uppercase font-bold tracking-wider transition-all rounded-full cursor-pointer"
             >
               LET'S TALK
             </motion.button>
@@ -895,7 +900,7 @@ export default function App() {
                 whileHover={{ scale: 1.05, y: -2 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => scrollTo('skills')}
-                className="bg-gradient-to-r from-[#8B5CF6] to-[#6366F1] hover:from-[#A78BFA] hover:to-[#8B5CF6] text-white font-mono font-bold text-xs tracking-widest px-8 py-4 transition-all cursor-pointer border-none shadow-[0_4px_20px_rgba(139,92,246,0.3)] hover:shadow-[0_4px_25px_rgba(139,92,246,0.45)] duration-300"
+                className="bg-gradient-to-r from-[#8B5CF6] to-[#6366F1] hover:from-[#A78BFA] hover:to-[#8B5CF6] text-white font-display font-bold text-xs tracking-widest px-8 py-4 transition-all cursor-pointer border-none shadow-[0_4px_20px_rgba(139,92,246,0.3)] hover:shadow-[0_4px_25px_rgba(139,92,246,0.45)] duration-300"
               >
                 EXPLORE SKILLS
               </motion.button>
@@ -903,7 +908,7 @@ export default function App() {
                 whileHover={{ scale: 1.05, y: -2, borderColor: '#A78BFA' }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => scrollTo('intro')}
-                className="border border-[#8B5CF6]/30 hover:border-[#A78BFA] bg-[#0F0C23]/50 text-white font-mono font-bold text-xs tracking-widest px-8 py-4 transition-all hover:bg-[#8B5CF6]/10 cursor-pointer duration-300 backdrop-blur-sm"
+                className="border border-[#8B5CF6]/30 hover:border-[#A78BFA] bg-[#0F0C23]/50 text-white font-display font-bold text-xs tracking-widest px-8 py-4 transition-all hover:bg-[#8B5CF6]/10 cursor-pointer duration-300 backdrop-blur-sm"
               >
                 ENGINEERING PROFILE
               </motion.button>
@@ -2500,6 +2505,118 @@ export default function App() {
               </div>
             </motion.div>
           </div>
+        )}
+      </AnimatePresence>
+
+      {/* Floating Achievement Badge / Tab */}
+      <AnimatePresence>
+        {!isFloatingDismissed && (
+          <motion.div
+            initial={{ opacity: 0, x: 50, scale: 0.9 }}
+            animate={{ 
+              opacity: 1, 
+              x: 0, 
+              scale: 1,
+              y: isFloatingHovered ? 0 : [0, -6, 0]
+            }}
+            exit={{ opacity: 0, x: 100, scale: 0.9 }}
+            transition={{
+              y: {
+                repeat: isFloatingHovered ? 0 : Infinity,
+                duration: 4,
+                ease: "easeInOut"
+              },
+              opacity: { duration: 0.3 },
+              x: { duration: 0.3 }
+            }}
+            onMouseEnter={() => setIsFloatingHovered(true)}
+            onMouseLeave={() => setIsFloatingHovered(false)}
+            onFocus={() => setIsFloatingHovered(true)}
+            onBlur={() => setIsFloatingHovered(false)}
+            className="fixed z-50 transition-all duration-300
+              bottom-6 right-6 max-w-[280px]
+              md:bottom-auto md:top-1/2 md:-translate-y-1/2 md:right-6 md:max-w-[250px]"
+          >
+            <div 
+              role="button"
+              tabIndex={0}
+              aria-label="Campus Ambassador - Techfest, IIT Bombay. Click to view Experience section."
+              onClick={() => scrollTo('experience')}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  scrollTo('experience');
+                }
+              }}
+              className="relative block w-full text-left cursor-pointer select-none group focus:outline-none"
+            >
+              {/* Golden and Blue Aura/Glow */}
+              <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-[#D97706]/10 to-[#2563EB]/10 blur-xl group-hover:from-[#D97706]/20 group-hover:to-[#2563EB]/20 transition-all duration-300" />
+              
+              {/* Card Container with Glassmorphism */}
+              <div className="relative overflow-hidden rounded-xl border p-3.5 backdrop-blur-md transition-all duration-300
+                bg-white/80 border-[#D97706]/20 shadow-[0_4px_20px_rgba(217,119,6,0.08)]
+                dark:bg-[#0A071E]/80 dark:border-[#2563EB]/25 dark:shadow-[0_4px_30px_rgba(37,99,235,0.12)]
+                group-hover:border-[#D97706]/45 dark:group-hover:border-[#2563EB]/45"
+              >
+                {/* Accent vertical sidebar line */}
+                <div className="absolute top-0 bottom-0 left-0 w-1 bg-gradient-to-b from-[#D97706] to-[#2563EB]" />
+
+                {/* Dismiss X Button */}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsFloatingDismissed(true);
+                  }}
+                  aria-label="Dismiss achievement badge"
+                  className="absolute top-2 right-2 p-1 rounded-full text-zinc-400 hover:text-zinc-900 dark:text-zinc-500 dark:hover:text-zinc-200 transition-colors bg-zinc-100/50 dark:bg-zinc-900/60 hover:bg-zinc-200 dark:hover:bg-zinc-800 focus:outline-none"
+                >
+                  <X className="w-2.5 h-2.5" />
+                </button>
+
+                <div className="flex gap-3 pl-1">
+                  {/* Glowing Award Icon */}
+                  <div className="relative flex items-center justify-center shrink-0">
+                    <div className="absolute inset-0 rounded-full bg-[#D97706]/20 blur-sm animate-pulse" />
+                    <div className="relative w-8 h-8 rounded-full flex items-center justify-center border border-[#D97706]/30 bg-[#D97706]/10 text-[#D97706] dark:text-[#FBBF24]">
+                      <Award className="w-4 h-4" />
+                    </div>
+                  </div>
+
+                  {/* Text Contents */}
+                  <div className="flex-1 min-w-0 pr-2">
+                    <span className="font-mono text-[8px] text-[#D97706] dark:text-[#FBBF24] tracking-widest font-black uppercase flex items-center gap-1">
+                      <span className="w-1 h-1 rounded-full bg-[#D97706] dark:bg-[#FBBF24]" />
+                      AMBASSADOR
+                    </span>
+                    <h4 className="text-xs font-extrabold text-zinc-900 dark:text-white uppercase tracking-tight leading-snug mt-0.5 font-sans">
+                      Campus Ambassador
+                    </h4>
+                    <p className="text-[10px] font-mono font-medium text-[#2563EB] dark:text-[#38BDF8] tracking-wide mt-0.5 leading-tight truncate">
+                      Techfest, IIT Bombay
+                    </p>
+
+                    {/* Smooth Expansion on Hover */}
+                    <AnimatePresence initial={false}>
+                      {isFloatingHovered && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0, marginTop: 0 }}
+                          animate={{ height: "auto", opacity: 1, marginTop: 6 }}
+                          exit={{ height: 0, opacity: 0, marginTop: 0 }}
+                          transition={{ duration: 0.25, ease: "easeInOut" }}
+                          className="overflow-hidden"
+                        >
+                          <p className="text-[10px] text-zinc-600 dark:text-[#A39DBE] leading-normal border-t border-zinc-100 dark:border-[#232047] pt-1.5 font-sans">
+                            Representing and promoting Asia’s largest science and technology festival.
+                          </p>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
         )}
       </AnimatePresence>
 

@@ -316,7 +316,7 @@ export default function AIToolsExpertise() {
           <button
             key={cat}
             onClick={() => setActiveTab(cat)}
-            className={`px-4 py-1.5 text-[9px] font-mono uppercase tracking-wider rounded-full border transition-all duration-300 cursor-pointer flex items-center gap-1.5 ${
+            className={`px-4 py-1.5 text-[9px] font-sans uppercase tracking-wider rounded-full border transition-all duration-300 cursor-pointer flex items-center gap-1.5 ${
               activeTab === cat
                 ? 'bg-brand-accent border-brand-accent text-brand-bg font-bold shadow-[0_0_12px_rgba(0,242,254,0.4)]'
                 : 'bg-brand-surface-card border-white/5 text-brand-text-muted hover:text-brand-text hover:border-brand-accent/30'

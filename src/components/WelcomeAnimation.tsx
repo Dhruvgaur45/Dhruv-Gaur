@@ -204,7 +204,7 @@ export default function WelcomeAnimation({ onComplete }: WelcomeAnimationProps) 
             transition={{ delay: 0.4, duration: 0.7 }}
             className="space-y-3"
           >
-            <h1 className="text-3xl md:text-4xl font-extrabold tracking-[0.2em] uppercase bg-gradient-to-r from-white via-cyan-400 to-white bg-clip-text text-transparent px-2 leading-none">
+            <h1 className="font-display text-3xl md:text-4xl font-extrabold tracking-[0.2em] uppercase bg-gradient-to-r from-white via-cyan-400 to-white bg-clip-text text-transparent px-2 leading-none">
               DHRUV GAUR
             </h1>
             
