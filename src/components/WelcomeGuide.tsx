@@ -21,7 +21,7 @@ export default function WelcomeGuide({ autoStartDelay = 800 }: WelcomeGuideProps
   const sentences = [
     "Welcome! I am your portfolio guide.",
     "Let me introduce Dhruv Gaur, a biotechnology student at Sharda University, passionate about bioinformatics, artificial intelligence, and genetic engineering.",
-    "As an active learner, Dhruv is a Techfest Campus Ambassador for IIT Bombay and participant in LEAF 2026 by Biotecnika.",
+    "Dhruv currently serves as a Campus Ambassador at SmartED, Techfest Campus Ambassador for IIT Bombay, and participant in LEAF 2026 by Biotecnika.",
     "He regularly leverages machine learning algorithms to map computational solutions for life sciences.",
     "He invites you to explore his Interactive DNA Sequencer, Microscopic bioreactor telemetries, and clinical tools.",
     "Enjoy this journey where biology meets coding!"

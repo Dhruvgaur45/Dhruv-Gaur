@@ -140,7 +140,9 @@ export const PROJECTS: BiotechProject[] = [
     tags: ['RNA-seq', 'Next-Gen Sequencing', 'FastQC', 'DESeq2 Alignment', 'DGE analysis'],
     scientificMetric: 'Q30 Base Score Quality: >96.8%',
     lifecycle: 'Completed',
-    stage: 1
+    stage: 1,
+    githubUrl: 'https://github.com/Dhruvgaur45/Dhruv-Gaur',
+    liveUrl: '#'
   },
   {
     id: 'proj-sequencer',
@@ -154,7 +156,24 @@ export const PROJECTS: BiotechProject[] = [
     scientificMetric: 'Ribosomal Translation Rate: 20 bases/sec',
     interactiveType: 'sequencer',
     lifecycle: 'Stable',
-    stage: 2
+    stage: 2,
+    githubUrl: 'https://github.com/Dhruvgaur45/Dhruv-Gaur',
+    liveUrl: '#'
+  },
+  {
+    id: 'proj-patient-monitor',
+    title: 'AI-Powered Patient Vital Monitor',
+    subtitle: 'Intelligent Real-Time Anomaly Detection & Clinical Alerts',
+    description: 'An AI-powered patient monitoring system that parses live physiological streams (ECG, SpO2, Heart Rate) to predict clinical deterioration.',
+    longDescription: 'Processes continuous multi-channel patient vitals with light-weight LSTM recurrent neural network models to flag impending vasoactive crises. Features real-time visual streams and secure clinical telemetry feeds.',
+    iconName: 'cpu',
+    tagline: 'HEALTHCARE INNOVATION',
+    tags: ['LSTM Recurrent Nets', 'Patient Vitals', 'Signal Processing', 'Predictive Alerting'],
+    scientificMetric: 'Crisis Warning Lead Time: 45 min',
+    lifecycle: 'Stable',
+    stage: 2,
+    githubUrl: 'https://github.com/Dhruvgaur45/Dhruv-Gaur',
+    liveUrl: '#'
   },
   {
     id: 'linkedin-creator',
@@ -167,7 +186,9 @@ export const PROJECTS: BiotechProject[] = [
     tags: ['Generative AI', 'LLM Fine-tuning', 'Scientific Copywriting', 'LinkedIn APIs'],
     scientificMetric: 'Research Summary Accuracy: 99.1%',
     lifecycle: 'Prototype',
-    stage: 3
+    stage: 3,
+    githubUrl: 'https://github.com/Dhruvgaur45/Dhruv-Gaur',
+    liveUrl: '#'
   },
   {
     id: 'proj-bioreactor',
@@ -181,7 +202,24 @@ export const PROJECTS: BiotechProject[] = [
     scientificMetric: 'Culture Viability Index: 98.4%',
     interactiveType: 'bioreactor',
     lifecycle: 'Beta',
-    stage: 3
+    stage: 3,
+    githubUrl: 'https://github.com/Dhruvgaur45/Dhruv-Gaur',
+    liveUrl: '#'
+  },
+  {
+    id: 'proj-civic-alert',
+    title: 'Civic Bio-Alert & Safety Dispatch',
+    subtitle: 'Automated Community Pathogen Alerting & Ticket Routing Node',
+    description: 'A civic alert platform built to route waste-water bio-sentinel alarms and community environmental risk logs directly to municipal responders.',
+    longDescription: 'Connects municipal environmental safety teams with live biosensor streams. Uses a queue system and a priority-based ticket engine to track environmental pathogen spikes and community welfare tickets.',
+    iconName: 'shield',
+    tagline: 'CIVIC SAFETY NODE',
+    tags: ['Queue management', 'Bio-sentinels', 'Priority router', 'React-Leaflet Map'],
+    scientificMetric: 'Mean Ticket Dispatch: <12 sec',
+    lifecycle: 'Beta',
+    stage: 3,
+    githubUrl: 'https://github.com/Dhruvgaur45/Dhruv-Gaur',
+    liveUrl: '#'
   },
   {
     id: 'silicon-processors',
@@ -194,6 +232,8 @@ export const PROJECTS: BiotechProject[] = [
     tags: ['Silicon Photonics', 'HPC Clusters', 'Genomic Compute', 'Smith-Waterman Alignment'],
     scientificMetric: 'Latency Reduction: 15x / Bandwidth Opt',
     lifecycle: 'Research',
-    stage: 4
+    stage: 4,
+    githubUrl: 'https://github.com/Dhruvgaur45/Dhruv-Gaur',
+    liveUrl: '#'
   }
 ];

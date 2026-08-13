@@ -24,7 +24,7 @@ export interface ExperienceItem {
   duration: string;
   periodText: string;
   location: string;
-  type: 'professional' | 'academic' | 'volunteering' | 'schooling';
+  type: 'professional' | 'academic' | 'volunteering' | 'schooling' | 'sih-lead';
   badge: string;
   description: string;
   skillsAcquired: string[];
@@ -32,6 +32,43 @@ export interface ExperienceItem {
 }
 
 const EXPERIENCE_DATA: ExperienceItem[] = [
+  {
+    id: 'exp-sih-2026-lead',
+    company: 'Smart India Hackathon (SIH) 2026',
+    role: 'SIH 2026 Team Lead',
+    duration: 'July 2026 – Present',
+    periodText: 'National Hackathon Leadership',
+    location: 'Ministry of Education, Govt of India',
+    type: 'sih-lead',
+    badge: 'SIH 2026 Team Leader',
+    description: 'Selected as the Team Lead representing Sharda University for the prestigious Smart India Hackathon (SIH) 2026. Heading a high-performance multidisciplinary cohort to architect and present advanced software prototypes targeting core national healthcare and diagnostic challenges.',
+    skillsAcquired: ['Team Leadership', 'Full-stack System Architecture', 'Agile Product Management', 'Rapid Prototyping', 'Government Challenge Mapping'],
+    keyHighlights: [
+      'Directing a team of engineers, designers, and domain specialists to construct impactful biotechnology and healthcare platforms.',
+      'Designed real-time responsive workflows including priority alerts and ticket-dispatch mechanisms for bio-sensor telemetry.',
+      'Supervising system specifications, hardware-software integration layouts, and developer sandbox environments.',
+      'Structuring end-to-end pitches and functional product demonstrations for government evaluation panels.'
+    ]
+  },
+  {
+    id: 'exp-smarted-ca',
+    company: 'SmartED',
+    role: 'Campus Ambassador',
+    duration: 'Currently (Present)',
+    periodText: 'Present',
+    location: 'Campus Outreach Network',
+    type: 'professional',
+    badge: 'Current Role',
+    description: 'Serving as a Campus Ambassador at SmartED, helping connect students with educational opportunities while strengthening leadership, communication, and community engagement skills. Promoting learning programs, webinars, and academic initiatives across university student communities.',
+    skillsAcquired: ['Campus Outreach', 'Educational Initiatives', 'Student Leadership', 'Community Engagement', 'Resource Communication'],
+    keyHighlights: [
+      'Represent SmartED on campus.',
+      'Promote educational initiatives and learning opportunities.',
+      'Organize and support student engagement activities.',
+      'Build awareness of SmartED programs.',
+      'Connect students with educational resources and events.'
+    ]
+  },
   {
     id: 'exp-techfest-iitb',
     company: 'Techfest, IIT Bombay',
@@ -174,7 +211,7 @@ const EXPERIENCE_DATA: ExperienceItem[] = [
 ];
 
 export default function ExperienceTimeline() {
-  const [activeFilter, setActiveFilter] = useState<'all' | 'professional' | 'academic' | 'volunteering' | 'schooling'>('all');
+  const [activeFilter, setActiveFilter] = useState<'all' | 'professional' | 'academic' | 'volunteering' | 'schooling' | 'sih-lead'>('all');
   const [expandedId, setExpandedId] = useState<string | null>('exp-techfest-iitb');
 
   const filteredItems = EXPERIENCE_DATA.filter(item => {
@@ -206,6 +243,12 @@ export default function ExperienceTimeline() {
           bg: 'bg-purple-500/5 text-purple-700 border-purple-500/20',
           dot: 'bg-purple-600',
           border: 'border-l-purple-500'
+        };
+      case 'sih-lead':
+        return {
+          bg: 'bg-rose-500/5 text-rose-700 border-rose-500/20',
+          dot: 'bg-rose-600',
+          border: 'border-l-rose-500'
         };
       default:
         return {
@@ -242,7 +285,7 @@ export default function ExperienceTimeline() {
           <div className="h-8 w-[1px] bg-[#1A1A1A]/10" />
           <div className="space-y-1 text-left">
             <span className="text-[8px] text-brand-text-muted tracking-widest block uppercase font-bold">COMMITTED STATIONS</span>
-            <span className="text-2xl font-black text-brand-accent tracking-tight">8 <span className="text-xs font-semibold text-brand-text-muted">PLACES</span></span>
+            <span className="text-2xl font-black text-brand-accent tracking-tight">10 <span className="text-xs font-semibold text-brand-text-muted">PLACES</span></span>
           </div>
         </div>
       </div>
@@ -253,10 +296,11 @@ export default function ExperienceTimeline() {
           <div className="flex flex-wrap items-center gap-2">
             {[
               { id: 'all', label: 'FULL DOSSIER' },
-              { id: 'professional', label: 'I. AMBASSADOR & WORK' },
-              { id: 'academic', label: 'II. UNDERGRAD ACADEMICS' },
-              { id: 'volunteering', label: 'III. LAB VOLUNTEERING' },
-              { id: 'schooling', label: 'IV. SCHOOLING & FOUNDATIONS' }
+              { id: 'sih-lead', label: 'I. SIH 2026 TEAM LEAD' },
+              { id: 'professional', label: 'II. AMBASSADOR & WORK' },
+              { id: 'academic', label: 'III. UNDERGRAD ACADEMICS' },
+              { id: 'volunteering', label: 'IV. LAB VOLUNTEERING' },
+              { id: 'schooling', label: 'V. SCHOOLING & FOUNDATIONS' }
             ].map(tab => (
               <button
                 key={tab.id}
@@ -298,18 +342,22 @@ export default function ExperienceTimeline() {
                 exit={{ opacity: 0, x: 15 }}
                 transition={{ duration: 0.35, delay: index * 0.05 }}
                 className={`border-2 border-l-4 ${style.border} p-6 relative transition-all group duration-300
-                  ${item.id === 'exp-techfest-iitb'
+                  ${item.id === 'exp-smarted-ca'
+                    ? 'bg-gradient-to-br from-indigo-500/[0.04] via-white/95 to-purple-500/[0.04] border-indigo-500/30 hover:border-indigo-500/50 shadow-[0_4px_25px_rgba(99,102,241,0.08)] hover:shadow-[0_12px_40px_rgba(99,102,241,0.15)] hover:-translate-y-1'
+                    : item.id === 'exp-techfest-iitb'
                     ? 'bg-gradient-to-br from-amber-500/[0.03] via-white/95 to-blue-500/[0.03] border-amber-500/30 hover:border-amber-500/50 shadow-[0_4px_25px_rgba(217,119,6,0.06)] hover:shadow-[0_12px_40px_rgba(217,119,6,0.12)] hover:-translate-y-1'
                     : 'bg-white border-[#1A1A1A]/10 hover:border-[#1A1A1A]/30 shadow-xs hover:-translate-y-0.5'
                   }`}
               >
                 {/* TIMELINE POINT CIRCLE DETECTOR */}
                 <div className={`absolute -left-[33px] md:-left-[41px] top-7 w-4.5 h-4.5 rounded-full bg-[#FAFAF9] border-2 p-0.5 z-10 shadow-xs flex items-center justify-center transition-all duration-300 ${
-                  item.id === 'exp-techfest-iitb'
+                  item.id === 'exp-smarted-ca'
+                    ? 'border-indigo-600 group-hover:scale-125'
+                    : item.id === 'exp-techfest-iitb'
                     ? 'border-[#D97706] group-hover:scale-125'
                     : 'border-[#1A1A1A]'
                 }`}>
-                  <div className={`w-2 h-2 rounded-full ${style.dot} ${item.id === 'exp-techfest-iitb' ? 'animate-ping' : 'animate-pulse'}`} />
+                  <div className={`w-2 h-2 rounded-full ${style.dot} ${item.id === 'exp-smarted-ca' || item.id === 'exp-techfest-iitb' ? 'animate-ping' : 'animate-pulse'}`} />
                 </div>
 
                 {/* CARD BODY CONTENT */}
@@ -328,6 +376,9 @@ export default function ExperienceTimeline() {
                       </div>
                       
                       <h3 className="font-sans font-black text-lg text-[#1A1A1A] leading-tight group-hover:text-brand-accent transition-colors duration-200 flex items-center gap-2">
+                        {item.id === 'exp-smarted-ca' && (
+                          <GraduationCap className="w-5 h-5 text-indigo-600 shrink-0" />
+                        )}
                         {item.id === 'exp-techfest-iitb' && (
                           <Award className="w-5 h-5 text-amber-600 shrink-0" />
                         )}
@@ -346,7 +397,11 @@ export default function ExperienceTimeline() {
                   {/* Company & Location Metadata Banner */}
                   <div className="flex flex-wrap items-center gap-4 text-[10px] font-mono text-[#1A1A1A]/70 font-semibold">
                     <span className="flex items-center gap-1.5">
-                      <Building2 className="w-3.5 h-3.5 text-brand-accent" />
+                      {item.id === 'exp-smarted-ca' ? (
+                        <GraduationCap className="w-3.5 h-3.5 text-indigo-600" />
+                      ) : (
+                        <Building2 className="w-3.5 h-3.5 text-brand-accent" />
+                      )}
                       <strong>{item.company}</strong>
                     </span>
                     <span className="text-[#1A1A1A]/20">•</span>

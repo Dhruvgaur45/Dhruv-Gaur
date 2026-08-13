@@ -56,11 +56,23 @@ import MicroscopeCellsBackground from './components/MicroscopeCellsBackground';
 import BioDataVizBackground from './components/BioDataVizBackground';
 import BiotechScheduler from './components/BiotechScheduler';
 import AIToolsExpertise from './components/AIToolsExpertise';
+import SmartEDSection from './components/SmartEDSection';
+import SmartEDPage from './components/smarted/SmartEDPage';
 import { HeroScene } from './components/HeroScene';
 import WelcomeAnimation from './components/WelcomeAnimation';
 import WelcomeGuide from './components/WelcomeGuide';
 import AdminPortal from './components/AdminPortal';
 import PipelineConsole from './components/PipelineConsole';
+import TiltCard3D from './components/3d/TiltCard3D';
+import MagneticButton3D from './components/3d/MagneticButton3D';
+import About3DCanvas from './components/3d/About3DCanvas';
+import Skills3DNetwork from './components/3d/Skills3DNetwork';
+import Projects3DCanvas from './components/3d/Projects3DCanvas';
+import Research3DLab from './components/3d/Research3DLab';
+import Experience3DCanvas from './components/3d/Experience3DCanvas';
+import Certifications3DCanvas from './components/3d/Certifications3DCanvas';
+import Contact3DCanvas from './components/3d/Contact3DCanvas';
+import Section3DTransition from './components/3d/Section3DTransition';
 
 // Framer Motion variants for core skills tag staggering
 const tagContainerVariants = {
@@ -162,6 +174,50 @@ export default function App() {
 
   // Academic Timeline Page State
   const [showTimelinePage, setShowTimelinePage] = useState(false);
+
+  // Standalone SmartED Page Route State
+  const [showSmartEDPage, setShowSmartEDPage] = useState(() => {
+    try {
+      return window.location.pathname === '/smarted' || window.location.hash === '#smarted';
+    } catch {
+      return false;
+    }
+  });
+
+  useEffect(() => {
+    const handleLocationChange = () => {
+      const isSmartED = window.location.pathname === '/smarted' || window.location.hash === '#smarted';
+      setShowSmartEDPage(isSmartED);
+    };
+
+    window.addEventListener('popstate', handleLocationChange);
+    window.addEventListener('hashchange', handleLocationChange);
+    return () => {
+      window.removeEventListener('popstate', handleLocationChange);
+      window.removeEventListener('hashchange', handleLocationChange);
+    };
+  }, []);
+
+  const openSmartED = () => {
+    setShowSmartEDPage(true);
+    try {
+      window.history.pushState(null, '', '#smarted');
+      window.scrollTo({ top: 0, behavior: 'instant' as any });
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const closeSmartED = () => {
+    setShowSmartEDPage(false);
+    try {
+      if (window.location.hash === '#smarted') {
+        window.history.pushState(null, '', window.location.pathname || '/');
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   // Maintenance Page State
   const [isMaintenanceActive, setIsMaintenanceActive] = useState(false);
@@ -316,7 +372,7 @@ export default function App() {
       setShowScrollTop(window.scrollY > 400);
     };
 
-    const sections = ['welcome', 'intro', 'skills', 'experience', 'certifications', 'research', 'research_map', 'ai_tools', 'planner', 'contact'];
+    const sections = ['welcome', 'intro', 'skills', 'experience', 'smarted', 'certifications', 'research', 'research_map', 'ai_tools', 'planner', 'contact'];
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -549,6 +605,16 @@ export default function App() {
         isOpen={showTimelinePage} 
         onClose={() => setShowTimelinePage(false)} 
         linkedinUrl="https://www.linkedin.com/in/dhruv-gaur-85ab12384"
+      />
+    );
+  }
+
+  if (showSmartEDPage) {
+    return (
+      <SmartEDPage 
+        theme={theme}
+        onToggleTheme={toggleTheme}
+        onBackToPortfolio={closeSmartED}
       />
     );
   }
@@ -801,17 +867,25 @@ export default function App() {
           </button>
 
           {/* Links Center */}
-          <nav className="hidden lg:flex items-center h-full gap-6 xl:gap-8 text-[11px] font-sans font-semibold text-brand-text-muted uppercase tracking-wider">
-            {['welcome', 'intro', 'skills', 'experience', 'certifications', 'research', 'research_map', 'ai_tools', 'planner', 'contact', 'admin'].map((sect) => (
+          <nav className="hidden lg:flex items-center h-full gap-5 xl:gap-7 text-[11px] font-sans font-semibold text-brand-text-muted uppercase tracking-wider">
+            {['welcome', 'intro', 'skills', 'experience', 'smarted', 'certifications', 'research', 'research_map', 'ai_tools', 'planner', 'contact', 'admin'].map((sect) => (
                 <button
                   key={sect}
-                  onClick={() => sect === 'admin' ? setShowAdminPortal(true) : scrollTo(sect)}
+                  onClick={() => {
+                    if (sect === 'admin') {
+                      setShowAdminPortal(true);
+                    } else if (sect === 'smarted') {
+                      openSmartED();
+                    } else {
+                      scrollTo(sect);
+                    }
+                  }}
                   className={`relative flex items-center h-full transition-all duration-300 cursor-pointer ${
                     activeSection === sect ? 'text-brand-accent' : 'hover:text-brand-text'
-                  }`}
+                  } ${sect === 'smarted' ? 'font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 px-2.5 py-1 rounded-full' : ''}`}
                 >                
-                  <span className="relative z-10">
-                    {sect === 'welcome' ? 'Welcome' : sect === 'intro' ? 'Intro' : sect === 'skills' ? 'Skills' : sect === 'experience' ? 'Experience' : sect === 'research' ? 'Research' : sect === 'research_map' ? 'Map' : sect === 'certifications' ? 'Certs' : sect === 'ai_tools' ? 'AI Tools' : sect === 'planner' ? 'Planner' : sect === 'admin' ? 'Admin' : 'Contact'}
+                  <span className="relative z-10 flex items-center gap-1">
+                    {sect === 'welcome' ? 'Welcome' : sect === 'intro' ? 'Intro' : sect === 'skills' ? 'Skills' : sect === 'experience' ? 'Experience' : sect === 'smarted' ? '📚 SmartED' : sect === 'research' ? 'Research' : sect === 'research_map' ? 'Map' : sect === 'certifications' ? 'Certs' : sect === 'ai_tools' ? 'AI Tools' : sect === 'planner' ? 'Planner' : sect === 'admin' ? 'Admin' : 'Contact'}
                   </span>
                   {activeSection === sect && (
                     <motion.span 
@@ -856,16 +930,36 @@ export default function App() {
           </div>
           <div className="max-w-3xl space-y-8 relative z-10">
             
-            {/* Availability Pill */}
-            <motion.div 
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-[#151130]/80 border border-[#8B5CF6]/30 text-white rounded-full font-mono text-[9px] tracking-[0.25em] font-semibold backdrop-blur-sm shadow-[0_0_15px_rgba(139,92,246,0.15)]"
-            >
-              <span className="w-2 h-2 rounded-full bg-[#A78BFA] animate-pulse"></span>
-              RECRUITER PORTAL • ACTIVE FAANG PIPELINE
-            </motion.div>
+            {/* Availability & Highlights Pills */}
+            <div className="flex flex-wrap items-center gap-3">
+              <motion.div 
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-[#151130]/80 border border-[#8B5CF6]/30 text-white rounded-full font-mono text-[9px] tracking-[0.25em] font-semibold backdrop-blur-sm shadow-[0_0_15px_rgba(139,92,246,0.15)]"
+              >
+                <span className="w-2 h-2 rounded-full bg-[#A78BFA] animate-pulse"></span>
+                RECRUITER PORTAL • ACTIVE FAANG PIPELINE
+              </motion.div>
+
+              {/* SmartED Campus Ambassador Premium Highlight Badge */}
+              <motion.div 
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.1 }}
+                whileHover={{ scale: 1.03, y: -2 }}
+                onClick={openSmartED}
+                className="inline-flex items-center gap-2.5 px-4 py-2 bg-[#151130]/90 border border-[#8B5CF6]/40 hover:border-[#D946EF]/70 text-white rounded-full font-mono text-[10px] md:text-[11px] font-semibold backdrop-blur-md shadow-[0_0_20px_rgba(139,92,246,0.25)] hover:shadow-[0_0_25px_rgba(217,70,239,0.4)] transition-all cursor-pointer group"
+              >
+                <span className="text-base select-none">🎓</span>
+                <span className="font-sans font-medium text-white/95 group-hover:text-white transition-colors">
+                  Currently Campus Ambassador at <strong className="font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#D946EF] via-[#A78BFA] to-[#6366F1]">SmartED</strong>
+                </span>
+                <span className="px-2 py-0.5 rounded-full text-[8px] font-mono font-bold uppercase bg-gradient-to-r from-[#8B5CF6]/30 to-[#D946EF]/30 border border-[#A78BFA]/40 text-[#E9D5FF] tracking-wider">
+                  Open Standalone Portal →
+                </span>
+              </motion.div>
+            </div>
   
             {/* Display Headings */}
             <div className="space-y-4">
@@ -917,15 +1011,19 @@ export default function App() {
         </section>
 
         {/* SECTION 2: INTRO / PRECISION */}
+        <Section3DTransition label="BIOLOGICAL DATA & ENGINEERING PROFILE" code="STAGE-02" />
         <motion.section 
           id="intro" 
           initial={{ opacity: 0, y: 35 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-120px" }}
           transition={{ duration: 0.75, ease: "easeOut" }}
-          className="py-24 border-t border-[#8B5CF6]/20"
+          className="py-24 border-t border-[#8B5CF6]/20 relative overflow-hidden"
         >
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-start">
+          {/* 3D Biological Data Network Canvas */}
+          <About3DCanvas />
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-start relative z-10">
             
             {/* Heading left */}
             <div className="lg:col-span-12 xl:col-span-5 space-y-4">
@@ -941,19 +1039,26 @@ export default function App() {
                 Currently pursuing a Bachelor of Technology in Biotechnology at Sharda University, I engineer high-end computational tools and software pipelines. Merging extensive academic investigations with high-fidelity React and Node.js solutions, my profile supports enterprise operations, fast-paced teams, and highly quantitative product suites.
               </p>
               <p>
+                I currently serve as a Campus Ambassador at SmartED, helping connect students with educational opportunities while strengthening leadership, communication, and community engagement skills.
+              </p>
+              <p>
                 Having earned key Google Accreditations across UX Design research principles and generative AI prompting, I translate complex biological parameters and industrial processes into high-availability interactive dashboards. Recruiter-friendly pipeline structures focus on high reliability, robust testing, and smooth user micro-interactions.
               </p>
  
-              {/* Stats Counters */}
-              <div className="grid grid-cols-2 gap-8 pt-8 border-t border-[#8B5CF6]/15">
-                <div>
-                  <p className="font-sans font-black text-5xl text-transparent bg-clip-text bg-gradient-to-r from-[#D946EF] via-[#8B5CF6] to-[#6366F1] drop-shadow-[0_0_15px_rgba(139,92,246,0.2)]">10+</p>
-                  <p className="font-mono text-[9px] text-[#A39DBE] tracking-[0.2em] mt-1.5 uppercase font-bold">MONTHS ACADEMIC WORK</p>
-                </div>
-                <div>
-                  <p className="font-sans font-black text-5xl text-transparent bg-clip-text bg-gradient-to-r from-[#8B5CF6] to-[#6366F1] drop-shadow-[0_0_15px_rgba(99,102,241,0.2)]">100%</p>
-                  <p className="font-mono text-[9px] text-[#A39DBE] tracking-[0.2em] mt-1.5 uppercase font-bold">PRODUCTION READINESS</p>
-                </div>
+              {/* Stats Counters with 3D Tilt */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-8 border-t border-[#8B5CF6]/15">
+                <TiltCard3D maxTilt={8} glowColor="#D946EF">
+                  <div className="bg-[#0a0724]/80 border border-[#8B5CF6]/30 p-6 backdrop-blur-md">
+                    <p className="font-sans font-black text-5xl text-transparent bg-clip-text bg-gradient-to-r from-[#D946EF] via-[#8B5CF6] to-[#6366F1] drop-shadow-[0_0_15px_rgba(139,92,246,0.2)]">10+</p>
+                    <p className="font-mono text-[9px] text-[#A39DBE] tracking-[0.2em] mt-1.5 uppercase font-bold">MONTHS ACADEMIC WORK</p>
+                  </div>
+                </TiltCard3D>
+                <TiltCard3D maxTilt={8} glowColor="#00F2FE">
+                  <div className="bg-[#0a0724]/80 border border-[#00F2FE]/30 p-6 backdrop-blur-md">
+                    <p className="font-sans font-black text-5xl text-transparent bg-clip-text bg-gradient-to-r from-[#00F2FE] to-[#10B981] drop-shadow-[0_0_15px_rgba(0,242,254,0.2)]">100%</p>
+                    <p className="font-mono text-[9px] text-[#A39DBE] tracking-[0.2em] mt-1.5 uppercase font-bold">PRODUCTION READINESS</p>
+                  </div>
+                </TiltCard3D>
               </div>
             </div>
  
@@ -961,13 +1066,14 @@ export default function App() {
         </motion.section>
 
         {/* SECTION 3: CORE SKILLS */}
+        <Section3DTransition label="INTERACTIVE 3D SKILLS MATRIX" code="STAGE-03" />
         <motion.section 
           id="skills" 
           initial={{ opacity: 0, y: 35 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-120px" }}
           transition={{ duration: 0.75, ease: "easeOut" }}
-          className="py-24 border-t border-[#8B5CF6]/20"
+          className="py-24 border-t border-[#8B5CF6]/20 relative"
         >
           <div className="space-y-12">
             
@@ -985,6 +1091,12 @@ export default function App() {
                 {SKILLS.reduce((acc, curr) => acc + curr.tags.length, 0)} Active Engineering Targets Integrated
               </div>
             </div>
+
+            {/* Interactive 3D Biological Network Ecosystem */}
+            <Skills3DNetwork 
+              selectedCategory={selectedSkillCategory} 
+              onSelectCategory={setSelectedSkillCategory} 
+            />
 
             {/* Filter and Search Layout Controls */}
             <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 bg-brand-surface p-4 border border-[#1A1A1A]/10">
@@ -1064,58 +1176,56 @@ export default function App() {
               return (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {filteredSkills.map((skill) => (
-                    <motion.div
-                      key={skill.id}
-                      layout
-                      whileHover={{ 
-                        y: -4, 
-                      }}
-                      transition={{ type: "spring", stiffness: 280, damping: 18 }}
-                      className="bg-white/60 backdrop-blur-xl rounded-3xl shadow-sm border border-white/50 p-6 md:p-8 flex flex-col justify-between space-y-6 transition-all duration-300"
-                    >
-                      <div className="space-y-4">
-                        {/* Icon Container - iOS Style */}
-                        <div className="w-12 h-12 flex items-center justify-center bg-brand-accent/10 text-brand-accent rounded-2xl">
-                          {renderIcon(skill.iconName, "w-6 h-6")}
-                        </div>
-                        {/* Title */}
-                        <div>
-                          <span className="font-mono text-[10px] text-brand-accent block uppercase font-bold tracking-widest">{skill.category}</span>
-                          <h3 className="font-sans text-lg font-bold text-brand-text tracking-tight mt-1">
-                            {skill.title}
-                          </h3>
-                        </div>
-                        <p className="text-xs text-brand-text-muted leading-relaxed font-normal">
-                          {skill.description}
-                        </p>
-                      </div>
-     
-                      {/* Tags */}
-                      <motion.div 
-                        key={`${skill.id}-${selectedSkillCategory}-${skillSearch}`}
-                        variants={tagContainerVariants}
-                        initial="hidden"
-                        animate="visible"
-                        className="flex flex-wrap gap-2 pt-4 border-t border-brand-border"
+                    <TiltCard3D key={skill.id} maxTilt={6} specular={true} glowColor="#00F2FE">
+                      <motion.div
+                        layout
+                        transition={{ type: "spring", stiffness: 280, damping: 18 }}
+                        className="bg-white/60 dark:bg-[#0F0C23]/80 backdrop-blur-xl rounded-3xl shadow-sm border border-white/50 dark:border-[#8B5CF6]/30 p-6 md:p-8 flex flex-col justify-between space-y-6 transition-all duration-300 h-full"
                       >
-                        {skill.tags.map(tag => {
-                          const isMatched = skillSearch && tag.toLowerCase().includes(skillSearch.toLowerCase());
-                          return (
-                            <motion.span 
-                              key={tag}
-                              variants={tagItemVariants}
-                              className={`px-3 py-1 rounded-full text-[10px] font-mono tracking-wider uppercase border transition-all duration-200 ${
-                                isMatched 
-                                  ? 'bg-brand-accent text-white border-brand-accent font-bold shadow-sm' 
-                                  : 'bg-white/50 text-brand-text-muted border-brand-border font-medium'
-                              }`}
-                            >
-                              {tag}
-                            </motion.span>
-                          );
-                        })}
+                        <div className="space-y-4">
+                          {/* Icon Container - iOS Style */}
+                          <div className="w-12 h-12 flex items-center justify-center bg-brand-accent/10 text-brand-accent rounded-2xl">
+                            {renderIcon(skill.iconName, "w-6 h-6")}
+                          </div>
+                          {/* Title */}
+                          <div>
+                            <span className="font-mono text-[10px] text-brand-accent block uppercase font-bold tracking-widest">{skill.category}</span>
+                            <h3 className="font-sans text-lg font-bold text-brand-text tracking-tight mt-1">
+                              {skill.title}
+                            </h3>
+                          </div>
+                          <p className="text-xs text-brand-text-muted leading-relaxed font-normal">
+                            {skill.description}
+                          </p>
+                        </div>
+       
+                        {/* Tags */}
+                        <motion.div 
+                          key={`${skill.id}-${selectedSkillCategory}-${skillSearch}`}
+                          variants={tagContainerVariants}
+                          initial="hidden"
+                          animate="visible"
+                          className="flex flex-wrap gap-2 pt-4 border-t border-brand-border"
+                        >
+                          {skill.tags.map(tag => {
+                            const isMatched = skillSearch && tag.toLowerCase().includes(skillSearch.toLowerCase());
+                            return (
+                              <motion.span 
+                                key={tag}
+                                variants={tagItemVariants}
+                                className={`px-3 py-1 rounded-full text-[10px] font-mono tracking-wider uppercase border transition-all duration-200 ${
+                                  isMatched 
+                                    ? 'bg-brand-accent text-white border-brand-accent font-bold shadow-sm' 
+                                    : 'bg-white/50 text-brand-text-muted border-brand-border font-medium'
+                                }`}
+                              >
+                                {tag}
+                              </motion.span>
+                            );
+                          })}
+                        </motion.div>
                       </motion.div>
-                    </motion.div>
+                    </TiltCard3D>
                   ))}
                 </div>
               );
@@ -1125,38 +1235,107 @@ export default function App() {
         </motion.section>
 
         {/* SECTION: EXPERIENCE TIMELINE */}
+        <Section3DTransition label="SPATIAL MILESTONE & TIMELINE PATH" code="STAGE-04" />
         <motion.section 
           id="experience"
           initial={{ opacity: 0, y: 35 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-120px" }}
           transition={{ duration: 0.75, ease: "easeOut" }}
-          className="py-24 border-t border-[#1A1A1A]/10"
+          className="py-24 border-t border-[#1A1A1A]/10 relative overflow-hidden"
         >
-          <ExperienceTimeline />
+          {/* 3D Milestone Pathway Canvas */}
+          <Experience3DCanvas />
+          <div className="relative z-10">
+            <ExperienceTimeline />
+          </div>
+        </motion.section>
+
+        {/* SECTION: SMARTED STANDALONE PORTAL GATEWAY CARD */}
+        <motion.section 
+          id="smarted"
+          initial={{ opacity: 0, y: 35 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-120px" }}
+          transition={{ duration: 0.75, ease: "easeOut" }}
+          className="py-16 border-t border-[#1A1A1A]/10"
+        >
+          <TiltCard3D maxTilt={7} specular={true} glowColor="#6366F1">
+            <div className="p-8 md:p-12 rounded-3xl bg-gradient-to-br from-indigo-900/10 via-purple-900/10 to-transparent border border-indigo-500/20 backdrop-blur-md relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-8">
+              <div className="space-y-4 max-w-2xl text-left">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 font-mono text-[10px] font-bold uppercase tracking-wider">
+                  <BookOpen className="w-3.5 h-3.5" />
+                  Standalone Company & Ambassador Hub
+                </div>
+                <h2 className="font-display font-black text-2xl md:text-4xl text-zinc-900 dark:text-white tracking-tight">
+                  SmartED Campus Ambassador Portal
+                </h2>
+                <p className="text-zinc-600 dark:text-zinc-400 font-sans text-sm md:text-base leading-relaxed">
+                  Explore an independent showcase dedicated to Dhruv's role at SmartED — featuring campaigns, 10 key responsibilities, certified workshops, live photo gallery, interactive skill dashboard, testimonials, and milestone roadmaps.
+                </p>
+                <div className="flex flex-wrap gap-4 pt-2 text-xs font-mono text-zinc-500">
+                  <span className="flex items-center gap-1.5 font-bold text-zinc-700 dark:text-zinc-300">
+                    <Check className="w-4 h-4 text-emerald-500" /> 1,200+ Students Reached
+                  </span>
+                  <span className="flex items-center gap-1.5 font-bold text-zinc-700 dark:text-zinc-300">
+                    <Check className="w-4 h-4 text-emerald-500" /> 6 Completed Campaigns
+                  </span>
+                  <span className="flex items-center gap-1.5 font-bold text-zinc-700 dark:text-zinc-300">
+                    <Check className="w-4 h-4 text-emerald-500" /> Verified Credentials
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row md:flex-col gap-3 shrink-0 w-full md:w-auto">
+                <MagneticButton3D>
+                  <button
+                    type="button"
+                    onClick={openSmartED}
+                    className="px-8 py-4 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-display font-bold text-sm tracking-wider shadow-lg shadow-indigo-500/25 flex items-center justify-center gap-2 cursor-pointer transition-all hover:scale-105"
+                  >
+                    <span>OPEN DEDICATED SMARTED PAGE</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                </MagneticButton3D>
+
+                <span className="text-[10px] font-mono text-zinc-400 text-center">
+                  Route: /smarted • Standalone View
+                </span>
+              </div>
+            </div>
+          </TiltCard3D>
         </motion.section>
 
         {/* SECTION 4: CERTIFICATION COLLECTION */}
+        <Section3DTransition label="3D HOLOGRAPHIC CREDENTIAL ARCHIVE" code="STAGE-05" />
         <motion.section 
           id="certifications"
           initial={{ opacity: 0, y: 35 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-120px" }}
           transition={{ duration: 0.75, ease: "easeOut" }}
-          className="py-24 border-t border-[#1A1A1A]/10"
+          className="py-24 border-t border-[#1A1A1A]/10 relative overflow-hidden"
         >
-          <CertificationCollection />
+          {/* 3D Holographic Credential Badge Background */}
+          <Certifications3DCanvas />
+          <div className="relative z-10">
+            <CertificationCollection />
+          </div>
         </motion.section>
 
         {/* SECTION: WORKING RESEARCH */}
+        <Section3DTransition label="3D COMPUTATIONAL BIOLOGY BENCH" code="STAGE-06" />
         <motion.section 
           id="research" 
           initial={{ opacity: 0, y: 35 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-120px" }}
           transition={{ duration: 0.75, ease: "easeOut" }}
-          className="py-24 border-t border-[#1A1A1A]/10"
+          className="py-24 border-t border-[#1A1A1A]/10 space-y-12"
         >
+          {/* Interactive 3D Alpha Helix Ribbon & Silicon IC Bench */}
+          <Research3DLab />
+
           <WorkingResearch 
             isOwner={isOwner} 
             onTriggerAuth={(customMessage) => {
@@ -1209,15 +1388,19 @@ export default function App() {
         </motion.section>
 
         {/* SECTION 6: CONTACT & FORM */}
+        <Section3DTransition label="CALM MOLECULAR PARTICLE CONTACT CONSOLE" code="STAGE-07" />
         <motion.section 
           id="contact" 
           initial={{ opacity: 0, y: 35 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-120px" }}
           transition={{ duration: 0.75, ease: "easeOut" }}
-          className="py-24 border-t border-[#1A1A1A]/10"
+          className="py-24 border-t border-[#1A1A1A]/10 relative overflow-hidden"
         >
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-start">
+          {/* 3D Molecular Particle Mesh Background */}
+          <Contact3DCanvas />
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-start relative z-10">
             
             {/* Left side text and direct emails */}
             <div className="lg:col-span-5 space-y-8">
@@ -1234,40 +1417,46 @@ export default function App() {
               {/* Direct Info cards */}
               <div className="space-y-4 max-w-sm">
                 
-                {/* Email link card */}
-                <a 
-                  href="mailto:dggaur385@gmail.com"
-                  className="bg-white hover:bg-brand-surface p-4 rounded-none border border-[#1A1A1A]/10 flex items-center gap-4 transition-all group cursor-pointer"
-                >
-                  <div className="w-10 h-10 flex items-center justify-center bg-[#1A1A1A] text-white rounded-none transition-all">
-                    <Mail className="w-4.5 h-4.5" />
-                  </div>
-                  <div>
-                    <p className="text-[9px] font-mono text-brand-text-muted uppercase tracking-widest font-bold">SEND DIRECT EMAIL</p>
-                    <p className="font-mono text-xs text-[#1A1A1A] font-bold mt-0.5 group-hover:text-brand-accent transition-colors">
-                      dggaur385@gmail.com
-                    </p>
-                  </div>
-                </a>
+                {/* Email link card with 3D Tilt */}
+                <TiltCard3D maxTilt={6} glowColor="#8B5CF6">
+                  <a 
+                    href="mailto:dggaur385@gmail.com"
+                    className="bg-white/90 hover:bg-brand-surface p-4 rounded-none border border-[#1A1A1A]/10 flex items-center gap-4 transition-all group cursor-pointer backdrop-blur-sm block"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 flex items-center justify-center bg-[#1A1A1A] text-white rounded-none transition-all shrink-0">
+                        <Mail className="w-4.5 h-4.5" />
+                      </div>
+                      <div>
+                        <p className="text-[9px] font-mono text-brand-text-muted uppercase tracking-widest font-bold">SEND DIRECT EMAIL</p>
+                        <p className="font-mono text-xs text-[#1A1A1A] font-bold mt-0.5 group-hover:text-brand-accent transition-colors">
+                          dggaur385@gmail.com
+                        </p>
+                      </div>
+                    </div>
+                  </a>
+                </TiltCard3D>
  
-                {/* Location Card */}
-                <div className="bg-white p-4 rounded-none border border-[#1A1A1A]/10 flex items-center gap-4">
-                  <div className="w-10 h-10 flex items-center justify-center bg-[#1A1A1A] text-white rounded-none">
-                    <MapPin className="w-4.5 h-4.5" />
+                {/* Location Card with 3D Tilt */}
+                <TiltCard3D maxTilt={6} glowColor="#00F2FE">
+                  <div className="bg-white/90 p-4 rounded-none border border-[#1A1A1A]/10 flex items-center gap-4 backdrop-blur-sm">
+                    <div className="w-10 h-10 flex items-center justify-center bg-[#1A1A1A] text-white rounded-none shrink-0">
+                      <MapPin className="w-4.5 h-4.5" />
+                    </div>
+                    <div>
+                      <p className="text-[9px] font-mono text-brand-text-muted uppercase tracking-widest font-bold">COORDINATES LOCATION</p>
+                      <p className="font-mono text-xs text-[#1A1A1A] font-bold mt-0.5">
+                        BULANDSHAHR / INDIA
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-[9px] font-mono text-brand-text-muted uppercase tracking-widest font-bold">COORDINATES LOCATION</p>
-                    <p className="font-mono text-xs text-[#1A1A1A] font-bold mt-0.5">
-                      BULANDSHAHR / INDIA
-                    </p>
-                  </div>
-                </div>
+                </TiltCard3D>
  
               </div>
             </div>
  
             {/* Right side interactive Form */}
-            <div className="lg:col-span-7 bg-white p-8 rounded-none border border-[#1A1A1A]/10 relative overflow-hidden shadow-sm">
+            <div className="lg:col-span-7 bg-white/95 p-8 rounded-none border border-[#1A1A1A]/10 relative overflow-hidden shadow-sm backdrop-blur-md">
               
               <form onSubmit={handleSubmitContact} className="space-y-6">
                 

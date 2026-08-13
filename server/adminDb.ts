@@ -114,6 +114,7 @@ const initialTabs: TabStatus[] = [
   { id: "intro", name: "Intro Summary", status: "Active", reason: "", startTime: "", endTime: "", message: "" },
   { id: "skills", name: "Core Skills", status: "Active", reason: "", startTime: "", endTime: "", message: "" },
   { id: "experience", name: "Experience Timeline", status: "Active", reason: "", startTime: "", endTime: "", message: "" },
+  { id: "smarted", name: "SmartED Portal", status: "Active", reason: "", startTime: "", endTime: "", message: "" },
   { id: "certifications", name: "Certifications", status: "Active", reason: "", startTime: "", endTime: "", message: "" },
   { id: "research", name: "Active Research", status: "Active", reason: "", startTime: "", endTime: "", message: "" },
   { id: "research_map", name: "Research Map", status: "Active", reason: "", startTime: "", endTime: "", message: "" },

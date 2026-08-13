@@ -43,9 +43,30 @@ interface AcademicTimelineProps {
 export default function AcademicTimeline({ isOpen, onClose, linkedinUrl }: AcademicTimelineProps) {
   const [selectedCategory, setSelectedCategory] = useState<'all' | 'science' | 'leadership' | 'code'>('all');
   const [selectedYear, setSelectedYear] = useState<string>('all');
-  const [expandedEventId, setExpandedEventId] = useState<string | null>('evt-current');
+  const [expandedEventId, setExpandedEventId] = useState<string | null>('evt-smarted-ca');
 
   const events: TimelineEvent[] = [
+    {
+      id: 'evt-smarted-ca',
+      year: '2026',
+      title: 'Joined SmartED as Campus Ambassador',
+      subtitle: 'Promoting student educational opportunities & engagement',
+      category: 'leadership',
+      date: 'PRESENT',
+      location: 'SMARTED CAMPUS ALLIANCE',
+      description: 'Joined SmartED as Campus Ambassador. Representing SmartED on campus, promoting educational initiatives and learning opportunities, organizing and supporting student engagement activities, building program awareness, and connecting students with educational resources and events.',
+      tags: ['SmartED', 'Campus Ambassador', 'Educational Initiatives', 'Student Leadership', 'Community Engagement'],
+      stats: [
+        { label: 'ROLE STATUS', value: 'Current Role' },
+        { label: 'ORGANIZATION', value: 'SmartED' },
+        { label: 'IMPACT VECTOR', value: 'Student Education' }
+      ],
+      activeLink: {
+        label: 'VIEW IN EXPERIENCE',
+        url: '#experience',
+        icon: <Award className="w-3.5 h-3.5" />
+      }
+    },
     {
       id: 'evt-current',
       year: '2026',

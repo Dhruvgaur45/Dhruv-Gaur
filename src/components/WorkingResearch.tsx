@@ -15,6 +15,7 @@ import {
   Sparkles,
   Trash2
 } from 'lucide-react';
+import TiltCard3D from './3d/TiltCard3D';
 
 // ----------------- HIGH END TECH BACKGROUND GRAPHICS -----------------
 function PhotonicChipBackground({ speeding }: { speeding: boolean }) {
@@ -375,58 +376,59 @@ export default function WorkingResearch({ isOwner, onTriggerAuth }: WorkingResea
               const isSelected = selectedPaperId === paper.id;
               const isInactive = paper.status === 'Inactive';
               return (
-                <button
-                  key={paper.id}
-                  disabled={isInactive}
-                  onClick={() => !isInactive && setSelectedPaperId(paper.id)}
-                  className={`w-full text-left p-5 border transition-all duration-300 relative group flex flex-col justify-between rounded-none bg-white ${
-                    isInactive
-                      ? 'opacity-40 cursor-not-allowed border-gray-250/20 bg-gray-50/20'
-                      : isSelected 
-                      ? 'border-[#1A1A1A] border-l-4 border-l-brand-accent shadow-sm cursor-pointer' 
-                      : 'border-[#1A1A1A]/10 hover:border-[#1A1A1A]/30 cursor-pointer'
-                  }`}
-                >
-                  <div className="space-y-1.5">
-                    <div className="flex items-center justify-between">
-                      <span className={`font-mono text-[8px] tracking-widest font-bold block ${isInactive ? 'text-gray-400' : 'text-brand-accent'}`}>
-                        {paper.category}
-                      </span>
-                      <span className={`text-[8px] font-mono font-black uppercase px-2 py-0.5 border ${
-                        paper.status === 'Starting Soon'
-                          ? 'border-[#D97706]/20 bg-[#D97706]/5 text-[#D97706]'
-                          : paper.status === 'Ongoing Active' 
-                          ? 'border-[#22C55E]/20 bg-[#22C55E]/5 text-[#16A34A]' 
-                          : isInactive
-                          ? 'border-gray-300/30 bg-gray-500/5 text-gray-400'
-                          : 'border-[#1A1A1A]/20 bg-[#1A1A1A]/5 text-[#1A1A1A]'
+                <TiltCard3D key={paper.id} maxTilt={5} specular={!isInactive} glowColor={isSelected ? "#00F2FE" : "#8B5CF6"}>
+                  <button
+                    disabled={isInactive}
+                    onClick={() => !isInactive && setSelectedPaperId(paper.id)}
+                    className={`w-full text-left p-5 border transition-all duration-300 relative group flex flex-col justify-between rounded-none bg-white ${
+                      isInactive
+                        ? 'opacity-40 cursor-not-allowed border-gray-250/20 bg-gray-50/20'
+                        : isSelected 
+                        ? 'border-[#1A1A1A] border-l-4 border-l-brand-accent shadow-sm cursor-pointer' 
+                        : 'border-[#1A1A1A]/10 hover:border-[#1A1A1A]/30 cursor-pointer'
+                    }`}
+                  >
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <span className={`font-mono text-[8px] tracking-widest font-bold block ${isInactive ? 'text-gray-400' : 'text-brand-accent'}`}>
+                          {paper.category}
+                        </span>
+                        <span className={`text-[8px] font-mono font-black uppercase px-2 py-0.5 border ${
+                          paper.status === 'Starting Soon'
+                            ? 'border-[#D97706]/20 bg-[#D97706]/5 text-[#D97706]'
+                            : paper.status === 'Ongoing Active' 
+                            ? 'border-[#22C55E]/20 bg-[#22C55E]/5 text-[#16A34A]' 
+                            : isInactive
+                            ? 'border-gray-300/30 bg-gray-500/5 text-gray-400'
+                            : 'border-[#1A1A1A]/20 bg-[#1A1A1A]/5 text-[#1A1A1A]'
+                        }`}>
+                          {paper.status}
+                        </span>
+                      </div>
+                      <h4 className={`font-serif italic text-base font-black leading-tight transition-colors ${
+                        isInactive ? 'text-gray-400' : 'text-[#1A1A1A] group-hover:text-brand-accent'
                       }`}>
-                        {paper.status}
-                      </span>
+                        {paper.title}
+                      </h4>
                     </div>
-                    <h4 className={`font-serif italic text-base font-black leading-tight transition-colors ${
-                      isInactive ? 'text-gray-400' : 'text-[#1A1A1A] group-hover:text-brand-accent'
-                    }`}>
-                      {paper.title}
-                    </h4>
-                  </div>
-                  <div className="mt-4 pt-3 border-t border-[#1A1A1A]/5 flex items-center justify-between text-[10px] font-mono text-brand-text-muted">
-                    {paper.date ? (
-                      <span>{paper.date}</span>
-                    ) : (
-                      <span className="text-brand-text-muted/40 italic">[NO DATE ASSIGNED]</span>
-                    )}
-                    {!isInactive ? (
-                      <span className="flex items-center text-brand-accent font-bold">
-                        INSPECT ABSTRACT <ChevronRight className="w-3 h-3 ml-0.5" />
-                      </span>
-                    ) : (
-                      <span className="flex items-center text-gray-400 font-bold tracking-wider">
-                        [INACTIVE / COMPILING]
-                      </span>
-                    )}
-                  </div>
-                </button>
+                    <div className="mt-4 pt-3 border-t border-[#1A1A1A]/5 flex items-center justify-between text-[10px] font-mono text-brand-text-muted">
+                      {paper.date ? (
+                        <span>{paper.date}</span>
+                      ) : (
+                        <span className="text-brand-text-muted/40 italic">[NO DATE ASSIGNED]</span>
+                      )}
+                      {!isInactive ? (
+                        <span className="flex items-center text-brand-accent font-bold">
+                          INSPECT ABSTRACT <ChevronRight className="w-3 h-3 ml-0.5" />
+                        </span>
+                      ) : (
+                        <span className="flex items-center text-gray-400 font-bold tracking-wider">
+                          [INACTIVE / COMPILING]
+                        </span>
+                      )}
+                    </div>
+                  </button>
+                </TiltCard3D>
               );
             })}
           </div>

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import TiltCard3D from './3d/TiltCard3D';
 import { 
   Award, 
   Calendar, 
@@ -443,71 +444,73 @@ export default function CertificationCollection() {
 
                   {/* LEFT OR RIGHT CONTENT SIDE (CARDS) */}
                   <div className="w-full md:w-[46%] pl-12 md:pl-0">
-                    <div className="bg-white border-2 border-[#1A1A1A]/10 hover:border-[#1A1A1A]/50 transition-all duration-300 p-6 shadow-xs relative group flex flex-col justify-between h-full hover:shadow-md">
-                      
-                      {/* Floating Category tag inside card */}
-                      <div className="flex items-center gap-2 justify-between mb-4">
-                        <span className={`text-[8px] font-mono tracking-widest uppercase px-2 py-0.5 border ${getCategoryColor(cert.category)}`}>
-                          {cert.category === 'ai' ? 'AI & COMPUTING' : cert.category === 'biotech' ? 'BIOTECHNOLOGY' : cert.category === 'leadership' ? 'VPRF LEADERSHIP' : cert.category === 'forums' ? 'GOOGLE FORUMS' : 'WORKSHOP'}
-                        </span>
+                    <TiltCard3D maxTilt={7} specular={true} glowColor="#8B5CF6">
+                      <div className="bg-white border-2 border-[#1A1A1A]/10 hover:border-[#1A1A1A]/50 transition-all duration-300 p-6 shadow-xs relative group flex flex-col justify-between h-full hover:shadow-md">
                         
-                        <div className="flex items-center gap-1.5 text-brand-text-muted text-[10px] font-mono leading-none">
-                          <Clock className="w-3.5 h-3.5 text-brand-accent" />
-                          <span className="font-bold">{cert.displayDate}</span>
-                        </div>
-                      </div>
-
-                      <div className="space-y-3">
-                        <div className="space-y-1">
-                          <span className="text-[7.5px] font-mono text-brand-accent tracking-widest font-black uppercase inline-block pr-2">
-                            {cert.issuer}
+                        {/* Floating Category tag inside card */}
+                        <div className="flex items-center gap-2 justify-between mb-4">
+                          <span className={`text-[8px] font-mono tracking-widest uppercase px-2 py-0.5 border ${getCategoryColor(cert.category)}`}>
+                            {cert.category === 'ai' ? 'AI & COMPUTING' : cert.category === 'biotech' ? 'BIOTECHNOLOGY' : cert.category === 'leadership' ? 'VPRF LEADERSHIP' : cert.category === 'forums' ? 'GOOGLE FORUMS' : 'WORKSHOP'}
                           </span>
-                          <h3 className="font-sans font-bold text-base text-[#1A1A1A] leading-tight group-hover:text-brand-accent transition-colors duration-200">
-                            {cert.title}
-                          </h3>
-                        </div>
-
-                        <p className="text-xs text-brand-text-muted leading-relaxed font-normal">
-                          {cert.description}
-                        </p>
-
-                        {/* STUDENT NOTES */}
-                        <div className="p-3 bg-brand-bg/45 border-l-2 border-brand-accent/50 text-2xs italic text-brand-text leading-relaxed font-mono font-medium">
-                          <span className="font-black text-[#1A1A1A] uppercase not-italic tracking-wider text-[8px] block mb-1">STUDENT LOG:</span>
-                          "{cert.notes}"
-                        </div>
-
-                        {/* SKILLS ACQUIRED TAGS */}
-                        <div className="space-y-1.5 pt-2">
-                          <p className="text-[7.5px] font-mono text-brand-text-muted tracking-widest font-extrabold uppercase">SKILLS ACQUIRED:</p>
-                          <div className="flex flex-wrap gap-1">
-                            {cert.skillsGained.map(skill => (
-                              <span 
-                                key={skill}
-                                className="px-2 py-0.5 text-[8.5px] font-mono tracking-wide bg-brand-surface border border-[#1A1A1A]/8 text-[#1A1A1A] hover:bg-[#1A1A1A] hover:text-white transition-colors duration-150"
-                              >
-                                {skill}
-                              </span>
-                            ))}
+                          
+                          <div className="flex items-center gap-1.5 text-brand-text-muted text-[10px] font-mono leading-none">
+                            <Clock className="w-3.5 h-3.5 text-brand-accent" />
+                            <span className="font-bold">{cert.displayDate}</span>
                           </div>
                         </div>
-                      </div>
 
-                      {/* ACTIONS BAR */}
-                      <div className="border-t border-[#1A1A1A]/10 mt-5 pt-4 flex items-center justify-between">
-                        <span className="font-mono text-[8px] text-brand-text-muted font-bold tracking-widest uppercase">
-                          ID: <span className="text-[#1A1A1A] font-extrabold">{cert.credentialId || 'PENDING'}</span>
-                        </span>
+                        <div className="space-y-3">
+                          <div className="space-y-1">
+                            <span className="text-[7.5px] font-mono text-brand-accent tracking-widest font-black uppercase inline-block pr-2">
+                              {cert.issuer}
+                            </span>
+                            <h3 className="font-sans font-bold text-base text-[#1A1A1A] leading-tight group-hover:text-brand-accent transition-colors duration-200">
+                              {cert.title}
+                            </h3>
+                          </div>
 
-                        <button
-                          type="button"
-                          onClick={() => handleSelectCert(cert)}
-                          className="px-3 py-1.5 bg-[#1A1A1A] hover:bg-brand-accent text-white font-mono text-[8.5px] uppercase font-black tracking-widest transition-all cursor-pointer flex items-center gap-1.5 active:scale-95"
-                        >
-                          <Eye className="w-3 h-3" /> PREVIEW SPECIMEN
-                        </button>
+                          <p className="text-xs text-brand-text-muted leading-relaxed font-normal">
+                            {cert.description}
+                          </p>
+
+                          {/* STUDENT NOTES */}
+                          <div className="p-3 bg-brand-bg/45 border-l-2 border-brand-accent/50 text-2xs italic text-brand-text leading-relaxed font-mono font-medium">
+                            <span className="font-black text-[#1A1A1A] uppercase not-italic tracking-wider text-[8px] block mb-1">STUDENT LOG:</span>
+                            "{cert.notes}"
+                          </div>
+
+                          {/* SKILLS ACQUIRED TAGS */}
+                          <div className="space-y-1.5 pt-2">
+                            <p className="text-[7.5px] font-mono text-brand-text-muted tracking-widest font-extrabold uppercase">SKILLS ACQUIRED:</p>
+                            <div className="flex flex-wrap gap-1">
+                              {cert.skillsGained.map(skill => (
+                                <span 
+                                  key={skill}
+                                  className="px-2 py-0.5 text-[8.5px] font-mono tracking-wide bg-brand-surface border border-[#1A1A1A]/8 text-[#1A1A1A] hover:bg-[#1A1A1A] hover:text-white transition-colors duration-150"
+                                >
+                                  {skill}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* ACTIONS BAR */}
+                        <div className="border-t border-[#1A1A1A]/10 mt-5 pt-4 flex items-center justify-between">
+                          <span className="font-mono text-[8px] text-brand-text-muted font-bold tracking-widest uppercase">
+                            ID: <span className="text-[#1A1A1A] font-extrabold">{cert.credentialId || 'PENDING'}</span>
+                          </span>
+
+                          <button
+                            type="button"
+                            onClick={() => handleSelectCert(cert)}
+                            className="px-3 py-1.5 bg-[#1A1A1A] hover:bg-brand-accent text-white font-mono text-[8.5px] uppercase font-black tracking-widest transition-all cursor-pointer flex items-center gap-1.5 active:scale-95"
+                          >
+                            <Eye className="w-3 h-3" /> PREVIEW SPECIMEN
+                          </button>
+                        </div>
                       </div>
-                    </div>
+                    </TiltCard3D>
                   </div>
 
                   {/* EMPTY OTHER SIDE TO ALIGN CHRONO */}
